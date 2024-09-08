@@ -1,0 +1,38 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.git
+
+# visualizer产物
+stats.html
+
+# 组件内容生成的类型声明,建议把他加入 gitignore 中，以免出现频繁更改导致 git 监测到项目内容一直变动的问题
+components.d.ts
+
+/src/auto-imports.d.ts
+
+# 批量任务执行时的日志产物
+error.log
