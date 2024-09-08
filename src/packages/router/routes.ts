@@ -26,9 +26,26 @@ Object.keys(metaRouters).forEach((item) => {
 const routers404: any = [
     {
         path: '/:pathMatch(.*)*',
-        redirect: '/404'
+        // redirect: '/404'
+        component: () => import('@/views/errPage/err404.vue')
+    }
+];
+const routes = [
+    {
+        path: '/articledetail',
+        component: () => import('@/views/articleDetail/index.vue')
+    },
+    {
+        path: '/drawer',
+        component: () => import('@/views/components/commentDrawer/index.vue')
+    },
+    {
+        path: '/articlerelease',
+        component: () => import('@/views/articleRelease/index.vue')
     }
 ];
 routerArray.push(...routers404);
+routerArray.push(...routes);
+console.log(routerArray);
 
 export default routerArray;

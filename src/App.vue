@@ -6,17 +6,21 @@
  * @LastEditors: zhoukai
  * @LastEditTime: 2023-03-27 10:15:27
 -->
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { NMessageProvider } from 'naive-ui';
+</script>
 
 <template>
-    <router-view v-slot="{ Component, route }">
-        <!-- 缓存的视图 -->
-        <keep-alive>
-            <component v-if="route.meta.keepAlive" :is="Component" :key="route.name || route.fullPath" />
-        </keep-alive>
-        <!-- 不缓存的视图 -->
-        <component v-if="!route.meta.keepAlive" :is="Component" />
-    </router-view>
+    <n-message-provider>
+        <router-view v-slot="{ Component, route }">
+            <!-- 缓存的视图 -->
+            <keep-alive>
+                <component v-if="route.meta.keepAlive" :is="Component" :key="route.name || route.fullPath" />
+            </keep-alive>
+            <!-- 不缓存的视图 -->
+            <component v-if="!route.meta.keepAlive" :is="Component" />
+        </router-view>
+    </n-message-provider>
 </template>
 
 <style scoped></style>

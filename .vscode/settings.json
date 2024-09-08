@@ -7,7 +7,7 @@
     "ProjectTree.withComment": true,
     "ProjectTree.loadIgnore": true,
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": "explicit"
     },
     "js/ts.implicitProjectConfig.checkJs": true,
     "vetur.format.enable": false,
