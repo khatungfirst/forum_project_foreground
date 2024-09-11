@@ -7,7 +7,7 @@
  * @LastEditTime: 2023-03-27 10:15:27
 -->
 <script setup lang="ts">
-import { NMessageProvider } from 'naive-ui';
+// import { NMessageProvider } from 'naive-ui';
 </script>
 
 <template>

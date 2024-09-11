@@ -37,7 +37,7 @@ const routes = [
     },
     {
         path: '/drawer',
-        component: () => import('@/views/components/commentDrawer/index.vue')
+        component: () => import('@/views/components/publicArticleCard/index.vue')
     },
     {
         path: '/articlerelease',

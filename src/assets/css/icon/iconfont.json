@@ -1,0 +1,16 @@
+{
+  "id": "4679448",
+  "name": "forum",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "8796463",
+      "name": "必选",
+      "font_class": "bixuan",
+      "unicode": "e640",
+      "unicode_decimal": 58944
+    }
+  ]
+}
