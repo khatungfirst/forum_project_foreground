@@ -1,20 +1,38 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { Editor } from '@bytemd/vue-next';
-import gfm from '@bytemd/plugin-gfm';
+// import { Editor } from '@bytemd/vue-next';
+// import gfm from '@bytemd/plugin-gfm';
 import 'bytemd/dist/index.css';
 import '@/assets/css/icon/iconfont.css';
 import type { UploadFileInfo } from 'naive-ui';
+import { getTypeTag } from '@/config/apis/publicArticle.ts';
+import { publicArticles } from '@/config/apis/publicArticle.ts';
+import markdown from '@/views/components/markdown/index.vue';
+import { useMessage } from 'naive-ui';
 
 //标题输入的数据
 const title = ref('');
+
 //计算标题的字数
 const titleNUmber = computed(() => title.value.length);
 
 //markdown里的内容
 const content = ref('');
 
-const plugins = [gfm()];
+//定义用户选择的分类
+const category_id = ref(null);
+
+// 定义用户选择的标签
+const tag = ref([]);
+
+//定义文章摘要
+const summary = ref('');
+
+//定义文章的状态(初始是草稿状态)
+const status = ref('draft');
+
+//定义封面图的路径
+const image = ref('');
 
 //控制卡片显示的变量
 const cardDisplay = ref(false);
@@ -25,23 +43,39 @@ const typeOptions = ref([]);
 //定义标签下拉框中的内容
 const tagOptions = ref([]);
 
-//定义用户选择的分类
-const typeValue = ref('');
+//定义消息提示对象
+const message = useMessage();
 
-// 定义用户选择的标签
-const tagVaule = ref('');
-
-//markdown是否显示
+//文件上传声明的属性
 const showModalRef = ref(false);
 const previewImageUrlRef = ref('');
 const previewFileList = ref([]);
 const showModal = showModalRef;
 const previewImageUrl = previewImageUrlRef;
 
+//生命周期
+onMounted(async () => {
+    const { data } = await getTypeTag();
+    typeOptions.value = data.categoryList;
+    tagOptions.value = data.tagList;
+});
+
+//将文章的各个属性放到一个对象中
+const articleData = reactive({
+    user_id: 1,
+    title: '',
+    status: '',
+    category_id: 0,
+    summary: '',
+    content: '',
+    tag: [],
+    image: ''
+});
+
 //获取到markdown中输入的数据
-const handleChange = (v: string) => {
-    content.value = v;
-    console.log(v, 'v');
+const getMessage = (msg: string) => {
+    content.value = msg;
+    console.log(content.value, 'msg');
 };
 
 //页面上发布按钮的点击事件
@@ -49,10 +83,48 @@ const releaseCard = () => {
     cardDisplay.value = !cardDisplay.value;
 };
 
+//真正发布的按钮的点击事件
+const publicArticle = async () => {
+    console.log(articleData, '111111');
+    articleData.title = title.value;
+    articleData.status = status.value;
+    articleData.category_id = category_id.value;
+    articleData.summary = summary.value;
+    articleData.content = content.value;
+    articleData.tag = tag.value;
+    articleData.image = image.value;
+    const { code } = await publicArticles(articleData);
+    if (code === 200) {
+        message.success('发布成功');
+        cardDisplay.value = false;
+        title.value = '';
+        status.value = '';
+        category_id.value = null;
+        summary.value = '';
+        content.value = '';
+        tag.value = [];
+        image.value = '';
+    }
+};
+
+//文件上传的相关方法
 const handlePreview = (file: UploadFileInfo) => {
     const { url } = file;
+    console.log(url, 'url');
+
     previewImageUrlRef.value = url as string;
     showModalRef.value = true;
+};
+
+const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) => {
+    const { data } = JSON.parse((event?.target as XMLHttpRequest).response);
+    image.value = data.url;
+    console.log(data.url);
+    message.success((event?.target as XMLHttpRequest).response);
+    const ext = file.name.split('.')[1];
+    file.name = `更名.${ext}`;
+    file.url = data.url;
+    return file;
 };
 </script>
 <template>
@@ -72,19 +144,20 @@ const handlePreview = (file: UploadFileInfo) => {
                         <i class="iconfont">&#xe640;</i>
                         分类
                     </span>
-                    <n-select v-model:value="typeValue" :options="typeOptions" />
+                    <n-select v-model:value="category_id" :options="typeOptions" placeholder="必填" />
                 </div>
                 <div class="tag">
                     <span>标签</span>
-                    <n-select v-model:value="tagVaule" :options="tagOptions" />
+                    <n-select v-model:value="tag" multiple :options="tagOptions" placeholder="支持选择多个标签" />
                 </div>
                 <div class="upload">
                     <span>封面图</span>
                     <n-upload
-                        action="https://www.mocky.io/v2/5e4bafc63100007100d8b70f"
+                        action="http://127.0.0.1:4523/m1/4891553-0-default/produce_image_url"
                         :default-file-list="previewFileList"
                         list-type="image-card"
                         @preview="handlePreview"
+                        @finish="handleFinish"
                     />
                     <n-modal v-model:show="showModal" preset="card" style="width: 600px" title="一张很酷的图片">
                         <img :src="previewImageUrl" style="width: 100%" />
@@ -96,11 +169,17 @@ const handlePreview = (file: UploadFileInfo) => {
                         <i class="iconfont">&#xe640;</i>
                         文章摘要
                     </span>
-                    <n-input type="textarea" maxlength="500" show-count placeholder="请输入文章摘要" />
+                    <n-input
+                        type="textarea"
+                        maxlength="500"
+                        show-count
+                        placeholder="请输入文章摘要（必填）"
+                        v-model:value="summary"
+                    />
                 </div>
                 <div class="bottom">
                     <n-button tertiary round type="primary" @click="releaseCard">取消</n-button>
-                    <n-button strong secondary round type="primary">发布</n-button>
+                    <n-button strong secondary round type="primary" @click="publicArticle">发布</n-button>
                 </div>
             </div>
         </n-card>
@@ -112,7 +191,7 @@ const handlePreview = (file: UploadFileInfo) => {
                 <span>ctrl+s保存草稿</span>
             </div>
         </div>
-        <Editor :value="content" :plugins="plugins" @change="handleChange" style="height: 100%" />
+        <markdown @get-message="getMessage"></markdown>
     </div>
 </template>
 <style scoped>
@@ -158,11 +237,13 @@ const handlePreview = (file: UploadFileInfo) => {
                     margin-right: 10px;
                 }
             }
-            .n-select >>> .n-base-selection--selected {
+            .n-select >>> .n-base-selection--selected,
+            .n-select >>> .n-base-selection {
                 width: 90%;
                 border-radius: 50px;
             }
-            .n-select >>> .n-base-selection-label {
+            .n-select >>> .n-base-selection-label,
+            .n-select >>> .n-base-selection {
                 border-radius: 50px;
             }
 

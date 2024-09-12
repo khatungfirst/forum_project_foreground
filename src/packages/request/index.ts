@@ -24,7 +24,7 @@ import { againRequest } from './retry';
 import { httpErrorStatusHandle } from './httpErrorStatusHandle';
 
 //  将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
-axios.defaults.baseURL = import.meta.env.VITE_APP_AXIOS_BASEURL;
+axios.defaults.baseURL = 'http://127.0.0.1:4523/m1/4891553-0-default' || import.meta.env.VITE_APP_AXIOS_BASEURL;
 // 表示跨域请求时是否需要使用凭证
 axios.defaults.withCredentials = true;
 // 请求超时时间设定
@@ -185,7 +185,7 @@ export const $http = (url: string, params: any, config = {}): Promise<any> => {
  * @param {AxiosRequestConfig} config 其他配置项，默认为{}
  * @returns {Promise}
  */
-export const $get = (url: string, params: any, config = {}): Promise<any> => {
+export const $get = (url: string, params: any = {}, config = {}): Promise<any> => {
     return new Promise((resolve, reject) => {
         axios
             .get(url, { params, ...config })
