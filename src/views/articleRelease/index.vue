@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 // import { Editor } from '@bytemd/vue-next';
 // import gfm from '@bytemd/plugin-gfm';
 import 'bytemd/dist/index.css';
@@ -9,15 +9,25 @@ import { getTypeTag } from '@/config/apis/publicArticle.ts';
 import { publicArticles } from '@/config/apis/publicArticle.ts';
 import markdown from '@/views/components/markdown/index.vue';
 import { useMessage } from 'naive-ui';
+import { useDialog } from 'naive-ui';
+import { onBeforeRouteLeave } from 'vue-router';
+import { Icon } from '@vicons/utils';
+import { CheckCircleTwotone } from '@vicons/antd';
 
 //标题输入的数据
 const title = ref('');
+
+//接受上次标题的数据
+const title1 = ref('');
 
 //计算标题的字数
 const titleNUmber = computed(() => title.value.length);
 
 //markdown里的内容
 const content = ref('');
+
+//接受上次markdown中的数据
+const content1 = ref('');
 
 //定义用户选择的分类
 const category_id = ref(null);
@@ -32,7 +42,7 @@ const summary = ref('');
 const status = ref('draft');
 
 //定义封面图的路径
-const image = ref('');
+const image_url = ref('');
 
 //控制卡片显示的变量
 const cardDisplay = ref(false);
@@ -46,6 +56,57 @@ const tagOptions = ref([]);
 //定义消息提示对象
 const message = useMessage();
 
+//定义弹窗对象
+const dialog = useDialog();
+
+//定义路由对象
+// const router = useRouter();
+
+// 定义变量来存储定时器ID
+// const timer = ref(null);
+
+//判断当前处于编辑状态还是保存状态
+const isSave = ref(false);
+
+//将文章的各个属性放到一个对象中
+const articleData = reactive({
+    user_id: 1,
+    title: '',
+    status: '',
+    category_id: 0,
+    summary: '',
+    content: '',
+    tag: [],
+    image_url: ''
+});
+
+// 路由离开守卫
+onBeforeRouteLeave(async (to, from, next) => {
+    const shouldLeave = await new Promise((resolve) => {
+        dialog.warning({
+            title: '注意',
+            content: '您的文章还没保存，是否要保存？',
+            positiveText: '保存',
+            negativeText: '取消',
+            maskClosable: false,
+            onEsc: () => {
+                console.log('通过 esc 关闭');
+                resolve(false); // 假设 ESC 也被视为取消
+            },
+            onPositiveClick: () => {
+                console.log('222');
+                resolve(true); // 用户确认离开
+            }
+        });
+    });
+
+    if (shouldLeave) {
+        next(); // 用户确认离开，继续路由跳转
+    } else {
+        next(false); // 用户选择不离开，阻止路由跳转
+    }
+});
+
 //文件上传声明的属性
 const showModalRef = ref(false);
 const previewImageUrlRef = ref('');
@@ -58,24 +119,75 @@ onMounted(async () => {
     const { data } = await getTypeTag();
     typeOptions.value = data.categoryList;
     tagOptions.value = data.tagList;
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    window.addEventListener('unload', unloadHandler);
+    // 添加键盘事件监听器
+    document.addEventListener('keydown', saveContent);
+    // 设置定时器
+    // timer.value = setInterval(() => {
+    //     save('timer');
+    // }, 10 * 10000);
 });
 
-//将文章的各个属性放到一个对象中
-const articleData = reactive({
-    user_id: 1,
-    title: '',
-    status: '',
-    category_id: 0,
-    summary: '',
-    content: '',
-    tag: [],
-    image: ''
+// 在组件卸载时移除事件监听器，防止内存泄漏
+onUnmounted(() => {
+    window.removeEventListener('beforeunload', beforeUnloadHandler);
+    window.removeEventListener('unload', unloadHandler);
+    // 移除键盘事件监听器
+    document.removeEventListener('keydown', saveContent);
+    // 清除定时器
+    // if (timer.value) {
+    //     clearInterval(timer.value);
+    // }
 });
+
+//用watch去监控标题是否发生更改
+watch(title, (newValue, oldValue) => {
+    console.log(newValue, oldValue);
+    isSave.value = false;
+});
+
+// 保存内容的方法
+const save = async () => {
+    console.log(`content saved by`);
+    articleData.title = title.value;
+    articleData.status = 'draft';
+    articleData.category_id = category_id.value;
+    articleData.summary = summary.value;
+    articleData.content = content.value;
+    articleData.tag = tag.value;
+    articleData.image_url = image_url.value;
+    await publicArticles(articleData);
+    isSave.value = true;
+};
+
+// 监听键盘事件以保存内容
+const saveContent = (e) => {
+    const key = e.keyCode || e.which;
+    if (key === 83 && e.ctrlKey) {
+        if (title.value === '' && content.value === '<p><br></p>') {
+            isSave.value = false;
+            console.log('目前为空');
+        } else {
+            save();
+        }
+        e.preventDefault();
+    }
+};
 
 //获取到markdown中输入的数据
 const getMessage = (msg: string) => {
+    console.log(msg);
     content.value = msg;
     console.log(content.value, 'msg');
+    console.log(content1.value, 'msg1');
+
+    if (content1.value === content.value && content1.value !== '<p><br></p>') {
+        isSave.value = true;
+    } else {
+        isSave.value = false;
+        content1.value = content.value;
+    }
 };
 
 //页面上发布按钮的点击事件
@@ -87,23 +199,32 @@ const releaseCard = () => {
 const publicArticle = async () => {
     console.log(articleData, '111111');
     articleData.title = title.value;
-    articleData.status = status.value;
+    articleData.status = 'private';
     articleData.category_id = category_id.value;
     articleData.summary = summary.value;
     articleData.content = content.value;
     articleData.tag = tag.value;
-    articleData.image = image.value;
-    const { code } = await publicArticles(articleData);
-    if (code === 200) {
-        message.success('发布成功');
-        cardDisplay.value = false;
-        title.value = '';
-        status.value = '';
-        category_id.value = null;
-        summary.value = '';
-        content.value = '';
-        tag.value = [];
-        image.value = '';
+    articleData.image_url = image_url.value;
+    if (
+        articleData.category_id !== null &&
+        articleData.summary !== '' &&
+        articleData.title !== '' &&
+        articleData.content !== ''
+    ) {
+        const { code } = await publicArticles(articleData);
+        if (code === 200) {
+            message.success('发布成功');
+            cardDisplay.value = false;
+            title.value = '';
+            status.value = '';
+            category_id.value = null;
+            summary.value = '';
+            content.value = '';
+            tag.value = [];
+            image_url.value = '';
+        }
+    } else {
+        message.error('请把信息补充完整');
     }
 };
 
@@ -116,15 +237,30 @@ const handlePreview = (file: UploadFileInfo) => {
     showModalRef.value = true;
 };
 
+//定义文件上传后的图片显示
 const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) => {
     const { data } = JSON.parse((event?.target as XMLHttpRequest).response);
-    image.value = data.url;
+    image_url.value = data.url;
     console.log(data.url);
-    message.success((event?.target as XMLHttpRequest).response);
+    // message.success((event?.target as XMLHttpRequest).response);
     const ext = file.name.split('.')[1];
     file.name = `更名.${ext}`;
     file.url = data.url;
     return file;
+};
+
+// 定义事件处理函数
+const beforeUnloadHandler = (e) => {
+    e.preventDefault(); // 阻止默认行为（在某些浏览器中可能不起作用）
+    e.returnValue = ''; // 设置返回值（但请注意，现代浏览器可能不支持直接修改returnValue）
+    return '您页面上的修改还未保存，确定离开页面吗？'; // 返回一个字符串可能不会在所有浏览器中触发对话框
+};
+
+const unloadHandler = (e) => {
+    // 注意：unload事件的处理函数通常不会阻止页面卸载，
+    // 因为浏览器会忽略事件处理函数中阻止默认行为的尝试。
+    // 这里主要是为了演示如何添加和移除事件监听器。
+    console.log(e, '页面正在卸载...');
 };
 </script>
 <template>
@@ -188,7 +324,13 @@ const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressE
             <span>{{ titleNUmber }}/30</span>
             <div class="top-right">
                 <n-button strong secondary round type="primary" @click="releaseCard">发布</n-button>
-                <span>ctrl+s保存草稿</span>
+                <span v-if="!isSave" class="save">ctrl+s保存草稿</span>
+                <span v-else>
+                    <Icon>
+                        <CheckCircleTwotone />
+                        已保存
+                    </Icon>
+                </span>
             </div>
         </div>
         <markdown @get-message="getMessage"></markdown>
@@ -315,9 +457,17 @@ const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressE
             align-items: center;
             padding-right: 20px;
             span {
+                width: 80px;
                 color: #9da4a8;
-                font-size: 14px;
                 margin-right: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                font-size: 14px;
+            }
+
+            .save {
+                width: 120px;
             }
 
             .n-button {

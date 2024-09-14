@@ -14,6 +14,8 @@ console.log(valueHtml.value);
 //通过defineEmits编译器宏生成emit方法
 const emit = defineEmits(['get-message']);
 
+const mode = ref('simple');
+
 // 模拟 ajax 异步获取内容
 onMounted(() => {
     setTimeout(() => {
