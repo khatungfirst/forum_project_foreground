@@ -10,6 +10,7 @@ import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { useMessage } from 'naive-ui';
 //定义图标颜色的属性
 const iconColor = '#8A919F';
+
 //定义一个响应式数组来跟踪每个图标的状态
 const currentIcon = ref([false, false]);
 

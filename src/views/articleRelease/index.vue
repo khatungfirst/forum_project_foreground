@@ -35,7 +35,7 @@ const tag = ref([]);
 const summary = ref('');
 
 //定义文章的状态(初始是草稿状态)
-const status = ref('draft');
+const status = ref('');
 
 //定义封面图的路径
 const image_url = ref('');
@@ -64,9 +64,13 @@ const router = useRouter();
 //判断当前处于编辑状态还是保存状态
 const isSave = ref(false);
 
+//存放当前文章的id
+const article_id = ref(null);
+
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
     user_id: 1,
+    article_id,
     title: '',
     status: '',
     category_id: 0,
@@ -160,8 +164,11 @@ const save = async () => {
     articleData.content = content.value;
     articleData.tag = tag.value;
     articleData.image_url = image_url.value;
-    await publicArticles(articleData);
+    const { data } = await publicArticles(articleData);
+    article_id.value = data.id;
     isSave.value = true;
+    status.value = 'draft';
+    console.log('save2');
 };
 
 // 监听键盘事件以保存内容
@@ -180,13 +187,14 @@ const saveContent = (e) => {
 
 //获取到markdown中输入的数据
 const getMessage = (msg: string) => {
-    console.log(msg);
+    console.log(status.value, 'status');
     content.value = msg;
     console.log(content.value, 'msg');
     console.log(content1.value, 'msg1');
 
-    if (content1.value === content.value && content1.value !== '<p><br></p>') {
+    if (content1.value === content.value && content1.value !== '<p><br></p>' && status.value === 'draft') {
         isSave.value = true;
+        console.log('save1');
     } else {
         isSave.value = false;
         content1.value = content.value;
