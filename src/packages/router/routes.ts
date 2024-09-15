@@ -36,8 +36,8 @@ const routes = [
         component: () => import('@/views/articleDetail/index.vue')
     },
     {
-        path: '/drawer',
-        component: () => import('@/views/components/publicArticleCard/index.vue')
+        path: '/transferPage',
+        component: () => import('@/views/components/transferPage/index.vue')
     },
     {
         path: '/articlerelease',

@@ -1,7 +1,5 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-// import { Editor } from '@bytemd/vue-next';
-// import gfm from '@bytemd/plugin-gfm';
 import 'bytemd/dist/index.css';
 import '@/assets/css/icon/iconfont.css';
 import type { UploadFileInfo } from 'naive-ui';
@@ -13,12 +11,10 @@ import { useDialog } from 'naive-ui';
 import { onBeforeRouteLeave } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
+import { useRouter } from 'vue-router';
 
 //标题输入的数据
 const title = ref('');
-
-//接受上次标题的数据
-const title1 = ref('');
 
 //计算标题的字数
 const titleNUmber = computed(() => title.value.length);
@@ -60,7 +56,7 @@ const message = useMessage();
 const dialog = useDialog();
 
 //定义路由对象
-// const router = useRouter();
+const router = useRouter();
 
 // 定义变量来存储定时器ID
 // const timer = ref(null);
@@ -82,28 +78,35 @@ const articleData = reactive({
 
 // 路由离开守卫
 onBeforeRouteLeave(async (to, from, next) => {
-    const shouldLeave = await new Promise((resolve) => {
-        dialog.warning({
-            title: '注意',
-            content: '您的文章还没保存，是否要保存？',
-            positiveText: '保存',
-            negativeText: '取消',
-            maskClosable: false,
-            onEsc: () => {
-                console.log('通过 esc 关闭');
-                resolve(false); // 假设 ESC 也被视为取消
-            },
-            onPositiveClick: () => {
-                console.log('222');
-                resolve(true); // 用户确认离开
-            }
-        });
-    });
+    console.log(status.value, '****');
 
-    if (shouldLeave) {
-        next(); // 用户确认离开，继续路由跳转
+    if (status.value === 'private') {
+        next();
     } else {
-        next(false); // 用户选择不离开，阻止路由跳转
+        console.log(status.value, '****');
+        const shouldLeave = await new Promise((resolve) => {
+            dialog.warning({
+                title: '注意',
+                content: '您的文章还没保存，是否要保存？',
+                positiveText: '保存',
+                negativeText: '取消',
+                maskClosable: false,
+                onEsc: () => {
+                    console.log('通过 esc 关闭');
+                    resolve(false); // 假设 ESC 也被视为取消
+                },
+                onPositiveClick: () => {
+                    console.log('222');
+                    resolve(true); // 用户确认离开
+                }
+            });
+        });
+
+        if (shouldLeave) {
+            next(); // 用户确认离开，继续路由跳转
+        } else {
+            next(false); // 用户选择不离开，阻止路由跳转
+        }
     }
 });
 
@@ -214,14 +217,9 @@ const publicArticle = async () => {
         const { code } = await publicArticles(articleData);
         if (code === 200) {
             message.success('发布成功');
-            cardDisplay.value = false;
-            title.value = '';
-            status.value = '';
-            category_id.value = null;
-            summary.value = '';
-            content.value = '';
-            tag.value = [];
-            image_url.value = '';
+            status.value = 'private';
+            console.log(status.value, '****');
+            router.push('/transferPage');
         }
     } else {
         message.error('请把信息补充完整');
@@ -294,6 +292,7 @@ const unloadHandler = (e) => {
                         list-type="image-card"
                         @preview="handlePreview"
                         @finish="handleFinish"
+                        max="1"
                     />
                     <n-modal v-model:show="showModal" preset="card" style="width: 600px" title="一张很酷的图片">
                         <img :src="previewImageUrl" style="width: 100%" />
