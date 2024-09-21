@@ -50,6 +50,10 @@ const routes = [
     {
         path: '/drawer',
         component: () => import('@/views/components/commentDrawer/index.vue')
+    },
+    {
+        path: '/settings',
+        component: () => import('@/views/settings/index.vue')
     }
 ];
 routerArray.push(...routers404);

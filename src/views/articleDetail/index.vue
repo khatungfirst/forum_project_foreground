@@ -1,21 +1,23 @@
 <script lang="ts" setup>
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
+import { getArticleDetail } from '@/config/apis/articleDetail';
+import { getAuthorDetail } from '@/config/apis/articleDetail';
+import { likeInter } from '@/config/apis/articleDetail';
+import { collectionInter } from '@/config/apis/articleDetail';
+import { concernInter } from '@/config/apis/articleDetail';
+import { debounce } from '@/utils/debounce.ts';
+import IconWrapper from '@/views/components/icon/IconWrapper.vue'; //导入图标组件
+import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { LikeTwotone } from '@vicons/antd'; // 导入点赞的图标
 import { MessageTwotone } from '@vicons/antd'; //导入评论的图标
 import { StarTwotone } from '@vicons/antd'; //导入收藏的图标
 import { WarningFilled } from '@vicons/antd'; //导入注意的图标
-import IconWrapper from '@/views/components/icon/IconWrapper.vue'; //导入图标组件
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
-import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { useMessage } from 'naive-ui';
-import { getArticleDetail } from '../../config/apis/articleDetail';
-import { getAuthorDetail } from '../../config/apis/articleDetail';
-import { likeInter } from '../../config/apis/articleDetail';
-import { collectionInter } from '../../config/apis/articleDetail';
-import { concernInter } from '../../config/apis/articleDetail';
-// import MarkdownIt from 'markdown-it';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined } from '@vicons/antd';
+// import MarkdownIt from 'markdown-it';
+
 //定义图标颜色的属性
 const iconColor = '#8A919F';
 
@@ -40,64 +42,38 @@ const childWidth = ref(0);
 //定义简洁作者简介是否出现
 const isAuthorInfo = ref(false);
 
-//当前作者的id
-const author_id = ref(0);
-
 //定义消息提示对象
 const message = useMessage();
-
-//定义本文章的点赞数
-const likeTotal = ref(0);
-
-//定义本文章的收藏数
-const collections = ref(0);
-
-//定义是否关注该作者的状态
-const concern_status = ref(false);
-
-//定义本篇文章的id
-const id = ref(0);
-
-//文章标题
-const title = ref('');
-
-//发布日期
-const time = ref('');
-
-//浏览量
-const views_count = ref(0);
-
-//标签
-const tags = ref([]);
-
-//作者头像
-const head = ref('');
-
-//作者昵称
-const nickname = ref('');
-
-//作者个签
-const signature = ref('');
-
-//作者文章数
-const author_article = ref(0);
-
-//作者阅读数
-const author_read = ref(0);
-
-//作者粉丝数
-const fans_count = ref(0);
-
-//点击文章的id
-// const article_id = ref(0);
 
 //相关推荐的内容
 const about = ref([]);
 
-const content = ref('<p><br><p/>');
-
 //当前登录人的id
 const user_id = ref(0);
+
+//文章对象
+const articleInfo = reactive({
+    id: 0, //定义本篇文章的id
+    likeTotal: 0, //定义本文章的点赞数
+    collections: 0, // //定义本文章的收藏数
+    title: 0, //文章标题
+    time: '', //发布日期
+    views_count: 0, //浏览量
+    tags: [], //标签
+    content: '<p><br><p/>' //文章内容
+});
+
+//作者对象
+const authorInfo = reactive({
+    author_id: 0, //当前作者的id
+    head: '', //作者头像
+    nickname: '', //作者昵称
+    signature: '', //作者个签
+    author_article: 0, //作者文章数
+    author_read: 0, //作者阅读数
+    fans_count: 0, //作者粉丝数
+    concern_status: false //定义是否关注该作者的状态
+});
 
 //文章内容（计算属性来转换markdown语言）
 // const contents = computed(() => {
@@ -112,60 +88,54 @@ onMounted(async () => {
     authorInit();
 });
 
-//防抖的函数
-const debounce = (func, wait) => {
-    let timeout = null;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            func.call(this, ...args);
-        }, wait);
-    };
-};
-
 //文章相关内容初始化的方法
 const initArticle = async () => {
     const articleId = {
-        id: id.value
+        id: articleInfo.id
     };
     const articleData = await getArticleDetail(articleId);
-    const article = articleData.data.article;
-    likeTotal.value = article.likes_count;
-    collections.value = article.collections_count;
-    currentIcon.value[0] = article.like_status;
-    currentIcon.value[1] = article.collection_status;
-    time.value = article.published_at;
-    title.value = article.title;
-    content.value = article.content;
-    tags.value = article.tags;
-    about.value = articleData.data.about;
+    if (articleData) {
+        const article = articleData.data.article;
+        articleInfo.likeTotal = article.likes_count;
+        articleInfo.collections = article.collections_count;
+        currentIcon.value[0] = article.like_status;
+        currentIcon.value[1] = article.collection_status;
+        articleInfo.time = article.published_at;
+        articleInfo.title = article.title;
+        articleInfo.content = article.content;
+        articleInfo.tags = article.tags;
+        articleInfo.views_count = article.views_count;
+        about.value = articleData.data.about;
+    }
 };
 
 //作者相关内容的初始化方法
 const authorInit = async () => {
     const authorId = {
-        author_id: author_id.value
+        author_id: authorInfo.author_id
     };
     const authorData = await getAuthorDetail(authorId);
-    const data = authorData.data;
-    head.value = data.head_shot;
-    nickname.value = data.nickname;
-    signature.value = data.signature;
-    author_article.value = data.author_article;
-    author_read.value = data.author_read;
-    concern_status.value = data.concern_status;
+    if (authorData) {
+        const data = authorData.data;
+        authorInfo.head = data.head_shot;
+        authorInfo.nickname = data.nickname;
+        authorInfo.signature = data.signature;
+        authorInfo.author_article = data.author_article;
+        authorInfo.author_read = data.author_read;
+        authorInfo.concern_status = data.concern_status;
+    }
 };
 
 //点赞的方法
 const like = async () => {
     currentIcon.value[0] = !currentIcon.value[0];
     if (currentIcon.value[0]) {
-        likeTotal.value = likeTotal.value + 1;
+        articleInfo.likeTotal = articleInfo.likeTotal + 1;
     } else {
-        likeTotal.value = likeTotal.value - 1;
+        articleInfo.likeTotal = articleInfo.likeTotal - 1;
     }
     const data = ref({
-        article_id: id.value,
+        article_id: articleInfo.id,
         like_status: currentIcon.value[0]
     });
     const { code } = await likeInter(data);
@@ -194,12 +164,12 @@ const collect = async () => {
     //
     currentIcon.value[1] = !currentIcon.value[1];
     if (currentIcon.value[1]) {
-        collections.value = collections.value + 1;
+        articleInfo.collections = articleInfo.collections + 1;
     } else {
-        collections.value = collections.value - 1;
+        articleInfo.collections = articleInfo.collections - 1;
     }
     const data = ref({
-        article_id: id.value,
+        article_id: articleInfo.id,
         collection_status: currentIcon.value[1]
     });
     const { code } = await collectionInter(data);
@@ -228,20 +198,20 @@ const login = () => {
 
 //关注的方法
 const concern = async () => {
-    concern_status.value = !concern_status.value;
-    if (!concern_status.value) {
-        if (fans_count.value > 0) {
-            fans_count.value--;
+    authorInfo.concern_status = !authorInfo.concern_status;
+    if (!authorInfo.concern_status) {
+        if (authorInfo.fans_count > 0) {
+            authorInfo.fans_count--;
         }
     } else {
-        fans_count.value++;
+        authorInfo.fans_count++;
     }
     const data = ref({
         user_id: user_id.value,
-        concern_status: concern_status.value
+        concern_status: authorInfo.concern_status
     });
     const { code } = await concernInter(data);
-    if (code === 200 && concern_status.value === true) {
+    if (code === 200 && authorInfo.concern_status === true) {
         message.success('关注成功');
     } else {
         message.success('取消关注成功');
@@ -310,7 +280,7 @@ onBeforeUnmount(() => {
                     :color="currentIcon[0] ? '#19A059' : iconColor"
                     :size="24"
                     @click="handleLike"
-                    :badgeValue="likeTotal"
+                    :badgeValue="articleInfo.likeTotal"
                     :showBadge="true"
                 />
                 <IconWrapper
@@ -326,7 +296,7 @@ onBeforeUnmount(() => {
                     :color="currentIcon[1] ? '#19A059' : iconColor"
                     :size="24"
                     @click="handleCollection"
-                    :badgeValue="collections"
+                    :badgeValue="articleInfo.collections"
                     :showBadge="true"
                 />
                 <IconWrapper
@@ -341,22 +311,25 @@ onBeforeUnmount(() => {
         </div>
         <div class="middle" ref="centerRef">
             <div class="article-detail">
-                <h2>{{ title }}</h2>
+                <h2>{{ articleInfo.title }}</h2>
                 <div class="message">
-                    <span class="nickName">{{ nickname }}</span>
-                    <span class="nickName">{{ time }}</span>
+                    <n-ellipsis style="max-width: 240px">
+                        {{ authorInfo.nickname }}
+                    </n-ellipsis>
+                    <!-- <span class="nickName">{{ authorInfo.nickname }}</span> -->
+                    <span class="nickName">{{ articleInfo.time }}</span>
                     <span class="icon">
                         <Icon>
                             <EyeOutlined />
                         </Icon>
-                        {{ views_count }}
+                        {{ articleInfo.views_count }}
                     </span>
                 </div>
-                <p v-html="content"></p>
+                <p v-html="articleInfo.content"></p>
                 <div class="tags">
                     <span>标签：</span>
                     <ul>
-                        <li v-for="(item, index) in tags" :key="index">{{ item }}</li>
+                        <li v-for="(item, index) in articleInfo.tags" :key="index">{{ item }}</li>
                     </ul>
                 </div>
             </div>
@@ -374,33 +347,40 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <!-- 评论的盒子 -->
-            <commentDrawer :appear="appear" :childWidth="childWidth" :head-shot="head"></commentDrawer>
+            <commentDrawer :appear="appear" :childWidth="childWidth" :headShot="authorInfo.head"></commentDrawer>
         </div>
         <div class="right">
             <div class="author-detail" ref="authorDetail">
                 <div class="top">
-                    <n-avatar round size="large" :src="head" />
+                    <n-avatar round size="large" :src="authorInfo.head" />
                     <div class="authorName">
-                        <p class="name">{{ nickname }}</p>
-                        <p class="tag">{{ signature }}</p>
+                        <p class="name">{{ authorInfo.nickname }}</p>
+                        <p class="tag">{{ authorInfo.signature }}</p>
                     </div>
                 </div>
                 <div class="middle">
                     <div class="article">
-                        <p>{{ author_article }}</p>
+                        <p>{{ authorInfo.author_article }}</p>
                         <p class="second">文章</p>
                     </div>
                     <div class="read">
-                        <p>{{ author_read }}</p>
+                        <p>{{ authorInfo.author_read }}</p>
                         <p class="second">阅读</p>
                     </div>
                     <div class="fan">
-                        <p>{{ fans_count }}</p>
+                        <p>{{ authorInfo.fans_count }}</p>
                         <p class="second">粉丝</p>
                     </div>
                 </div>
                 <div class="bottom">
-                    <n-button strong secondary round type="primary" @click="handleConcern" v-if="!concern_status">
+                    <n-button
+                        strong
+                        secondary
+                        round
+                        type="primary"
+                        @click="handleConcern"
+                        v-if="!authorInfo.concern_status"
+                    >
                         关注
                     </n-button>
                     <n-button strong secondary round type="primary" @click="concern" v-else>已关注</n-button>
@@ -433,10 +413,8 @@ onBeforeUnmount(() => {
         </div>
     </div>
 </template>
-<style scoped>
-* {
-    box-sizing: border-box;
-}
+<style scoped lang="scss">
+@import '@/assets/styles/mixin.scss';
 .wrap {
     width: 100%;
     height: 100%;
@@ -462,9 +440,7 @@ onBeforeUnmount(() => {
             position: fixed;
             .laconicAuthorInfo {
                 height: 100px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                @include flex;
                 .n-avatar {
                     margin-right: 20px;
                 }
@@ -487,7 +463,7 @@ onBeforeUnmount(() => {
                 align-items: center;
                 margin-bottom: 50px;
                 .nickName {
-                    margin-right: 20px;
+                    margin: 0px 20px;
                 }
                 .icon {
                     position: relative;
@@ -573,9 +549,7 @@ onBeforeUnmount(() => {
 
                 .authorName {
                     p {
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
+                        @include ellipsis;
                     }
                     .name {
                         font-size: 16px;
@@ -647,9 +621,7 @@ onBeforeUnmount(() => {
             li {
                 margin-bottom: 20px;
                 p {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
+                    @include ellipsis;
 
                     span {
                         color: #999fbb;

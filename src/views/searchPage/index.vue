@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { getSelectArticle } from '../../config/apis/select';
-import Article from '../components/article/index.vue';
+import { getSelectArticle } from '@/config/apis/select';
+import Article from '@/views/components/article/index.vue';
 //用来存放后端传来的相关数据
 const selectData = ref([]);
 
@@ -43,7 +43,9 @@ const init = async () => {
         kind: middleActiveTab.value
     };
     const { data } = await getSelectArticle(dataObj);
-    selectData.value = data.selectedList;
+    if (data) {
+        selectData.value = data.selectedList;
+    }
 };
 
 //获取页面中加载后对应的数据的方法
@@ -60,9 +62,11 @@ const loadInit = async () => {
             kind: middleActiveTab.value
         };
         const { data } = await getSelectArticle(dataObj);
-        selectData.value.push(...data.selectedList);
-        page.value++;
-        isLoading.value = false;
+        if (data) {
+            selectData.value.push(...data.selectedList);
+            page.value++;
+            isLoading.value = false;
+        }
     }, 1000);
 };
 

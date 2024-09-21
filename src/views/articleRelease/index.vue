@@ -1,45 +1,27 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import 'bytemd/dist/index.css';
-import '@/assets/css/icon/iconfont.css';
-import type { UploadFileInfo } from 'naive-ui';
+import { useRouter } from 'vue-router';
+import { onBeforeRouteLeave } from 'vue-router';
 import { getTypeTag } from '@/config/apis/publicArticle.ts';
 import { publicArticles } from '@/config/apis/publicArticle.ts';
 import markdown from '@/views/components/markdown/index.vue';
+import { getArticleDetail } from '@/config/apis/articleDetail';
+import 'bytemd/dist/index.css';
+import '@/assets/css/icon/iconfont.css';
+import type { UploadFileInfo } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { useDialog } from 'naive-ui';
-import { onBeforeRouteLeave } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
-import { useRouter } from 'vue-router';
-import { getArticleDetail } from '../../config/apis/articleDetail';
-
-//标题输入的数据
-const title = ref('');
 
 //计算标题的字数
-const titleNUmber = computed(() => title.value.length);
-
-//markdown里的内容
-const content = ref('');
+const titleNUmber = computed(() => articleData.title.length);
 
 //接受上次markdown中的数据
 const content1 = ref('');
 
-//定义用户选择的分类
-const category_id = ref(null);
-
-// 定义用户选择的标签
-const tag = ref([]);
-
-//定义文章摘要
-const summary = ref('');
-
-//定义文章的状态(初始是草稿状态)
-const status = ref('');
-
-//定义封面图的路径
-const image_url = ref('');
+//定义上次的标题
+const title1 = ref('');
 
 //控制卡片显示的变量
 const cardDisplay = ref(false);
@@ -59,40 +41,28 @@ const dialog = useDialog();
 //定义路由对象
 const router = useRouter();
 
-// 定义变量来存储定时器ID
-// const timer = ref(null);
-
 //判断当前处于编辑状态还是保存状态
 const isSave = ref(false);
-
-//存放当前文章的id
-const article_id = ref(0);
-
-//文章发布字段
-const published_at = ref('');
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
     user_id: 1,
-    article_id,
-    title: '',
-    status: '',
-    category_id: 0,
-    summary: '',
-    content: '',
-    tags: [],
-    image_url: '',
-    published_at: ''
+    article_id: 0, //存放当前文章的id
+    title: '', //标题输入的数据
+    status: '', //定义文章的状态(初始是草稿状态)
+    category_id: 0, //定义用户选择的分类
+    summary: '', //定义文章摘要
+    content: '', //markdown里的内容
+    tags: [], // 定义用户选择的标签
+    image_url: '', //定义封面图的路径
+    published_at: '' //文章发布时间字段
 });
 
 // 路由离开守卫
 onBeforeRouteLeave(async (to, from, next) => {
-    console.log(status.value, '****');
-
-    if (status.value === 'private') {
+    if (articleData.status === 'private') {
         next();
     } else {
-        console.log(status.value, '****');
         const shouldLeave = await new Promise((resolve) => {
             dialog.warning({
                 title: '注意',
@@ -129,17 +99,16 @@ const previewImageUrl = previewImageUrlRef;
 //生命周期
 onMounted(async () => {
     const { data } = await getTypeTag();
-    typeOptions.value = data.categories;
-    tagOptions.value = data.tags;
+    if (data) {
+        typeOptions.value = data.categories;
+        tagOptions.value = data.tags;
+    }
     init();
     window.addEventListener('beforeunload', beforeUnloadHandler);
     window.addEventListener('unload', unloadHandler);
     // 添加键盘事件监听器
     document.addEventListener('keydown', saveContent);
     // 设置定时器
-    // timer.value = setInterval(() => {
-    //     save('timer');
-    // }, 10 * 10000);
 });
 
 // 在组件卸载时移除事件监听器，防止内存泄漏
@@ -149,50 +118,46 @@ onUnmounted(() => {
     // 移除键盘事件监听器
     document.removeEventListener('keydown', saveContent);
     // 清除定时器
-    // if (timer.value) {
-    //     clearInterval(timer.value);
-    // }
 });
 
 //用watch去监控标题是否发生更改
-watch(title, (newValue, oldValue) => {
-    console.log(newValue, oldValue);
-    isSave.value = false;
-});
+watch(
+    () => articleData.title, //articleData.title 本身不是一个响应式引用（ref），而是一个响应式对象（reactive）的属性
+    (newValue, oldValue) => {
+        console.log(newValue, oldValue);
+        title1.value = newValue;
+        isSave.value = false;
+    }
+);
 
 //初始化的方法
 const init = async () => {
     const id = {
-        article_id: article_id.value
+        article_id: articleData.article_id
     };
-    const articleData = await getArticleDetail(id);
-    const data = articleData.data.article;
-    title.value = data.title;
-    content.value = data.content;
-    category_id.value = data.category_id;
-    tag.value = data.tags;
-    image_url.value = data.image_url;
-    summary.value = data.summary;
-    article_id.value = data.id;
-    published_at.value = data.published_at;
+    const articleDatas = await getArticleDetail(id);
+    if (articleDatas) {
+        const data = articleDatas.data.article;
+        articleData.title = data.title;
+        articleData.content = data.content;
+        articleData.category_id = data.category_id;
+        articleData.tags = data.tags;
+        articleData.image_url = data.image_url;
+        articleData.summary = data.summary;
+        articleData.article_id = data.id;
+        articleData.published_at = data.published_at;
+    }
 };
 
 // 保存内容的方法
 const save = async () => {
-    console.log(`content saved by`);
-    articleData.title = title.value;
     articleData.status = 'draft';
-    articleData.category_id = category_id.value;
-    articleData.summary = summary.value;
-    articleData.content = content.value;
-    articleData.tags = tag.value;
-    articleData.image_url = image_url.value;
-    articleData.article_id = article_id.value;
-    articleData.published_at = published_at.value;
     const { data } = await publicArticles(articleData);
-    article_id.value = data.id;
+    if (data) {
+        articleData.article_id = data.id;
+    }
     isSave.value = true;
-    status.value = 'draft';
+    articleData.status = 'draft';
     console.log('save2');
 };
 
@@ -200,7 +165,7 @@ const save = async () => {
 const saveContent = (e) => {
     const key = e.keyCode || e.which;
     if (key === 83 && e.ctrlKey) {
-        if (title.value === '' && content.value === '<p><br></p>') {
+        if (articleData.title === '' && articleData.content === '<p><br></p>') {
             isSave.value = false;
             console.log('目前为空');
         } else {
@@ -212,13 +177,18 @@ const saveContent = (e) => {
 
 //获取到markdown中输入的数据
 const getMessage = (msg: string) => {
-    content.value = msg;
-    if (content1.value === content.value && content1.value !== '<p><br></p>' && status.value === 'draft') {
+    articleData.content = msg;
+    if (
+        content1.value === articleData.content &&
+        content1.value !== '<p><br></p>' &&
+        articleData.status === 'draft' &&
+        title1.value === articleData.title
+    ) {
         isSave.value = true;
-        console.log('save1');
+        console.log(content1, 'save1');
     } else {
         isSave.value = false;
-        content1.value = content.value;
+        content1.value = articleData.content;
     }
 };
 
@@ -230,14 +200,7 @@ const releaseCard = () => {
 //真正发布的按钮的点击事件
 const publicArticle = async () => {
     console.log(articleData, '111111');
-    articleData.title = title.value;
     articleData.status = 'private';
-    articleData.category_id = category_id.value;
-    articleData.summary = summary.value;
-    articleData.content = content.value;
-    articleData.tags = tag.value;
-    articleData.image_url = image_url.value;
-    articleData.published_at = published_at.value;
     if (
         articleData.category_id !== null &&
         articleData.summary !== '' &&
@@ -247,8 +210,7 @@ const publicArticle = async () => {
         const { code } = await publicArticles(articleData);
         if (code === 200) {
             message.success('发布成功');
-            status.value = 'private';
-            console.log(status.value, '****');
+            articleData.status = 'private';
             router.push('/transferPage');
         }
     } else {
@@ -268,7 +230,7 @@ const handlePreview = (file: UploadFileInfo) => {
 //定义文件上传后的图片显示
 const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) => {
     const { data } = JSON.parse((event?.target as XMLHttpRequest).response);
-    image_url.value = data.url;
+    articleData.image_url = data.url;
     console.log(data.url);
     // message.success((event?.target as XMLHttpRequest).response);
     const ext = file.name.split('.')[1];
@@ -308,11 +270,16 @@ const unloadHandler = (e) => {
                         <i class="iconfont">&#xe640;</i>
                         分类
                     </span>
-                    <n-select v-model:value="category_id" :options="typeOptions" placeholder="必填" />
+                    <n-select v-model:value="articleData.category_id" :options="typeOptions" placeholder="必填" />
                 </div>
                 <div class="tag">
                     <span>标签</span>
-                    <n-select v-model:value="tag" multiple :options="tagOptions" placeholder="支持选择多个标签" />
+                    <n-select
+                        v-model:value="articleData.tags"
+                        multiple
+                        :options="tagOptions"
+                        placeholder="支持选择多个标签"
+                    />
                 </div>
                 <div class="upload">
                     <span>封面图</span>
@@ -340,7 +307,7 @@ const unloadHandler = (e) => {
                         maxlength="500"
                         show-count
                         placeholder="请输入文章摘要（必填）"
-                        v-model:value="summary"
+                        v-model:value="articleData.summary"
                     />
                 </div>
                 <div class="bottom">
@@ -350,7 +317,7 @@ const unloadHandler = (e) => {
             </div>
         </n-card>
         <div class="top">
-            <input maxlength="30" placeholder="请输入标题" v-model="title" />
+            <input maxlength="30" placeholder="请输入标题" v-model="articleData.title" />
             <span>{{ titleNUmber }}/30</span>
             <div class="top-right">
                 <n-button strong secondary round type="primary" @click="releaseCard">发布</n-button>
@@ -363,10 +330,11 @@ const unloadHandler = (e) => {
                 </span>
             </div>
         </div>
-        <markdown @get-message="getMessage" :article_id="article_id"></markdown>
+        <markdown @get-message="getMessage" :article_id="articleData.article_id"></markdown>
     </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/styles/mixin.scss';
 .wrap {
     width: 100%;
     height: 100%;
@@ -378,10 +346,7 @@ const unloadHandler = (e) => {
     .n-card {
         width: 30%;
         /* height: 60vh; */
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        @include absolute;
         z-index: 1000;
         box-shadow: 4px 5px 7px 0px rgba(0, 0, 0, 0.4);
 

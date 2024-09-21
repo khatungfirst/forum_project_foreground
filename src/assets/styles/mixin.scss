@@ -1,0 +1,18 @@
+@mixin flex {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin ellipsis{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin absolute{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
