@@ -42,6 +42,14 @@ const routes = [
     {
         path: '/articlerelease',
         component: () => import('@/views/articleRelease/index.vue')
+    },
+    {
+        path: '/select',
+        component: () => import('@/views/searchPage/index.vue')
+    },
+    {
+        path: '/drawer',
+        component: () => import('@/views/components/commentDrawer/index.vue')
     }
 ];
 routerArray.push(...routers404);

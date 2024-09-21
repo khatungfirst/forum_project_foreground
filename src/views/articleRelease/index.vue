@@ -12,6 +12,7 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
 import { useRouter } from 'vue-router';
+import { getArticleDetail } from '../../config/apis/articleDetail';
 
 //标题输入的数据
 const title = ref('');
@@ -65,7 +66,10 @@ const router = useRouter();
 const isSave = ref(false);
 
 //存放当前文章的id
-const article_id = ref(null);
+const article_id = ref(0);
+
+//文章发布字段
+const published_at = ref('');
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
@@ -76,8 +80,9 @@ const articleData = reactive({
     category_id: 0,
     summary: '',
     content: '',
-    tag: [],
-    image_url: ''
+    tags: [],
+    image_url: '',
+    published_at: ''
 });
 
 // 路由离开守卫
@@ -124,8 +129,9 @@ const previewImageUrl = previewImageUrlRef;
 //生命周期
 onMounted(async () => {
     const { data } = await getTypeTag();
-    typeOptions.value = data.categoryList;
-    tagOptions.value = data.tagList;
+    typeOptions.value = data.categories;
+    tagOptions.value = data.tags;
+    init();
     window.addEventListener('beforeunload', beforeUnloadHandler);
     window.addEventListener('unload', unloadHandler);
     // 添加键盘事件监听器
@@ -154,6 +160,23 @@ watch(title, (newValue, oldValue) => {
     isSave.value = false;
 });
 
+//初始化的方法
+const init = async () => {
+    const id = {
+        article_id: article_id.value
+    };
+    const articleData = await getArticleDetail(id);
+    const data = articleData.data.article;
+    title.value = data.title;
+    content.value = data.content;
+    category_id.value = data.category_id;
+    tag.value = data.tags;
+    image_url.value = data.image_url;
+    summary.value = data.summary;
+    article_id.value = data.id;
+    published_at.value = data.published_at;
+};
+
 // 保存内容的方法
 const save = async () => {
     console.log(`content saved by`);
@@ -162,8 +185,10 @@ const save = async () => {
     articleData.category_id = category_id.value;
     articleData.summary = summary.value;
     articleData.content = content.value;
-    articleData.tag = tag.value;
+    articleData.tags = tag.value;
     articleData.image_url = image_url.value;
+    articleData.article_id = article_id.value;
+    articleData.published_at = published_at.value;
     const { data } = await publicArticles(articleData);
     article_id.value = data.id;
     isSave.value = true;
@@ -187,11 +212,7 @@ const saveContent = (e) => {
 
 //获取到markdown中输入的数据
 const getMessage = (msg: string) => {
-    console.log(status.value, 'status');
     content.value = msg;
-    console.log(content.value, 'msg');
-    console.log(content1.value, 'msg1');
-
     if (content1.value === content.value && content1.value !== '<p><br></p>' && status.value === 'draft') {
         isSave.value = true;
         console.log('save1');
@@ -214,8 +235,9 @@ const publicArticle = async () => {
     articleData.category_id = category_id.value;
     articleData.summary = summary.value;
     articleData.content = content.value;
-    articleData.tag = tag.value;
+    articleData.tags = tag.value;
     articleData.image_url = image_url.value;
+    articleData.published_at = published_at.value;
     if (
         articleData.category_id !== null &&
         articleData.summary !== '' &&
@@ -295,7 +317,8 @@ const unloadHandler = (e) => {
                 <div class="upload">
                     <span>封面图</span>
                     <n-upload
-                        action="http://127.0.0.1:4523/m1/4891553-0-default/produce_image_url"
+                        action="http://127.0.0.1:4523/m1/4891553-4547208-default/produce_image_url"
+                        method="get"
                         :default-file-list="previewFileList"
                         list-type="image-card"
                         @preview="handlePreview"
@@ -340,7 +363,7 @@ const unloadHandler = (e) => {
                 </span>
             </div>
         </div>
-        <markdown @get-message="getMessage"></markdown>
+        <markdown @get-message="getMessage" :article_id="article_id"></markdown>
     </div>
 </template>
 <style scoped>

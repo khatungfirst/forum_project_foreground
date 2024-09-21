@@ -2,7 +2,12 @@
 import '@wangeditor/editor/dist/css/style.css';
 import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
-// import getImageUrl from '@/config/apis/publicArticle';
+import { getArticleDetail } from '../../../config/apis/articleDetail';
+
+//获取父组件传过来的文章id
+const prop = defineProps({
+    article_id: Number
+});
 
 // 编辑器实例，必须用 shallowRef，重要！
 const editorRef = shallowRef();
@@ -18,7 +23,12 @@ const mode = ref('simple');
 
 // 模拟 ajax 异步获取内容
 onMounted(() => {
-    setTimeout(() => {
+    setTimeout(async () => {
+        const id = {
+            article_id: prop.article_id
+        };
+        const articleData = await getArticleDetail(id);
+        valueHtml.value = articleData.data.article.content;
         // valueHtml.value = '<p>模拟 Ajax 异步设置内容</p>';
     }, 1500);
 });

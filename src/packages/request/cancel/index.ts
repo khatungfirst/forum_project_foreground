@@ -44,7 +44,6 @@ function removePendingRequest(config: AxiosRequestConfigNew) {
         const cancelToken = pendingMap.get(pendingKey);
         // 取消请求（message 参数是可选的）
         cancelToken('取消的请求唯一key(method&url&params&data)：' + pendingKey); // 取消请求
-
         pendingMap.delete(pendingKey); // 从队列中移除
     }
 }

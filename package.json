@@ -32,6 +32,8 @@
         "axios": "^1.2.1",
         "bytemd": "latest",
         "dayjs": "^1.11.7",
+        "emoji-mart-vue-fast": "^15.0.2",
+        "markdown-it": "^14.1.0",
         "nprogress": "^0.2.0",
         "pinia": "^2.0.23",
         "qs": "^6.11.0",
