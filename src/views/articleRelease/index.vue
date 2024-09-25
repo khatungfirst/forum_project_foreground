@@ -7,7 +7,6 @@ import { publicArticles } from '@/config/apis/publicArticle.ts';
 import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
 import 'bytemd/dist/index.css';
-import '@/assets/css/icon/iconfont.css';
 import type { UploadFileInfo } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { useDialog } from 'naive-ui';
@@ -57,6 +56,12 @@ const articleData = reactive({
     image_url: '', //定义封面图的路径
     published_at: '' //文章发布时间字段
 });
+
+//制定表单的的校验规则
+const rules = {
+    categories: { required: true, trigger: ['blur', 'input'], message: '请输入要选择的分类' },
+    text: { required: true, trigger: ['blur', 'input'], message: '请输入文章摘要' }
+};
 
 // 路由离开守卫
 onBeforeRouteLeave(async (to, from, next) => {
@@ -265,51 +270,65 @@ const unloadHandler = (e) => {
             }"
         >
             <div class="contain">
-                <div class="type">
-                    <span>
-                        <i class="iconfont">&#xe640;</i>
-                        分类
-                    </span>
-                    <n-select v-model:value="articleData.category_id" :options="typeOptions" placeholder="必填" />
-                </div>
-                <div class="tag">
-                    <span>标签</span>
-                    <n-select
-                        v-model:value="articleData.tags"
-                        multiple
-                        :options="tagOptions"
-                        placeholder="支持选择多个标签"
-                    />
-                </div>
-                <div class="upload">
-                    <span>封面图</span>
-                    <n-upload
-                        action="http://127.0.0.1:4523/m1/4891553-4547208-default/produce_image_url"
-                        method="get"
-                        :default-file-list="previewFileList"
-                        list-type="image-card"
-                        @preview="handlePreview"
-                        @finish="handleFinish"
-                        max="1"
-                    />
-                    <n-modal v-model:show="showModal" preset="card" style="width: 600px" title="一张很酷的图片">
-                        <img :src="previewImageUrl" style="width: 100%" />
-                    </n-modal>
-                </div>
-                <n-p depth="3" style="margin: 8px 0 0 0">格式：png,jpg,gif 大小不大于：2M尺寸：192*128px</n-p>
-                <div class="abstract">
-                    <span>
-                        <i class="iconfont">&#xe640;</i>
-                        文章摘要
-                    </span>
-                    <n-input
-                        type="textarea"
-                        maxlength="500"
-                        show-count
-                        placeholder="请输入文章摘要（必填）"
-                        v-model:value="articleData.summary"
-                    />
-                </div>
+                <n-form
+                    ref="formRef"
+                    label-placement="left"
+                    label-width="auto"
+                    :rule="rules"
+                    size="medium"
+                    :style="{
+                        maxWidth: '640px'
+                    }"
+                >
+                    <n-form-item
+                        label="分类"
+                        show-require-mark
+                        require-mark-placement="left"
+                        required
+                        path="categories"
+                    >
+                        <n-select v-model:value="articleData.category_id" placeholder="必填" :options="typeOptions" />
+                    </n-form-item>
+                    <n-form-item label="标签">
+                        <n-select v-model:value="articleData.tags" placeholder="多选" :options="tagOptions" multiple />
+                    </n-form-item>
+                    <div class="upload">
+                        <span>封面图</span>
+                        <n-upload
+                            action="http://127.0.0.1:4523/m1/4891553-4547208-default/produce_image_url"
+                            method="get"
+                            :default-file-list="previewFileList"
+                            list-type="image-card"
+                            @preview="handlePreview"
+                            @finish="handleFinish"
+                            max="1"
+                        />
+                        <n-modal v-model:show="showModal" preset="card" style="width: 600px" title="一张很酷的图片">
+                            <img :src="previewImageUrl" style="width: 100%" />
+                        </n-modal>
+                    </div>
+                    <n-p depth="3" style="margin: 8px 0 0 0">格式：png,jpg,gif 大小不大于：2M尺寸：192*128px</n-p>
+                    <n-form-item
+                        label="文章摘要"
+                        show-require-mark
+                        require-mark-placement="left"
+                        required
+                        class="text"
+                        path="text"
+                    >
+                        <n-input
+                            v-model:value="articleData.summary"
+                            placeholder="请输入文章摘要（必填）"
+                            type="textarea"
+                            maxlength="500"
+                            show-count
+                            :autosize="{
+                                minRows: 3,
+                                maxRows: 5
+                            }"
+                        />
+                    </n-form-item>
+                </n-form>
                 <div class="bottom">
                     <n-button tertiary round type="primary" @click="releaseCard">取消</n-button>
                     <n-button strong secondary round type="primary" @click="publicArticle">发布</n-button>
@@ -336,8 +355,7 @@ const unloadHandler = (e) => {
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
 .wrap {
-    width: 100%;
-    height: 100%;
+    @include all;
     display: grid;
     grid-template-rows: 1fr 18fr;
     overflow: hidden;
@@ -351,36 +369,13 @@ const unloadHandler = (e) => {
         box-shadow: 4px 5px 7px 0px rgba(0, 0, 0, 0.4);
 
         .contain {
-            .type {
-                display: grid;
-                grid-template-columns: 1fr 6fr;
-                margin: 20px 0px 30px 0px;
-                padding-left: 20px;
-                span {
-                    height: 34px;
-                    line-height: 34px;
-                    margin-right: 10px;
-                }
-            }
-            .tag {
-                display: grid;
-                grid-template-columns: 1fr 9fr;
-                padding-left: 40px;
-                margin: 20px 0px;
-                span {
-                    width: 30px;
-                    height: 34px;
-                    line-height: 34px;
-                    margin-right: 10px;
-                }
-            }
-            .n-select >>> .n-base-selection--selected,
-            .n-select >>> .n-base-selection {
+            .n-select :deep(.n-base-selection--selected),
+            .n-select :deep(.n-base-selection) {
                 width: 90%;
                 border-radius: 50px;
             }
-            .n-select >>> .n-base-selection-label,
-            .n-select >>> .n-base-selection {
+            .n-select :deep(.n-base-selection-label),
+            .n-select :deep(.n-base-selection) {
                 border-radius: 50px;
             }
 
@@ -389,11 +384,11 @@ const unloadHandler = (e) => {
                 grid-template-columns: 1fr 6fr;
                 padding-left: 30px;
 
-                .n-upload >>> .n-upload-file-list--grid {
+                .n-upload :deep(.n-upload-file-list--grid) {
                     display: flex;
                 }
 
-                .n-upload >>> .n-upload-trigger--image-card {
+                .n-upload :deep(.n-upload-trigger--image-card) {
                     width: 85%;
                     height: 140px;
                 }
@@ -403,15 +398,16 @@ const unloadHandler = (e) => {
                 text-align: center;
             }
 
-            .abstract {
-                display: grid;
-                grid-template-columns: 1fr 5fr;
-                margin: 20px 0px 50px 3px;
-                font-size: 13px;
+            .text {
+                margin-top: 25px;
 
                 .n-input {
                     width: 85%;
                     margin-left: 10px;
+                }
+
+                .n-input :deep(.n-form-item-label--left-mark) {
+                    width: 90px;
                 }
             }
         }
@@ -427,7 +423,7 @@ const unloadHandler = (e) => {
         }
     }
 
-    .n-card >>> .n-card__content {
+    .n-card :deep(.n-card__content) {
         padding: 0px;
     }
 

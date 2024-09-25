@@ -13,7 +13,6 @@ import { LikeTwotone } from '@vicons/antd'; // 导入点赞的图标
 import { MessageTwotone } from '@vicons/antd'; //导入评论的图标
 import { StarTwotone } from '@vicons/antd'; //导入收藏的图标
 import { WarningFilled } from '@vicons/antd'; //导入注意的图标
-import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined } from '@vicons/antd';
 // import MarkdownIt from 'markdown-it';
@@ -53,7 +52,7 @@ const user_id = ref(0);
 
 //文章对象
 const articleInfo = reactive({
-    id: 0, //定义本篇文章的id
+    id: 4, //定义本篇文章的id
     likeTotal: 0, //定义本文章的点赞数
     collections: 0, // //定义本文章的收藏数
     title: 0, //文章标题
@@ -319,7 +318,7 @@ onBeforeUnmount(() => {
                     <!-- <span class="nickName">{{ authorInfo.nickname }}</span> -->
                     <span class="nickName">{{ articleInfo.time }}</span>
                     <span class="icon">
-                        <Icon>
+                        <Icon class="icon1">
                             <EyeOutlined />
                         </Icon>
                         {{ articleInfo.views_count }}
@@ -329,7 +328,7 @@ onBeforeUnmount(() => {
                 <div class="tags">
                     <span>标签：</span>
                     <ul>
-                        <li v-for="(item, index) in articleInfo.tags" :key="index">{{ item }}</li>
+                        <li v-for="(item, index) in articleInfo.tags" :key="index">{{ item.ID }}</li>
                     </ul>
                 </div>
             </div>
@@ -416,8 +415,7 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
 .wrap {
-    width: 100%;
-    height: 100%;
+    @include all;
     display: flex;
     background-color: #f2f3f5;
 
@@ -425,8 +423,7 @@ onBeforeUnmount(() => {
         position: fixed; /* 固定定位 */
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
+        @include all;
         background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色 */
         z-index: 998; /* 确保在最上层 */
     }
@@ -469,7 +466,7 @@ onBeforeUnmount(() => {
                     position: relative;
                 }
 
-                .icon >>> svg {
+                .icon1 :deep(svg) {
                     height: 16px;
                     position: absolute;
                     top: 5px;

@@ -32,7 +32,7 @@ const routers404: any = [
 ];
 const routes = [
     {
-        path: '/articledetail',
+        path: '/articledetail/:id',
         component: () => import('@/views/articleDetail/index.vue')
     },
     {

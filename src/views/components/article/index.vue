@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined } from '@vicons/antd';
 import { LikeTwotone } from '@vicons/antd';
-import { defineProps } from 'vue';
+
 const prop = defineProps({
     item: {
         type: Object as () => {
@@ -16,6 +18,7 @@ const prop = defineProps({
             tags: Array<{
                 ID: number;
             }>;
+            id: string;
         },
         required: true,
         default: () => ({
@@ -26,13 +29,23 @@ const prop = defineProps({
             views_count: 0,
             likes_count: 0,
             image_url: '',
-            tags: [{ ID: 0 }]
+            tags: [{ ID: 0 }],
+            id: ''
         })
     }
 });
+
+//路由对象
+const route = useRouter();
+
+//查看文章详情的方法
+const checkDetail = () => {
+    route.push(`/articledetail/${prop.item.id}`);
+    console.log(prop.item.id);
+};
 </script>
 <template>
-    <ul class="content">
+    <ul class="content" @click="checkDetail">
         <li class="whole">
             <div class="left">
                 <h3>{{ prop.item.title }}</h3>
@@ -75,15 +88,18 @@ const prop = defineProps({
         </li>
     </ul>
 </template>
-<style scoped>
+<style scoped lang="scss">
 .content {
     width: 100%;
-    /* background-color: antiquewhite; */
 
     .other {
         display: grid;
         grid-template-columns: 5fr 1fr;
     }
+}
+
+.content:hover {
+    cursor: pointer;
 }
 .whole {
     display: flex;
@@ -112,7 +128,7 @@ const prop = defineProps({
                 position: relative;
             }
 
-            .icon >>> svg {
+            .icon :deep(svg) {
                 height: 16px;
                 position: absolute;
                 /* top: 0px; */

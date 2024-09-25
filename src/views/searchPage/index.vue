@@ -123,10 +123,10 @@ const handleScroll = () => {
         </div>
     </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/styles/mixin.scss';
 .wrap {
-    width: 100%;
-    height: 100%;
+    @include all;
     background-color: #f2f3f5;
     .top-menu {
         width: 100%;
@@ -138,7 +138,7 @@ const handleScroll = () => {
             margin: 0 auto;
         }
 
-        .n-tabs >>> .n-tabs-nav-scroll-content {
+        .n-tabs :deep(.n-tabs-nav-scroll-content) {
             height: 50px;
         }
     }
@@ -170,7 +170,7 @@ const handleScroll = () => {
             }
         }
 
-        .n-tabs >>> .n-tabs-nav-scroll-content {
+        .n-tabs :deep(.n-tabs-nav-scroll-content) {
             border: none;
         }
 

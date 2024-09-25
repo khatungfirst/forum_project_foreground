@@ -190,7 +190,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         </div>
     </div>
 </template>
-<style scoped>
+<style scoped lang="scss">
 @keyframes loading {
     from {
         transform: translateY(100%); /* 从下方进入 */
@@ -260,7 +260,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                     margin-left: 50px;
                 }
 
-                .n-upload >>> .n-upload-trigger + .n-upload-file-list {
+                .n-upload :deep(.n-upload-trigger + .n-upload-file-list) {
                     width: 500px;
                     display: inline-block;
                 }
@@ -277,7 +277,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                 }
                 .icon1 {
                     position: absolute;
-                    bottom: 24px;
+                    bottom: 40px;
                     left: 20px;
                     z-index: 9999;
                 }
@@ -287,7 +287,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                 .emoji-mart {
                     width: 30px;
                     position: absolute;
-                    bottom: 36px;
+                    bottom: 50px;
                     left: -120px;
                     z-index: 999;
                 }

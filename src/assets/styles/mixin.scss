@@ -16,3 +16,15 @@
     left: 50%;
     transform: translate(-50%, -50%);
 }
+
+@mixin all{
+    width: 100%;
+    height: 100%;
+}
+
+@mixin border{
+    .n-input :deep(.n-input__border),
+    .n-input :deep(.n-input__state-border) {
+            display: none;
+    }
+}

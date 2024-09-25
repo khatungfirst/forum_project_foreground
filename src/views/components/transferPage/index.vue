@@ -28,7 +28,7 @@ const back = () => {
 
 //继续发布的点击事件
 const continuePublic = () => {
-    router.push('/articlerelease');
+    router.push('/articlerelease/0');
 };
 
 onMounted(() => {
@@ -47,10 +47,9 @@ onMounted(() => {
     </div>
 </template>
 <style scoped lang="scss">
+@import '@/assets/styles/mixin.scss';
 .wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    @include flex;
     flex-direction: column;
     position: relative;
     top: 13%;

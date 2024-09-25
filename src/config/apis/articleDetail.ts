@@ -3,7 +3,7 @@ import { $post } from '@/packages/request';
 
 // 1、获取初始化的文章、作者、相关推荐的信息
 export const getArticleDetail = (params: any): Promise<any> => {
-    return $get('/aritcle/detail', params);
+    return $get('/article/detail', params);
 };
 
 //2、获取初始化作者的信息
