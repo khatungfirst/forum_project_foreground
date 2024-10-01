@@ -46,14 +46,20 @@ onMounted(async () => {
 //获取焦点后编辑信息
 const handleFocus = (e) => {
     if (e === 'weibo_link') {
-        weiboInputInstRef.value?.focus();
         weiboStatus.value = false;
+        setTimeout(() => {
+            weiboInputInstRef.value?.focus();
+        }, 10);
     } else if (e === 'github_link') {
-        githubInputInstRef.value?.focus();
         githubStatus.value = false;
+        setTimeout(() => {
+            githubInputInstRef.value?.focus();
+        }, 10);
     } else {
-        passwordInputInstRef.value?.focus();
         passwordStatus.value = false;
+        setTimeout(() => {
+            passwordInputInstRef.value?.focus();
+        }, 10);
     }
 };
 
@@ -150,7 +156,5 @@ const loseFocus = async (e) => {
         }
     }
 }
-.n-card :deep(.n-card-header) {
-    border-bottom: 1px solid #f2f2f2;
-}
+@include headBorder;
 </style>

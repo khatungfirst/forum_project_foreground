@@ -66,6 +66,7 @@ const change = async () => {
     </n-card>
 </template>
 <style scoped lang="scss">
+@import '@/assets/styles/mixin.scss';
 .n-card {
     height: 900px;
 
@@ -74,7 +75,5 @@ const change = async () => {
         margin: 20px 20px 0px 0px;
     }
 }
-.n-card :deep(.n-card-header) {
-    border-bottom: 1px solid #f2f2f2;
-}
+@include headBorder;
 </style>

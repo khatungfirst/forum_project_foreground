@@ -80,12 +80,10 @@ const tabTop = (value: string) => {
 const tabMiddle = (value: string) => {
     middleActiveTab.value = value;
     init();
-    console.log(value);
 };
 
 //滚动触发事件
 const handleScroll = () => {
-    console.log(dataContainer.value, '****');
     loadInit();
 };
 </script>
@@ -178,36 +176,7 @@ const handleScroll = () => {
             display: block;
         }
 
-        .loading {
-            width: 100%;
-            text-align: center;
-            color: #7d8791;
-            position: relative;
-            bottom: 25px;
-            float: left;
-            z-index: 100;
-
-            .videos {
-                display: inline-block;
-                height: 52px;
-                overflow: hidden;
-                position: absolute;
-                bottom: -20px;
-                left: 40%;
-
-                video {
-                    width: 100px;
-                    height: 80px;
-                }
-            }
-
-            .text {
-                position: absolute;
-                bottom: -22px;
-                left: 48%;
-                z-index: 999;
-            }
-        }
+        @include loading;
     }
 }
 </style>

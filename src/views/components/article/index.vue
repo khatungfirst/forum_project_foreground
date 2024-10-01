@@ -19,6 +19,7 @@ const prop = defineProps({
                 ID: number;
             }>;
             id: string;
+            status: boolean;
         },
         required: true,
         default: () => ({
@@ -30,7 +31,8 @@ const prop = defineProps({
             likes_count: 0,
             image_url: '',
             tags: [{ ID: 0 }],
-            id: ''
+            id: '',
+            status: false
         })
     }
 });
@@ -49,6 +51,7 @@ const checkDetail = () => {
         <li class="whole">
             <div class="left">
                 <h3>{{ prop.item.title }}</h3>
+                <slot name="type"></slot>
                 <n-ellipsis :line-clamp="2" style="color: #868686; font-size: 14px; margin: 8px 0px">
                     {{ prop.item.summary }}
 
@@ -83,6 +86,7 @@ const checkDetail = () => {
                 </div>
             </div>
             <div class="right" v-if="prop.item.image_url !== ''">
+                <slot class="edit" name="edit"></slot>
                 <img :src="prop.item.image_url" alt="" />
             </div>
         </li>
@@ -110,6 +114,11 @@ const checkDetail = () => {
 
     .left {
         flex: 1;
+
+        h3 {
+            float: left;
+            margin-right: 10px;
+        }
         .detail-bottom {
             span {
                 margin: 0px 5px;
@@ -151,6 +160,7 @@ const checkDetail = () => {
     .right {
         display: flex;
         flex-direction: row-reverse;
+        position: relative;
         /* float: right; */
         margin-left: 8px;
         img {

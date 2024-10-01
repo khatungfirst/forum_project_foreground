@@ -264,7 +264,5 @@ const handlePreview = async () => {
     }
 }
 
-.n-card :deep(.n-card-header) {
-    border-bottom: 1px solid #f2f2f2;
-}
+@include headBorder;
 </style>

@@ -22,6 +22,6 @@ export const collectionInter = (params: any): Promise<any> => {
 };
 //6、关注
 export const concernInter = (params: any): Promise<any> => {
-    return $post('/author/concern', params);
+    return $post('/user/follow', params);
 };
 //7、发布评论

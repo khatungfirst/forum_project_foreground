@@ -10,6 +10,7 @@ import { debounce } from '@/utils/debounce.ts';
 import IconWrapper from '@/views/components/icon/IconWrapper.vue'; //导入图标组件
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
+import { useMessage } from 'naive-ui';
 import { LikeTwotone } from '@vicons/antd'; // 导入点赞的图标
 import { MessageTwotone } from '@vicons/antd'; //导入评论的图标
 import { StarTwotone } from '@vicons/antd'; //导入收藏的图标
@@ -207,11 +208,10 @@ const concern = async () => {
         authorInfo.fans_count++;
     }
     const data = ref({
-        user_id: user_id.value,
-        concern_status: authorInfo.concern_status
+        user_id: user_id.value
     });
     const { code } = await concernInter(data);
-    if (code === 200 && authorInfo.concern_status === true) {
+    if (code === 2000 && authorInfo.concern_status === true) {
         message.success('关注成功');
     } else {
         message.success('取消关注成功');
@@ -352,27 +352,6 @@ onBeforeUnmount(() => {
         <div class="right">
             <div class="author-detail" ref="authorDetail">
                 <authorMessage :authorInfo="authorInfo"></authorMessage>
-                <!-- <div class="top">
-                    <n-avatar round size="large" :src="authorInfo.head" />
-                    <div class="authorName">
-                        <p class="name">{{ authorInfo.nickname }}</p>
-                        <p class="tag">{{ authorInfo.signature }}</p>
-                    </div>
-                </div>
-                <div class="middle">
-                    <div class="article">
-                        <p>{{ authorInfo.author_article }}</p>
-                        <p class="second">文章</p>
-                    </div>
-                    <div class="read">
-                        <p>{{ authorInfo.author_read }}</p>
-                        <p class="second">阅读</p>
-                    </div>
-                    <div class="fan">
-                        <p>{{ authorInfo.fans_count }}</p>
-                        <p class="second">粉丝</p>
-                    </div>
-                </div> -->
                 <div class="bottom">
                     <n-button
                         strong
@@ -538,42 +517,6 @@ onBeforeUnmount(() => {
             background-color: #fff;
             margin-bottom: 20px;
             padding: 10px;
-
-            // .top {
-            //     padding-left: 15px;
-            //     .n-avatar {
-            //         float: left;
-            //         margin-right: 10px;
-            //     }
-
-            //     .authorName {
-            //         p {
-            //             @include ellipsis;
-            //         }
-            //         .name {
-            //             font-size: 16px;
-            //         }
-            //         .tag {
-            //             font-size: 12px;
-            //             color: #707070;
-            //         }
-            //     }
-            // }
-
-            // .middle {
-            //     width: 100%;
-            //     display: grid;
-            //     grid-template-columns: 1fr 1fr 1fr;
-            //     margin: 15px 0px;
-            //     text-align: center;
-            //     p {
-            //         margin: 5px;
-            //     }
-
-            //     .second {
-            //         color: #8a919f;
-            //     }
-            // }
 
             .bottom {
                 display: flex;

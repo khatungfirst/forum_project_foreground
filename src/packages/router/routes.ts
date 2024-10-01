@@ -40,7 +40,7 @@ const routes = [
         component: () => import('@/views/components/transferPage/index.vue')
     },
     {
-        path: '/articlerelease',
+        path: '/articlerelease/:id',
         component: () => import('@/views/articleRelease/index.vue')
     },
     {
@@ -49,11 +49,15 @@ const routes = [
     },
     {
         path: '/drawer',
-        component: () => import('@/views/components/commentDrawer/index.vue')
+        component: () => import('@/views/components/fansInfo/index.vue')
     },
     {
-        path: '/settings',
+        path: '/settings/:id',
         component: () => import('@/views/settings/index.vue')
+    },
+    {
+        path: '/member/:id',
+        component: () => import('@/views/memberCenter/index.vue')
     }
 ];
 routerArray.push(...routers404);
