@@ -3,25 +3,24 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Article from '@/views/components/article/index.vue';
 import FansInfo from '@/views/components/fansInfo/index.vue';
-import { getMemberInfo } from '@/config/apis/member.ts';
-import { editSignature } from '@/config/apis/member.ts';
-import { getArticleInfo } from '@/config/apis/member.ts';
-import { deleteArticle } from '@/config/apis/member.ts';
-import { getConcernList } from '@/config/apis/member.ts';
+import { getMemberInfo, editSignature, getArticleInfo, deleteArticle, getConcernList } from '@/config/apis/member.ts';
 import { concernInter } from '@/config/apis/articleDetail';
 import { getNumberData } from '@/config/apis/settings.ts';
+import { debounce } from '@/utils/debounce.ts';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
-import { EditTwotone } from '@vicons/antd';
-import { LikeTwotone } from '@vicons/antd';
-import { EyeOutlined } from '@vicons/antd';
-import { HeartFilled } from '@vicons/antd';
-import { GlobalOutlined } from '@vicons/antd';
-import { WeiboOutlined } from '@vicons/antd';
-import { GithubFilled } from '@vicons/antd';
-import { DeleteTwotone } from '@vicons/antd';
-import { SearchOutlined } from '@vicons/antd';
+import {
+    EditTwotone,
+    LikeTwotone,
+    EyeOutlined,
+    HeartFilled,
+    GlobalOutlined,
+    WeiboOutlined,
+    GithubFilled,
+    DeleteTwotone,
+    SearchOutlined
+} from '@vicons/antd';
 import { Edit } from '@vicons/fa';
 
 //定义路由对象
@@ -152,7 +151,7 @@ const commitSignature = async () => {
 };
 
 //关注
-const concern = async () => {
+const concernFun = async () => {
     user.concern_status = !user.concern_status;
     const { code } = await concernInter(user.id);
     if (code === 2000) {
@@ -165,6 +164,8 @@ const concern = async () => {
         message.error('关注失败');
     }
 };
+
+const concern = debounce(concernFun, 500);
 
 //设置按钮
 const settinngs = () => {
@@ -189,7 +190,6 @@ const tabChange = (value: string) => {
         fansType.page = 1;
         fansList();
     }
-    console.log(aticleType.type, '//////');
 };
 
 //下拉加载文章数据

@@ -2,8 +2,7 @@
 import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { Icon } from '@vicons/utils';
-import { EyeOutlined } from '@vicons/antd';
-import { LikeTwotone } from '@vicons/antd';
+import { EyeOutlined, LikeTwotone } from '@vicons/antd';
 
 const prop = defineProps({
     item: {
@@ -43,7 +42,6 @@ const route = useRouter();
 //查看文章详情的方法
 const checkDetail = () => {
     route.push(`/articledetail/${prop.item.id}`);
-    console.log(prop.item.id);
 };
 </script>
 <template>

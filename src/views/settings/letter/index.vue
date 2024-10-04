@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { getLetterStatus } from '@/config/apis/settings.ts';
-import { changeLetterStatus } from '@/config/apis/settings.ts';
+import { getLetterStatus, changeLetterStatus } from '@/config/apis/settings.ts';
 import { useMessage } from 'naive-ui';
 
 //用户id

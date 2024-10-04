@@ -81,33 +81,10 @@ const customAlert = (info, type) => {
 };
 const customPaste = async (editor, event, callback) => {
     console.log('ClipboardEvent 粘贴事件对象', event);
-
-    // const { data } = await getImageUrl();
-    // // 自定义插入内容
-    // editor.insertText(`${data.src}`);
-
     // 返回值（注意，vue 事件的返回值，不能用 return）
     callback(true); // 返回 false ，阻止默认粘贴行为
     // callback(true) // 返回 true ，继续默认的粘贴行为
 };
-
-// const insertText = () => {
-//     const editor = editorRef.value;
-//     if (editor == null) return;
-//     editor.insertText('hello world');
-// };
-
-// const printHtml = () => {
-//     const editor = editorRef.value;
-//     if (editor == null) return;
-//     console.log(editor.getHtml());
-// };
-
-// const disable = () => {
-//     const editor = editorRef.value;
-//     if (editor == null) return;
-//     editor.disable();
-// };
 </script>
 <template>
     <div style="border: 1px solid #ccc">

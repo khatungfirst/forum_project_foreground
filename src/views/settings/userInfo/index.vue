@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { getUserInfo } from '@/config/apis/settings.ts';
-import { changeUserInfo } from '@/config/apis/settings.ts';
+import { getUserInfo, changeUserInfo } from '@/config/apis/settings.ts';
 import { getImageUrl } from '@/config/apis/publicArticle';
 import { useMessage } from 'naive-ui';
 import '@/assets/css/icon/iconfont.css';

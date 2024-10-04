@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
-import { getNumberData } from '@/config/apis/settings.ts';
-import { changeNumberData } from '@/config/apis/settings.ts';
+import { getNumberData, changeNumberData } from '@/config/apis/settings.ts';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 

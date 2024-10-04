@@ -1,18 +1,14 @@
 <script lang="ts" setup>
-import { Icon } from '@vicons/utils';
-import { SmileOutlined } from '@ant-design/icons-vue';
-import { FileImageOutlined } from '@ant-design/icons-vue';
-import { QuestionCircleOutlined } from '@ant-design/icons-vue';
 import { defineProps } from 'vue';
+import { getImageUrl } from '@/config/apis/publicArticle';
+import type { UploadFileInfo } from 'naive-ui';
+import { Icon } from '@vicons/utils';
+import { CaretDownFilled, CloseCircleTwotone } from '@vicons/antd';
+import { SmileOutlined, FileImageOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import data from 'emoji-mart-vue-fast/data/all.json';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
-import { CaretDownFilled } from '@vicons/antd';
-import { CloseCircleTwotone } from '@vicons/antd';
-import type { UploadFileInfo } from 'naive-ui';
-import { getImageUrl } from '@/config/apis/publicArticle';
 
-// import { useMessage } from 'naive-ui';
 const prop = defineProps<{
     appear: boolean;
     childWidth: number;
@@ -31,12 +27,6 @@ const emoji = ref(false);
 //存放上传图片的url路径
 const uploadedImages = ref<{ id: string; url: string }[]>([]);
 console.log(uploadedImages);
-
-//定义消息提示对象
-// const message = useMessage();
-
-// const fileListLengthRef = ref(0);
-// const uploadRef = ref<UploadInst | null>(null);
 
 const fileListRef = ref<UploadFileInfo[]>([]);
 
@@ -71,19 +61,6 @@ const handleEmoji = (e) => {
     inputValue.value = inputValue.value + e.native;
 };
 
-//  先预览再上传图片的做法
-// const handleChange = (options: { fileList: UploadFileInfo[] }) => {
-//     console.log(fileListRef, '222');
-
-//     fileListLengthRef.value = options.fileList.length;
-// };
-
-// const handleClick = () => {
-//     console.log('111');
-
-//     uploadRef.value?.submit();
-// };
-
 // 创建一个模拟生成缩略图 URL 的函数
 function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefined> {
     if (!file) return undefined;
@@ -95,7 +72,6 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
             .then((response) => {
                 if (response && response.data && response.data.url) {
                     // 如果成功获取到 URL，则解析 Promise
-                    console.log('0000'); // 调试输出
                     resolve(response.data.url);
                 } else {
                     // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
@@ -141,28 +117,6 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                         @select="handleEmoji"
                         v-if="emoji"
                     />
-                    <!-- 先预览再上传图片的做法 -->
-                    <!-- 
-                    <n-upload
-                        ref="upload"
-                        :default-upload="false"
-                        multiple
-                        @change="handleChange"
-                        list-type="image"
-                        :create-thumbnail-url="createThumbnailUrl"
-                        :default-file-list="fileListRef"
-                    >
-                        <Icon :size="18" color="#8a919f" class="icon">
-                            <FileImageOutlined />
-                        </Icon>
-                    </n-upload>
-                    <n-button
-                        style="margin-bottom: 12px; margin-left: 200px"
-                        @click="handleClick"
-                        v-if="fileListLengthRef"
-                    >
-                        上传文件
-                    </n-button> -->
                     <n-upload
                         list-type="image"
                         :create-thumbnail-url="createThumbnailUrl"

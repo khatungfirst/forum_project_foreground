@@ -1,15 +1,12 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { onBeforeRouteLeave } from 'vue-router';
-import { getTypeTag } from '@/config/apis/publicArticle.ts';
-import { publicArticles } from '@/config/apis/publicArticle.ts';
+import { useRouter, onBeforeRouteLeave } from 'vue-router';
+import { getTypeTag, publicArticles } from '@/config/apis/publicArticle.ts';
 import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
 import 'bytemd/dist/index.css';
 import type { UploadFileInfo } from 'naive-ui';
-import { useMessage } from 'naive-ui';
-import { useDialog } from 'naive-ui';
+import { useMessage, useDialog } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
 
@@ -122,7 +119,6 @@ onUnmounted(() => {
     window.removeEventListener('unload', unloadHandler);
     // 移除键盘事件监听器
     document.removeEventListener('keydown', saveContent);
-    // 清除定时器
 });
 
 //用watch去监控标题是否发生更改

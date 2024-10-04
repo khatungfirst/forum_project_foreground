@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// import { ref } from 'vue';
 import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { concernInter } from '@/config/apis/articleDetail';
+import { debounce } from '@/utils/debounce.ts';
 import { useMessage } from 'naive-ui';
 
 const prop = defineProps({
@@ -35,7 +35,7 @@ const message = useMessage();
 const router = useRouter();
 
 //关注的方法
-const concern = async (id) => {
+const concernFun = async (id) => {
     const { code } = await concernInter(id);
     if (code === 2000) {
         concernStatus.value = !concernStatus.value;
@@ -50,6 +50,7 @@ const concern = async (id) => {
         message.error('关注失败');
     }
 };
+const concern = debounce(concernFun, 500);
 
 //跳转到关注人的会员中心
 const routeMember = (id) => {

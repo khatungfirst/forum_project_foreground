@@ -1,22 +1,21 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { getArticleDetail } from '@/config/apis/articleDetail';
-import { getAuthorDetail } from '@/config/apis/articleDetail';
-import { likeInter } from '@/config/apis/articleDetail';
-import { collectionInter } from '@/config/apis/articleDetail';
-import { concernInter } from '@/config/apis/articleDetail';
+import {
+    getArticleDetail,
+    getAuthorDetail,
+    likeInter,
+    collectionInter,
+    concernInter
+} from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';
-import IconWrapper from '@/views/components/icon/IconWrapper.vue'; //导入图标组件
+import IconWrapper from '@/views/components/icon/IconWrapper.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
+import MarkdownViewer from '@/views/components/markdownViewer/index.vue';
 import { useMessage } from 'naive-ui';
-import { LikeTwotone } from '@vicons/antd'; // 导入点赞的图标
-import { MessageTwotone } from '@vicons/antd'; //导入评论的图标
-import { StarTwotone } from '@vicons/antd'; //导入收藏的图标
-import { WarningFilled } from '@vicons/antd'; //导入注意的图标
+import { LikeTwotone, MessageTwotone, StarTwotone, WarningFilled, EyeOutlined } from '@vicons/antd'; // 导入点赞的图标
 import { Icon } from '@vicons/utils';
-import { EyeOutlined } from '@vicons/antd';
 // import MarkdownIt from 'markdown-it';
 
 //定义图标颜色的属性
@@ -51,6 +50,9 @@ const about = ref([]);
 
 //当前登录人的id
 const user_id = ref(0);
+
+// 目录框是否收起的按钮
+const catalogueButton = ref('展开');
 
 //文章对象
 const articleInfo = reactive({
@@ -148,7 +150,7 @@ const like = async () => {
 };
 
 // 应用防抖到点赞函数
-const debouncedLikePost = debounce(like, 500);
+const debouncedLikePost = debounce(like, 300);
 
 // 直接返回防抖后的函数作为事件处理函数
 const handleLike = debouncedLikePost;
@@ -226,6 +228,15 @@ const handleConcern = debouncedConcernPost;
 //私信的方法
 const personalLetter = () => {
     message.warning('私信功能暂未开放，敬请期待吧！');
+};
+
+//控制目录框是否展开
+const catalogueControl = () => {
+    if (catalogueButton.value === '收起') {
+        catalogueButton.value = '展开';
+    } else {
+        catalogueButton.value = '收起';
+    }
 };
 
 //定义遮罩层的点击事件
@@ -368,11 +379,19 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <div class="catalogue">
-                <div class="catalogue-top">
-                    <span>目录</span>
-                    <span class="pack_up">收起</span>
-                </div>
-                <div class="catalogue-detail"></div>
+                <n-collapse>
+                    <template #header>
+                        <div class="collapse-header" style="border-bottom: 1px solid black"></div>
+                    </template>
+                    <template #header-extra>
+                        <span style="color: #8a9fc7; font-size: 13px">{{ catalogueButton }}</span>
+                    </template>
+                    <n-collapse-item title="目录" @click="catalogueControl">
+                        <div class="catalogue-detail">
+                            <MarkdownViewer content="<h1>voluptate</h1><h2>234</h2><h3>34</h3><p>5</p>" />
+                        </div>
+                    </n-collapse-item>
+                </n-collapse>
             </div>
             <div class="advertisement"></div>
             <div class="relevant_recommendation">
@@ -384,7 +403,7 @@ onBeforeUnmount(() => {
                         <p>{{ item.title }}</p>
                         <p class="bottom">
                             <span>{{ item.views_count }}阅读</span>
-                            -
+                            ·
                             <span>{{ item.likes_count }}点赞</span>
                         </p>
                     </li>
@@ -546,6 +565,14 @@ onBeforeUnmount(() => {
                     cursor: pointer;
                 }
             }
+        }
+
+        .catalogue :deep(.n-collapse-item-arrow) {
+            display: none;
+        }
+
+        .catalogue :deep(.n-collapse-item__header) {
+            border-bottom: 1px solid rgb(218, 211, 211);
         }
 
         .advertisement {

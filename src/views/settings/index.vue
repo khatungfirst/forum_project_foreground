@@ -5,10 +5,7 @@ import userInfo from '@/views/settings/userInfo/index.vue';
 import numberSettings from '@/views/settings/numberSettings/index.vue';
 import letter from '@/views/settings/letter/index.vue';
 import { Icon } from '@vicons/utils';
-import { LeftOutlined } from '@vicons/antd';
-import { IdcardTwotone } from '@vicons/antd';
-import { SettingTwotone } from '@vicons/antd';
-import { MailOutlined } from '@vicons/antd';
+import { LeftOutlined, IdcardTwotone, SettingTwotone, MailOutlined } from '@vicons/antd';
 </script>
 <template>
     <div class="wrap">
