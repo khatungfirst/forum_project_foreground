@@ -49,7 +49,7 @@ const routes = [
     },
     {
         path: '/drawer',
-        component: () => import('@/views/components/markdownViewer/index.vue')
+        component: () => import('@/views/articleDetail/firstOrderComments/index.vue')
     },
     {
         path: '/settings/:id',

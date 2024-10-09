@@ -7,7 +7,7 @@ export const getTypeTag = (): Promise<any> => {
 
 //获取图片的url链接
 export const getImageUrl = (params: any): Promise<any> => {
-    return $get('/produce_image_url', params);
+    return $post('/produce_image_url', params);
 };
 
 //发布文章

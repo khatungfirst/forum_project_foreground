@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
-import { getTypeTag, publicArticles } from '@/config/apis/publicArticle.ts';
+import { getTypeTag, publicArticles, getImageUrl } from '@/config/apis/publicArticle.ts';
 import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
 import 'bytemd/dist/index.css';
@@ -219,27 +219,6 @@ const publicArticle = async () => {
     }
 };
 
-//文件上传的相关方法
-const handlePreview = (file: UploadFileInfo) => {
-    const { url } = file;
-    console.log(url, 'url');
-
-    previewImageUrlRef.value = url as string;
-    showModalRef.value = true;
-};
-
-//定义文件上传后的图片显示
-const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) => {
-    const { data } = JSON.parse((event?.target as XMLHttpRequest).response);
-    articleData.image_url = data.url;
-    console.log(data.url);
-    // message.success((event?.target as XMLHttpRequest).response);
-    const ext = file.name.split('.')[1];
-    file.name = `更名.${ext}`;
-    file.url = data.url;
-    return file;
-};
-
 // 定义事件处理函数
 const beforeUnloadHandler = (e) => {
     e.preventDefault(); // 阻止默认行为（在某些浏览器中可能不起作用）
@@ -252,6 +231,12 @@ const unloadHandler = (e) => {
     // 因为浏览器会忽略事件处理函数中阻止默认行为的尝试。
     // 这里主要是为了演示如何添加和移除事件监听器。
     console.log(e, '页面正在卸载...');
+};
+
+//获取上传封面图的链接
+const getUrl = async () => {
+    const { data } = await getImageUrl();
+    articleData.image_url = data.url;
 };
 </script>
 <template>
@@ -291,12 +276,9 @@ const unloadHandler = (e) => {
                     <div class="upload">
                         <span>封面图</span>
                         <n-upload
-                            action="http://127.0.0.1:4523/m1/4891553-4547208-default/produce_image_url"
-                            method="get"
+                            @change="getUrl"
                             :default-file-list="previewFileList"
                             list-type="image-card"
-                            @preview="handlePreview"
-                            @finish="handleFinish"
                             max="1"
                         />
                         <n-modal v-model:show="showModal" preset="card" style="width: 600px" title="一张很酷的图片">

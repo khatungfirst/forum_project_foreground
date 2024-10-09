@@ -8,11 +8,13 @@ import {
     collectionInter,
     concernInter
 } from '@/config/apis/articleDetail';
+import { getFirstOrderComments } from '@/config/apis/comments';
 import { debounce } from '@/utils/debounce.ts';
 import IconWrapper from '@/views/components/icon/IconWrapper.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
 import MarkdownViewer from '@/views/components/markdownViewer/index.vue';
+import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.vue';
 import { useMessage } from 'naive-ui';
 import { LikeTwotone, MessageTwotone, StarTwotone, WarningFilled, EyeOutlined } from '@vicons/antd'; // 导入点赞的图标
 import { Icon } from '@vicons/utils';
@@ -54,6 +56,12 @@ const user_id = ref(0);
 // 目录框是否收起的按钮
 const catalogueButton = ref('展开');
 
+//一级评论接收数组
+const commentsList = ref([]);
+
+//评论总条数
+const commentTotal = ref(0);
+
 //文章对象
 const articleInfo = reactive({
     id: 4, //定义本篇文章的id
@@ -78,6 +86,14 @@ const authorInfo = reactive({
     concern_status: false //定义是否关注该作者的状态
 });
 
+//评论相关数据
+const commentInfo = reactive({
+    article_id: 0,
+    offset: 1,
+    limit: 4,
+    user_id: 0
+});
+
 //文章内容（计算属性来转换markdown语言）
 // const contents = computed(() => {
 //     const md = new MarkdownIt();
@@ -89,7 +105,10 @@ const authorInfo = reactive({
 onMounted(async () => {
     initArticle();
     authorInit();
+    initComments();
 });
+
+// ---------------------------相关初始化方法----------------------------------
 
 //文章相关内容初始化的方法
 const initArticle = async () => {
@@ -129,6 +148,17 @@ const authorInit = async () => {
     }
 };
 
+//评论相关初始化方法
+const initComments = async () => {
+    const { data } = await getFirstOrderComments(commentInfo);
+    if (data) {
+        commentsList.value = data.firstCommentsList;
+        commentTotal.value = data.commentsTotal;
+    }
+};
+
+//-----------------------------点赞、收藏、私信、关注方法------------------------
+
 //点赞的方法
 const like = async () => {
     currentIcon.value[0] = !currentIcon.value[0];
@@ -154,13 +184,6 @@ const debouncedLikePost = debounce(like, 300);
 
 // 直接返回防抖后的函数作为事件处理函数
 const handleLike = debouncedLikePost;
-
-//评论的方法
-const review = () => {
-    appear.value = !appear.value;
-    isOverlayVisible.value = !isOverlayVisible.value;
-    console.log('review');
-};
 
 //收藏的方法
 const collect = async () => {
@@ -261,6 +284,29 @@ const handleScroll = () => {
     }
 };
 
+//-------------------------------评论的相关方法-------------------------------
+
+//发表评论的方法
+const review = () => {
+    appear.value = !appear.value;
+    isOverlayVisible.value = !isOverlayVisible.value;
+};
+
+//评论的下拉事件
+const handleLoad = async () => {
+    commentInfo.offset = commentInfo.offset + 1;
+    const { data } = await getFirstOrderComments(commentInfo);
+    if (data) {
+        commentsList.value.push(...data.firstCommentsList);
+    }
+};
+const handleLoadComment = debounce(handleLoad, 200);
+
+//删除评论
+const deleteFirst = (id) => {
+    commentsList.value = commentsList.value.filter((item) => item.id !== id);
+};
+
 // 监听窗口调整
 onMounted(async () => {
     await nextTick(); // 确保 DOM 更新完成
@@ -345,7 +391,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <div class="reviewModule">
-                <h3>评论</h3>
+                <h3>评论 {{ commentTotal }}</h3>
                 <div class="loginRegist">
                     <n-avatar round size="large" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
                     <div class="loginBgc">
@@ -355,6 +401,16 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="review-detail">
                     <p>最新</p>
+                    <div class="alone-comments">
+                        <n-infinite-scroll :distance="0" @load="handleLoadComment">
+                            <FirstOrderComments
+                                :item="item"
+                                v-for="(item, index) in commentsList"
+                                :key="index"
+                                @delete-firComments="deleteFirst"
+                            ></FirstOrderComments>
+                        </n-infinite-scroll>
+                    </div>
                 </div>
             </div>
             <!-- 评论的盒子 -->
@@ -415,7 +471,6 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
 .wrap {
-    @include all;
     display: flex;
     background-color: #f2f3f5;
 

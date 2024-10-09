@@ -26,7 +26,6 @@ const emoji = ref(false);
 
 //存放上传图片的url路径
 const uploadedImages = ref<{ id: string; url: string }[]>([]);
-console.log(uploadedImages);
 
 const fileListRef = ref<UploadFileInfo[]>([]);
 
@@ -73,6 +72,8 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                 if (response && response.data && response.data.url) {
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data.url);
+                    uploadedImages.value.push(response.data.url);
+                    console.log(uploadedImages.value);
                 } else {
                     // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
                     reject(new Error('Failed to retrieve thumbnail URL'));

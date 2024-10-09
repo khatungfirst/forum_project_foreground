@@ -155,7 +155,7 @@ const handlePreview = async () => {
                 </n-form-item>
             </n-form>
             <div class="head">
-                <n-upload list-type="image-card" @change="handlePreview" method="get">
+                <n-upload list-type="image-card" @change="handlePreview">
                     <n-avatar round size="large" :src="userInfo.path" style="width: 100%; height: 100%" />
                 </n-upload>
                 <p>上传头像</p>
