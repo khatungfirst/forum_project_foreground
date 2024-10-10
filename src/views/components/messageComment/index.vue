@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
     comment_message: {
@@ -8,6 +8,8 @@ const props = defineProps({
         default: () => []
     }
 });
+
+const emit = defineEmits(['likeComment', 'showCommentBox']);
 </script>
 
 <template>
@@ -26,10 +28,10 @@ const props = defineProps({
             </div>
             <div class="comment-actions">
                 <span class="date">{{ comment.created_at }}</span>
-                <button class="like-button" :class="{ liked: comment.likes_count > 0 }">
-                    点赞{{ comment.likes_count }}
+                <button class="like-button" @click="() => emit('likeComment', comment)">
+                    {{ comment.likes_count }} 次赞
                 </button>
-                <span class="comment-reply">回复</span>
+                <span class="comment-reply" @click="() => emit('showCommentBox', comment)">回复</span>
             </div>
         </div>
     </div>
