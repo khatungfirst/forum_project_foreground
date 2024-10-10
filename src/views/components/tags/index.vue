@@ -61,19 +61,25 @@ const truncatedDescriptions = computed(() => {
 <style scoped>
 .tag-item {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 290px;
+    width: 310px;
     background-color: #ffffff;
 }
 
 .tag-item-container {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     align-items: center;
+}
+
+.tag-item-single {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 }
 
 .tag-item-info {
@@ -102,13 +108,15 @@ const truncatedDescriptions = computed(() => {
 
 .tag-item_data {
     color: #7d7b7b;
-    margin: 7px 0;
+    margin: 7px auto;
+    font-size: 14px;
 }
 
 .tag-item-description {
     margin: 1px 0;
     font-size: 14px;
     color: #7d7b7b;
+    width: 100%;
 }
 
 .tag-item_button {
@@ -118,7 +126,9 @@ const truncatedDescriptions = computed(() => {
     border-radius: 50px;
     outline: none;
     color: #19a059;
-    padding: 8px 125px;
+    /* padding: 8px 125px; */
     margin: 6px 0;
+    padding: 8px 0;
+    width: 270px;
 }
 </style>

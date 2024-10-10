@@ -42,7 +42,6 @@ const follow_tag = async (id) => {
 
 <template>
     <TagItem :tags="tags" @follow="follow_tag" />
-    <div>标签</div>
 </template>
 
 <style scoped>

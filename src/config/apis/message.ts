@@ -9,3 +9,13 @@ export const comment_message = (params: any): Promise<any> => {
 export const like_comment_message = (params: any): Promise<any> => {
     return $http('/comment/praise', params);
 };
+
+// 展示点赞消息
+export const like_message = (params: any): Promise<any> => {
+    return $get('/message/like', params);
+};
+
+// 展示收藏消息
+export const collect_message = (params: any): Promise<any> => {
+    return $get('/message/collection', params);
+};
