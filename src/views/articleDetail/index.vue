@@ -32,7 +32,7 @@ const router = useRouter();
 //定义控制评论页面的出现
 const appear = ref(false);
 
-//定义是否显示遮罩层的方法
+//定义是否显示遮罩层的变量
 const isOverlayVisible = ref(false);
 
 //定义一个变量接收中间盒子的宽度
@@ -307,6 +307,8 @@ const deleteFirst = (id) => {
     commentsList.value = commentsList.value.filter((item) => item.id !== id);
 };
 
+//----------------------------------生命周期------------------------------------
+
 // 监听窗口调整
 onMounted(async () => {
     await nextTick(); // 确保 DOM 更新完成
@@ -414,7 +416,12 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <!-- 评论的盒子 -->
-            <commentDrawer :appear="appear" :childWidth="childWidth" :headShot="authorInfo.head"></commentDrawer>
+            <commentDrawer
+                :appear="appear"
+                :childWidth="childWidth"
+                :headShot="authorInfo.head"
+                @close-comment="handleMaskClick"
+            ></commentDrawer>
         </div>
         <div class="right">
             <div class="author-detail" ref="authorDetail">
@@ -474,14 +481,7 @@ onBeforeUnmount(() => {
     display: flex;
     background-color: #f2f3f5;
 
-    .overlay {
-        position: fixed; /* 固定定位 */
-        top: 0;
-        left: 0;
-        @include all;
-        background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色 */
-        z-index: 998; /* 确保在最上层 */
-    }
+    @include overlay;
 
     .left {
         width: 10%;
