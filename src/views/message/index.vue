@@ -3,14 +3,22 @@ import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import CommentItem from '../components/messageComment/index.vue';
 import LikeItem from '../components/messageLike&Collect/index.vue';
+import followItem from '../components/messageFollow/index.vue';
 import commentDrawer from '../components/commentDrawer/index.vue';
-import { comment_message, like_message, collect_message, like_comment_message } from '@/config/apis/message';
+import {
+    comment_message,
+    like_message,
+    collect_message,
+    like_comment_message,
+    follow_message
+} from '@/config/apis/message';
 
 const router = useRouter();
 
 const commentList = ref([]); // 存储评论消息
 const likeList = ref([]); // 存储点赞消息
 const collectList = ref([]); // 存储收藏消息
+const followList = ref([]); // 存储关注消息
 
 const likedComments = ref(new Set()); // 存储已点赞的评论ID
 
@@ -72,6 +80,13 @@ onMounted(async () => {
     } else {
         console.error('获取收藏消息失败');
     }
+
+    const followResponse = await follow_message({ page: 1, limit: 5 });
+    if (followResponse.code === 2000) {
+        followList.value = followResponse.data.follow_list;
+    } else {
+        console.error('获取关注消息失败');
+    }
 });
 
 const likeComment = async (comment) => {
@@ -126,6 +141,9 @@ const goToArticleDetail = (articleId) => {
                     @goToArticleDetail="goToArticleDetail"
                     @goToMember="goToMember"
                 />
+            </div>
+            <div>
+                <followItem :followList="followList" @goToMember="goToMember"></followItem>
             </div>
         </div>
     </div>

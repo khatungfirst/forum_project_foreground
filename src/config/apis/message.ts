@@ -19,3 +19,8 @@ export const like_message = (params: any): Promise<any> => {
 export const collect_message = (params: any): Promise<any> => {
     return $get('/message/collection', params);
 };
+
+// 展示关注消息
+export const follow_message = (params: any): Promise<any> => {
+    return $get('/message/follow', params);
+};
