@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { getUserInfo, changeUserInfo } from '@/config/apis/settings.ts';
-import { getImageUrl } from '@/config/apis/publicArticle';
+import useUpload from '@/hooks/useUpload';
 import { useMessage } from 'naive-ui';
 import '@/assets/css/icon/iconfont.css';
 
@@ -93,10 +93,12 @@ const handleClose = async (e) => {
 
 //---------------------------------上传头像-----------------------------------
 
+const { image_url, getUrl } = useUpload();
+
 //上传图片预览图
-const handlePreview = async () => {
-    const { data } = await getImageUrl();
-    userInfo.path = data.url;
+const handlePreview = async (item) => {
+    await getUrl(item);
+    userInfo.path = image_url.value;
     update('更改头像成功', '更改头像失败');
     // showModalRef.value = true;
 };

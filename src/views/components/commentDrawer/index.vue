@@ -61,15 +61,15 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
     // // 这里我们仅返回一个固定的 URL 字符串作为示例
     return new Promise((resolve, reject) => {
         // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
-        getImageUrl(file, 200)
+        const fd = new FormData();
+        fd.append('files', file);
+        fd.append('width', '200');
+        getImageUrl(fd)
             .then((response) => {
-                console.log(response, '=====');
-
                 if (response && response.data) {
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data);
                     uploadedImages.value.push(...response.data);
-                    console.log(uploadedImages.value);
                 } else {
                     // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
                     reject(new Error('Failed to retrieve thumbnail URL'));
@@ -279,7 +279,7 @@ const publicFirst = async () => {
                 }
 
                 .n-upload :deep(.n-upload-trigger + .n-upload-file-list) {
-                    width: 500px;
+                    width: 300px;
                     display: inline-block;
                 }
 

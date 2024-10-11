@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
-import { getTypeTag, publicArticles, getImageUrl } from '@/config/apis/publicArticle.ts';
+import { getTypeTag, publicArticles, getImageUrl } from '@/config/apis/publicArticle';
 import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
+import useUpload from '@/hooks/useUpload';
 import 'bytemd/dist/index.css';
-import type { UploadFileInfo } from 'naive-ui';
 import { useMessage, useDialog } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
@@ -13,42 +13,8 @@ import { CheckCircleTwotone } from '@vicons/antd';
 //定义消息提示对象
 const message = useMessage();
 
-//定义弹窗对象
-const dialog = useDialog();
-
 //定义路由对象
 const router = useRouter();
-
-// 路由离开守卫
-onBeforeRouteLeave(async (to, from, next) => {
-    if (articleData.status === 'private') {
-        next();
-    } else {
-        const shouldLeave = await new Promise((resolve) => {
-            dialog.warning({
-                title: '注意',
-                content: '您的文章还没保存，是否要保存？',
-                positiveText: '保存',
-                negativeText: '取消',
-                maskClosable: false,
-                onEsc: () => {
-                    console.log('通过 esc 关闭');
-                    resolve(false); // 假设 ESC 也被视为取消
-                },
-                onPositiveClick: () => {
-                    console.log('222');
-                    resolve(true); // 用户确认离开
-                }
-            });
-        });
-
-        if (shouldLeave) {
-            next(); // 用户确认离开，继续路由跳转
-        } else {
-            next(false); // 用户选择不离开，阻止路由跳转
-        }
-    }
-});
 
 // 定义事件处理函数
 const beforeUnloadHandler = (e) => {
@@ -136,7 +102,6 @@ const saveContent = (e) => {
     if (key === 83 && e.ctrlKey) {
         if (articleData.title === '' && articleData.content === '<p><br></p>') {
             isSave.value = false;
-            console.log('目前为空');
         } else {
             save();
         }
@@ -190,24 +155,17 @@ const getMessage = (msg: string) => {
         title1.value === articleData.title
     ) {
         isSave.value = true;
-        console.log(content1, 'save1');
     } else {
         isSave.value = false;
         content1.value = articleData.content;
     }
 };
 
-//文件上传声明的属性
-const showModalRef = ref(false);
-const previewImageUrlRef = ref('');
-const previewFileList = ref([]);
-// const showModal = showModalRef;
-// const previewImageUrl = previewImageUrlRef;
-
 //获取上传封面图的链接
-const getUrl = async () => {
-    const { data } = await getImageUrl();
-    articleData.image_url = data.url;
+const { image_url, getUrl } = useUpload();
+const getImage = async (item) => {
+    await getUrl(item);
+    articleData.image_url = image_url.value;
 };
 
 //页面上发布按钮的点击事件
@@ -272,14 +230,9 @@ const publicArticle = async () => {
                     </n-form-item>
                     <div class="upload">
                         <span>封面图</span>
-                        <n-upload
-                            @change="getUrl"
-                            :default-file-list="previewFileList"
-                            list-type="image-card"
-                            max="1"
-                        />
-                        <n-modal v-model:show="showModalRef" preset="card" style="width: 600px" title="封面图">
-                            <img :src="previewImageUrlRef" style="width: 100%" />
+                        <n-upload @change="getImage" list-type="image-card" max="1" />
+                        <n-modal preset="card" style="width: 600px" title="封面图">
+                            <img :src="articleData.image_url" style="width: 100%" />
                         </n-modal>
                     </div>
                     <n-p depth="3" style="margin: 8px 0 0 0">格式：png,jpg,gif 大小不大于：2M尺寸：192*128px</n-p>

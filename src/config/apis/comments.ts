@@ -1,5 +1,4 @@
-import { $post } from '@/packages/request';
-import { $get } from '@/packages/request';
+import { $post, $get } from '@/packages/request';
 
 //1、获取一级评论
 export const getFirstOrderComments = (params: any): Promise<any> => {

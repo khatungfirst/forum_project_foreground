@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import {
     getArticleDetail,
     getAuthorDetail,
@@ -22,6 +22,8 @@ import { Icon } from '@vicons/utils';
 
 //定义router
 const router = useRouter();
+
+const route = useRoute();
 
 //定义消息提示对象
 const message = useMessage();
@@ -63,7 +65,7 @@ const currentIcon = ref([false, false]);
 
 //文章对象
 const articleInfo = reactive({
-    id: 4, //定义本篇文章的id
+    id: route.params.id, //定义本篇文章的id
     likeTotal: 0, //定义本文章的点赞数
     collections: 0, // //定义本文章的收藏数
     title: 0, //文章标题
@@ -221,6 +223,11 @@ const handleScroll = () => {
     } else {
         isAuthorInfo.value = false;
     }
+};
+
+//跳转到对应推荐文章的文章详情
+const recommendedArtical = (id) => {
+    router.push(`/articledetail/${id}`);
 };
 
 // ---------------------------评论模块---------------------------------
@@ -452,7 +459,12 @@ const catalogueControl = () => {
                     <p>相关推荐</p>
                 </div>
                 <ul>
-                    <li class="about-detail" v-for="(item, index) in about" :key="index">
+                    <li
+                        class="about-detail"
+                        v-for="(item, index) in about"
+                        :key="index"
+                        @click="recommendedArtical(item.id)"
+                    >
                         <p>{{ item.title }}</p>
                         <p class="bottom">
                             <span>{{ item.views_count }}阅读</span>

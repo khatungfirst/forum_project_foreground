@@ -1,5 +1,4 @@
-import { $get } from '@/packages/request';
-import { $post } from '@/packages/request';
+import { $get, $post } from '@/packages/request';
 
 //1、获取用户的初始化信息
 export const getMemberInfo = (params: any): Promise<any> => {
