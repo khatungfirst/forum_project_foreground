@@ -6,7 +6,7 @@ import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import '@/assets/css/icon/iconfont.css';
 import { useMessage } from 'naive-ui';
 
-//---------------------------------声明----------------------------------------
+//---------------------------------统一声明的变量-----------------------------
 const prop = defineProps({
     item: {
         type: Object as () => {
@@ -47,35 +47,12 @@ const prop = defineProps({
     }
 });
 
-//发表评论需要的相关属性
-const commentItems = reactive({
-    article_id: prop.item.article_id,
-    user_id: 0, //当前登录
-    highest_id: prop.item.highest_id,
-    parent_id: prop.item.parent_id,
-    parent_user_id: prop.item.parent_id
-});
-
-//控制评论框是否显示
-const appear = ref(false);
-
-//定义是否显示遮罩层的变量
-const isOverlayVisible = ref(false);
-
-///获取中间盒子对象
-const boxRef = ref<HTMLElement | null>(null);
-
-//定义一个变量接收中间盒子宽度
-const childWidth = ref(0);
-
 const router = useRouter();
-
-const emit = defineEmits(['delete-secComments']);
 
 //定义消息提示对象
 const message = useMessage();
 
-//---------------------------------生命周期----------------------------------------
+//---------------------------------生命周期-----------------------------------
 
 // 监听窗口调整
 onMounted(async () => {
@@ -89,9 +66,18 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', updateChildWidth);
 });
 
-//--------------------------------评论有关方法----------------------------------------
+//--------------------------------评论有关方法--------------------------------
 
-//解构点赞方法
+//发表评论需要的相关属性
+const commentItems = reactive({
+    article_id: prop.item.article_id,
+    user_id: 0, //当前登录
+    highest_id: prop.item.highest_id,
+    parent_id: prop.item.parent_id,
+    parent_user_id: prop.item.parent_id
+});
+
+//解构点赞评论方法
 const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
 
 const likeObj = {
@@ -100,14 +86,10 @@ const likeObj = {
     user_id: 1
 };
 
-//跳转到指定用户会员中心
-const jumpMember = (id: number) => {
-    router.push(`/member/${id}`);
-};
-
 //删除评论
 const { deleteCom } = useDeleteComments(prop.item.id);
 
+const emit = defineEmits(['delete-secComments']);
 const deleteFun = () => {
     deleteCom();
     emit('delete-secComments', prop.item.id);
@@ -118,13 +100,33 @@ const report = () => {
     message.warning('举报功能暂未开发，敬请期待吧！');
 };
 
-//------------------------------其他方法------------------------------------------
+//跳转到指定用户会员中心
+const jumpMember = (id: number) => {
+    router.push(`/member/${id}`);
+};
+
+//------------------------------确定评论盒子的宽度-------------------------
+
+///获取中间盒子对象
+const boxRef = ref<HTMLElement | null>(null);
+
+//定义一个变量接收中间盒子宽度
+const childWidth = ref(0);
+
 //获取中间盒子宽度
 const updateChildWidth = () => {
     if (boxRef.value) {
         childWidth.value = boxRef.value.clientWidth;
     }
 };
+
+//------------------------------遮罩层--------------------------------
+
+//控制评论框是否显示
+const appear = ref(false);
+
+//定义是否显示遮罩层的变量
+const isOverlayVisible = ref(false);
 
 //定义遮罩层的点击事件
 const handleMaskClick = () => {
@@ -146,7 +148,7 @@ const handleMaskClick = () => {
                 <span class="nickname" @click="jumpMember(1)">{{ prop.item.nickname }}</span>
                 <span>回复</span>
                 <span class="nickname1" @click="jumpMember(2)">{{ prop.item.parent_nickname }} ：</span>
-                <span>再来</span>
+                <span>{{ prop.item.content }}</span>
             </n-ellipsis>
             <div class="comment-detail">
                 <span class="small-detail1">{{ prop.item.create_at }}</span>

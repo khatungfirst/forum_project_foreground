@@ -27,12 +27,11 @@ const prop = defineProps({
     }
 });
 
-// 定义 ref
-const concernStatus = ref(prop.item.concern_status);
-
 const message = useMessage();
 
 const router = useRouter();
+
+const concernStatus = ref(prop.item.concern_status);
 
 //关注的方法
 const concernFun = async (id) => {

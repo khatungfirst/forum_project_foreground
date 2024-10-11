@@ -1,12 +1,10 @@
 <script setup lang="ts">
-// import { ref } from 'vue';
-// import { useRouter } from 'vue-router';
 import userInfo from '@/views/settings/userInfo/index.vue';
 import numberSettings from '@/views/settings/numberSettings/index.vue';
 import letter from '@/views/settings/letter/index.vue';
 import '@/assets/css/icon/iconfont.css';
 import { Icon } from '@vicons/utils';
-import { LeftOutlined, IdcardTwotone, SettingTwotone, MailOutlined } from '@vicons/antd';
+import { LeftOutlined, MailOutlined } from '@vicons/antd';
 </script>
 <template>
     <div class="wrap">

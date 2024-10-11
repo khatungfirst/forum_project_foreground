@@ -45,57 +45,16 @@ const prop = defineProps({
     }
 });
 
-// 使用ref来创建一个响应式的数据属性
-const inputValue = ref('');
+//定义消息提示对象
+const message = useMessage();
 
-//输入框中的字数
-const fontNumber = computed(() => inputValue.value.length);
-
-//控制emoji表情是否出现
-const emoji = ref(false);
+//----------------------------------------评论图片---------------------------------
 
 //存放上传图片的url路径
 const uploadedImages = ref<{ id: string; url: string }[]>([]);
 
 const fileListRef = ref<UploadFileInfo[]>([]);
 
-const emit = defineEmits(['close-comment']);
-
-//定义消息提示对象
-const message = useMessage();
-
-const emojiI18n = {
-    search: '搜索',
-    notfound: 'No Emoji Found',
-    categories: {
-        search: '搜索结果',
-        recent: '经常使用',
-        smileys: '表情与情感',
-        people: '人物与身体',
-        nature: '动物与自然',
-        foods: '食物与饮料',
-        activity: '活动',
-        places: '旅行与地理',
-        objects: '物品',
-        symbols: '符号标志',
-        flags: '旗帜',
-        custom: 'Custom',
-        joy: '哭笑'
-    }
-};
-
-//控制emoji组件是否出现的点击事件
-const emojiClick = () => {
-    emoji.value = !emoji.value;
-};
-const emojiIndex = new EmojiIndex(data);
-// 选中emoji
-const handleEmoji = (e) => {
-    console.log(e.native);
-    inputValue.value = inputValue.value + e.native;
-};
-
-// 创建一个模拟生成缩略图 URL 的函数
 function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefined> {
     if (!file) return undefined;
 
@@ -123,7 +82,53 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
     });
 }
 
-//发布评论
+//-----------------------------------emoji表情的相关设置------------------------------
+
+const emojiI18n = {
+    search: '搜索',
+    notfound: 'No Emoji Found',
+    categories: {
+        search: '搜索结果',
+        recent: '经常使用',
+        smileys: '表情与情感',
+        people: '人物与身体',
+        nature: '动物与自然',
+        foods: '食物与饮料',
+        activity: '活动',
+        places: '旅行与地理',
+        objects: '物品',
+        symbols: '符号标志',
+        flags: '旗帜',
+        custom: 'Custom',
+        joy: '哭笑'
+    }
+};
+
+//控制emoji表情是否出现
+const emoji = ref(false);
+
+//控制emoji组件是否出现的点击事件
+const emojiClick = () => {
+    emoji.value = !emoji.value;
+};
+const emojiIndex = new EmojiIndex(data);
+
+//----------------------------------------发布评论--------------------------------------
+
+// 使用ref来创建一个响应式的数据属性
+const inputValue = ref('');
+
+//输入框中的字数
+const fontNumber = computed(() => inputValue.value.length);
+
+const emit = defineEmits(['close-comment']);
+
+//将emoji表情加入到评论中
+const handleEmoji = (e) => {
+    console.log(e.native);
+    inputValue.value = inputValue.value + e.native;
+};
+
 const publicFirst = async () => {
     console.log(uploadedImages.value);
     const commentDetail = reactive({

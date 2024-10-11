@@ -10,7 +10,7 @@ import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { DownOutlined } from '@vicons/antd';
 
-//-----------------------------声明-------------------------------------------
+//--------------------统一声明的变量-------------------------
 
 const prop = defineProps({
     item: {
@@ -50,52 +50,12 @@ const prop = defineProps({
     }
 });
 
-//控制评论框是否显示
-const appear = ref(false);
-
-//定义接收二级评论的数组
-const commentList = ref([]);
-
-//定义是否显示遮罩层的变量
-const isOverlayVisible = ref(false);
-
-///获取中间盒子对象
-const boxRef = ref<HTMLElement | null>(null);
-
-//定义一个变量接收中间盒子宽度
-const childWidth = ref(0);
-
 const router = useRouter();
 
 //定义消息提示对象
 const message = useMessage();
 
-//获取评论需要的相关属性
-const commentInfo = reactive({
-    highest_id: prop.item.id,
-    offset: 1,
-    limit: 2,
-    user_id: 0
-});
-
-const likeObj = {
-    id: 0,
-    status: 1,
-    user_id: 1
-};
-
-//发表评论需要的相关属性
-const commentItems = reactive({
-    article_id: prop.item.article_id,
-    user_id: 0, //当前登录
-    highest_id: prop.item.highest_id,
-    parent_id: prop.item.parent_id,
-    parent_user_id: prop.item.parent_id
-});
-//通过defineEmits编译器宏生成emit方法来进行组件之间通信
-const emit = defineEmits(['delete-firComments']);
-
-//-----------------------------生命周期-------------------------------------------
+//-----------------------------生命周期---------------------------
 
 // 监听窗口调整
 onMounted(async () => {
@@ -109,37 +69,36 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('resize', updateChildWidth);
 });
-//-----------------------------评论有关方法-------------------------------------------
+//-----------------------------二级评论--------------------------
 
+//定义接收二级评论的数组
+const commentList = ref([]);
+
+//获取评论需要的相关属性
+const commentInfo = reactive({
+    highest_id: prop.item.id,
+    offset: 1,
+    limit: 2,
+    user_id: 0
+});
 //初始化二级评论
 const getSecondComments = async () => {
-    const { data } = await getSecondOrderComments(commentInfo);
-    if (data) {
-        commentList.value.push(...data.secondCommentsList);
+    try {
+        const { data } = await getSecondOrderComments(commentInfo);
+        if (data) {
+            commentList.value.push(...data.secondCommentsList);
+        }
+    } catch (error) {
+        console.error('Failed to fetch comments:', error);
+        message.error('加载评论失败，请重试。');
     }
 };
 
-//加载更多二级菜单
+//加载更多二级评论
 const moreSecondComments = async () => {
     commentInfo.limit = 5;
     commentInfo.offset = commentInfo.offset + 1;
     getSecondComments();
-};
-
-//解构点赞方法
-const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
-
-//跳转到指定用户会员中心
-const jumpMember = (id: number) => {
-    router.push(`/member/${id}`);
-};
-
-//解构删除方法
-const { deleteCom } = useDeleteComments(prop.item.id);
-
-const deleteFun = () => {
-    deleteCom();
-    emit('delete-firComments', prop.item.id);
 };
 
 //删除二级评论
@@ -148,12 +107,55 @@ const deleteSec = (id) => {
     commentList.value = commentList.value.filter((item) => item.id !== id);
 };
 
+//------------------------------一级评论---------------------------------
+
+//回复一级评论需要的相关属性
+const commentItems = reactive({
+    article_id: prop.item.article_id,
+    user_id: 0, //当前登录
+    highest_id: prop.item.highest_id,
+    parent_id: prop.item.parent_id,
+    parent_user_id: prop.item.parent_id
+});
+
+//解构点赞方法
+const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
+const likeObj = {
+    id: 0,
+    status: 1,
+    user_id: 1
+};
+
+//跳转到指定用户会员中心
+const jumpMember = (id: number) => {
+    router.push(`/member/${id}`);
+};
+
+//--------------------------------删除、举报功能----------------------------
+
+//解构删除方法
+const { deleteCom } = useDeleteComments(prop.item.id);
+
+//通过defineEmits编译器宏生成emit方法来进行组件之间通信
+const emit = defineEmits(['delete-firComments']);
+
+const deleteFun = () => {
+    deleteCom();
+    emit('delete-firComments', prop.item.id);
+};
+
 //举报评论
 const report = () => {
     message.warning('举报功能暂未开发，敬请期待吧！');
 };
 
-//-----------------------------其他方法-------------------------------------------
+//-----------------------------确定评论盒子宽度----------------
+
+///获取中间盒子对象
+const boxRef = ref<HTMLElement | null>(null);
+
+//定义一个变量接收中间盒子宽度
+const childWidth = ref(0);
 
 //获取中间盒子宽度
 const updateChildWidth = () => {
@@ -161,6 +163,14 @@ const updateChildWidth = () => {
         childWidth.value = boxRef.value.clientWidth;
     }
 };
+
+//-----------------------------遮罩层-----------------------------------
+
+//控制评论框是否显示
+const appear = ref(false);
+
+//定义是否显示遮罩层的变量
+const isOverlayVisible = ref(false);
 
 //定义遮罩层的点击事件
 const handleMaskClick = () => {

@@ -8,7 +8,14 @@ import '@/assets/css/icon/iconfont.css';
 //定义消息提示对象
 const message = useMessage();
 
-// const showModalRef = ref(false);
+//-----------------------------------个人资料-------------------------------------
+
+onMounted(async () => {
+    const { data } = await getUserInfo(userInfo.id);
+    if (data) {
+        Object.assign(userInfo, data);
+    }
+});
 
 //定义个人资料的所有信息
 const userInfo = reactive({
@@ -39,23 +46,6 @@ const rules = {
     }
 };
 
-onMounted(async () => {
-    const { data } = await getUserInfo(userInfo.id);
-    if (data) {
-        Object.assign(userInfo, data);
-    }
-});
-
-//计算属性，处理过的标签
-const processedTags = computed(() => {
-    return userInfo.all_tag_names.map((tag) => {
-        console.log(tag);
-
-        const isSelected = userInfo.user_tags.includes(tag);
-        return { tag, isSelected };
-    });
-});
-
 //将更新用户数据的操作提取成一个方法
 const update = async (msg1, msg2) => {
     const { code } = await changeUserInfo(userInfo);
@@ -77,6 +67,18 @@ const changeForm = (item) => {
     Object.assign(oldUserInfo, userInfo);
 };
 
+//-----------------------------------标签-------------------------------------
+
+//计算属性，处理过的标签
+const processedTags = computed(() => {
+    return userInfo.all_tag_names.map((tag) => {
+        console.log(tag);
+
+        const isSelected = userInfo.user_tags.includes(tag);
+        return { tag, isSelected };
+    });
+});
+
 //添加标签的方法
 const addTags = async (item) => {
     userInfo.user_tags.push(item.tag);
@@ -88,6 +90,8 @@ const handleClose = async (e) => {
     userInfo.user_tags = userInfo.user_tags.filter((item) => item !== e);
     update('删除标签成功', '删除标签失败');
 };
+
+//---------------------------------上传头像-----------------------------------
 
 //上传图片预览图
 const handlePreview = async () => {
