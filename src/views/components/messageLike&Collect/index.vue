@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
     messageList: {
@@ -13,18 +13,28 @@ const props = defineProps({
         validator: (value) => ['like', 'collect'].includes(value)
     }
 });
+
+const emit = defineEmits(['goToMember', 'goToArticleDetail']);
 </script>
 
 <template>
     <div v-for="message in messageList" :key="message.user_id" class="message-item">
-        <div class="message-avatar">
+        <div class="message-avatar" @click="() => emit('goToMember', message.user_id)">
             <img :src="message.path" alt="User avatar" />
         </div>
         <div class="message-content">
             <div class="message-header">
-                <span class="nickname">{{ message.nickname }}</span>
-                <span class="actioned" v-if="actionType === 'like'">赞了你的文章《{{ message.title }}》</span>
-                <span class="actioned" v-else>收藏了你的文章《{{ message.title }}》</span>
+                <span class="nickname" @click="() => emit('goToMember', message.user_id)">{{ message.nickname }}</span>
+                <span
+                    class="actioned"
+                    v-if="actionType === 'like'"
+                    @click="() => emit('goToArticleDetail', message.article_id)"
+                >
+                    赞了你的文章《{{ message.title }}》
+                </span>
+                <span class="actioned" @click="() => emit('goToArticleDetail', message.article_id)" v-else>
+                    收藏了你的文章《{{ message.title }}》
+                </span>
             </div>
             <div class="message-actions">
                 <span class="date">{{ message.created_at }}</span>

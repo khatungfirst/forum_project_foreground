@@ -32,60 +32,50 @@ const truncatedDescriptions = computed(() => {
 </script>
 
 <template>
-    <div class="tag-item">
-        <div class="tag-item-container">
-            <div v-for="tag in props.tags" :key="tag.id" class="tag-item-single">
-                <div class="tag-item-info">
-                    <img :src="tag.path" alt="tag image" class="tag-item_avatar" />
-                    <div class="tag-item-message">
-                        <span class="tag-item_title">{{ tag.name }}</span>
-                        <div class="tag-item_data">
-                            文章：{{ tag.article_count }} | 热度：{{ tag.heat }} | 人数：{{ tag.fans_count }}
-                        </div>
+    <div class="tag-item-container">
+        <div v-for="tag in truncatedDescriptions" :key="tag.id" class="tag-item-single">
+            <div class="tag-item-info">
+                <img :src="tag.path" alt="Tag Image" class="tag-item_avatar" />
+                <div class="tag-item-message">
+                    <span class="tag-item_title">{{ tag.name }}</span>
+                    <div class="tag-item_data">
+                        文章：{{ tag.article_count }} | 热度：{{ tag.heat }} | 人数：{{ tag.fans_count }}
                     </div>
                 </div>
-                <div class="tag-item-description">
-                    <span>{{ tag.description }}</span>
-                </div>
-                <div class="tag-item_follow">
-                    <button class="tag-item_button" @click="handleFollow(tag)">
-                        {{ tag.status === 1 ? '已关注√' : '关注' }}
-                    </button>
-                </div>
+            </div>
+            <div class="tag-item-description">
+                <span>{{ tag.description }}</span>
+            </div>
+            <div class="tag-item_follow">
+                <button class="tag-item_button" @click="handleFollow(tag)">
+                    {{ tag.is_followed ? '已关注√' : '关注' }}
+                </button>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.tag-item {
-    display: flex;
-    /* flex-direction: column; */
-    align-items: center;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 310px;
-    background-color: #ffffff;
-}
-
 .tag-item-container {
     display: flex;
-    /* flex-direction: column; */
+    flex-direction: column;
     align-items: center;
+    width: 100%;
 }
 
 .tag-item-single {
     display: flex;
-    align-items: center;
     flex-direction: column;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .tag-item-info {
-    margin-top: 2px;
     display: flex;
     flex-direction: row;
     align-items: center;
+    width: 100%;
 }
 
 .tag-item_avatar {
@@ -125,9 +115,8 @@ const truncatedDescriptions = computed(() => {
     border-radius: 50px;
     outline: none;
     color: #19a059;
-    /* padding: 8px 125px; */
-    margin: 6px 0;
     padding: 8px 0;
-    width: 270px;
+    width: 100%;
+    text-align: center;
 }
 </style>

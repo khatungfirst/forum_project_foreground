@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import Article from '../components/article/index.vue';
+import TagItem from '../components/tagDetail/index.vue';
 import { getTagList, Tag_follow } from '../../config/apis/tag';
-import TagItem from '../components/tags/index.vue';
 
 const tags = ref([]); // 使用数组初始化
 
 onMounted(async () => {
     try {
+        console.log('111');
         const response = await getTagList();
         if (response.code === 2000 && Array.isArray(response.data.tag_list)) {
             tags.value = response.data.tag_list;
@@ -38,19 +40,37 @@ const follow_tag = async (id) => {
         console.error('Error following tag:', error);
     }
 };
+
+const articles = ref([
+    {
+        id: '1',
+        title: 'GSAdmin一键代码生成工具',
+        summary: 'GSAdmin是一个基于Vue3的后台管理系统模板，支持一键代码生成。',
+        nickname: '作者名',
+        published_at: '2024-04-24',
+        views_count: 1000,
+        likes_count: 50,
+        image_url: 'path/to/image1.jpg',
+        tags: [{ ID: 101 }, { ID: 102 }],
+        status: false
+    }
+]);
 </script>
 
 <template>
     <div class="tag-list-container">
-        <TagItem :tags="tags" @follow="follow_tag" />
+        <tagItem :tags="tags" @follow="follow_tag" />
+    </div>
+    <div class="tag-articl">
+        <Article v-for="article in articles" :key="article.id" :item="article" />
     </div>
 </template>
 
 <style scoped>
-.tag-list-container {
+.article-list-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    gap: 20px;
     padding: 20px;
 }
 </style>

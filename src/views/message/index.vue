@@ -1,9 +1,12 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import CommentItem from '../components/messageComment/index.vue';
 import LikeItem from '../components/messageLike&Collect/index.vue';
 import commentDrawer from '../components/commentDrawer/index.vue';
 import { comment_message, like_message, collect_message, like_comment_message } from '@/config/apis/message';
+
+const router = useRouter();
 
 const commentList = ref([]); // 存储评论消息
 const likeList = ref([]); // 存储点赞消息
@@ -86,6 +89,14 @@ const likeComment = async (comment) => {
         console.error('点赞操作失败:', response.message);
     }
 };
+
+const goToMember = (userId) => {
+    router.push(`/member/${userId}`);
+};
+
+const goToArticleDetail = (articleId) => {
+    router.push(`/articledetail/${articleId}`);
+};
 </script>
 
 <template>
@@ -95,20 +106,32 @@ const likeComment = async (comment) => {
                 :comment_message="commentList"
                 @likeComment="likeComment"
                 @showCommentBox="review"
+                @goToArticleDetail="goToArticleDetail"
+                @goToMember="goToMember"
             ></CommentItem>
             <div class="middle" ref="centerRef">
                 <!-- 评论的盒子 -->
                 <commentDrawer :appear="appear" :childWidth="childWidth" :headShot="authorInfo.head"></commentDrawer>
             </div>
             <div>
-                <LikeItem :messageList="likeList" actionType="like" />
-                <LikeItem :messageList="collectList" actionType="collect" />
+                <LikeItem
+                    :messageList="likeList"
+                    actionType="like"
+                    @goToArticleDetail="goToArticleDetail"
+                    @goToMember="goToMember"
+                />
+                <LikeItem
+                    :messageList="collectList"
+                    actionType="collect"
+                    @goToArticleDetail="goToArticleDetail"
+                    @goToMember="goToMember"
+                />
             </div>
         </div>
     </div>
 </template>
 
-<style scope>
+<style scoped>
 .right {
     /* ... 其他样式 ... */
 

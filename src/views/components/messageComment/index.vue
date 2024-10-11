@@ -14,16 +14,18 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
 
 <template>
     <div class="comment-item" v-for="comment in comment_message" :key="comment.id">
-        <div class="comment-avatar">
-            <img src="../../../public/static/img/favicon.ico" alt="User avatar" />
+        <div class="comment-avatar" @click="() => emit('goToMember', comment.user_id)">
+            <img :src="comment.path" alt="User avatar" />
         </div>
         <div class="comment-content">
             <div class="comment-header">
-                <span class="nickname">{{ comment.nickname }}</span>
+                <span class="nickname" @click="() => emit('goToMember', comment.user_id)">
+                    {{ comment.nickname }}
+                </span>
                 <span class="commented" v-if="comment.comment">回复了你 [{{ comment.comment }}] 的评论</span>
             </div>
             <p class="comment-text">{{ comment.content }}</p>
-            <div class="comment-title">
+            <div class="comment-title" @click="() => emit('goToArticleDetail', comment.article_id)">
                 <a href="#">{{ comment.title }}</a>
             </div>
             <div class="comment-actions">
