@@ -7,6 +7,7 @@ import { getMemberInfo, editSignature, getArticleInfo, deleteArticle, getConcern
 import { concernInter } from '@/config/apis/articleDetail';
 import { getNumberData } from '@/config/apis/settings.ts';
 import { debounce } from '@/utils/debounce.ts';
+import '@/assets/css/icon/iconfont.css';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -15,13 +16,10 @@ import {
     LikeTwotone,
     EyeOutlined,
     HeartFilled,
-    GlobalOutlined,
     WeiboOutlined,
     GithubFilled,
-    DeleteTwotone,
     SearchOutlined
 } from '@vicons/antd';
-import { Edit } from '@vicons/fa';
 
 //定义路由对象
 const router = useRouter();
@@ -278,16 +276,12 @@ const searchFun = () => {
                             :disabled="isEdit"
                             @blur="commitSignature"
                         />
-                        <Icon size="16" color="#cbcbcb" @click="edit">
-                            <Edit />
-                        </Icon>
+                        <i class="iconfont" @click="edit" style="color: #cbcbcb">&#xe602;</i>
                     </div>
                     <div class="left-right">
                         <div class="icons">
                             <a :href="user.blog_link">
-                                <Icon size="18">
-                                    <GlobalOutlined />
-                                </Icon>
+                                <i class="iconfont">&#xe668;</i>
                             </a>
                             <a :href="user.weibo_link">
                                 <Icon size="18">
@@ -340,12 +334,20 @@ const searchFun = () => {
                                     </template>
                                     <template #edit>
                                         <n-tag type="success" class="edit">
-                                            <Icon size="21" color="##19a059" @click="editTotal(item.id)">
-                                                <Edit />
-                                            </Icon>
-                                            <Icon size="21" color="##19a059" @click="deleteArticles(item.id)">
-                                                <DeleteTwotone />
-                                            </Icon>
+                                            <i
+                                                class="iconfont"
+                                                @click="editTotal(item.id)"
+                                                style="color: #19a059; font-size: 21px"
+                                            >
+                                                &#xe602;
+                                            </i>
+                                            <i
+                                                class="iconfont"
+                                                @click="deleteArticles(item.id)"
+                                                style="color: #19a059; font-size: 21px"
+                                            >
+                                                &#xe624;
+                                            </i>
                                         </n-tag>
                                     </template>
                                 </Article>
@@ -452,6 +454,13 @@ const searchFun = () => {
                         width: 100px;
                     }
 
+                    .iconfont {
+                        margin-left: 5px;
+                    }
+                    .iconfont:hover {
+                        cursor: pointer;
+                    }
+
                     @include border;
 
                     .n-input :deep(.n-input-wrapper) {
@@ -471,6 +480,17 @@ const searchFun = () => {
                     .n-button {
                         margin-top: 40px;
                         width: 80px;
+                    }
+
+                    .icons {
+                        position: relative;
+
+                        .iconfont {
+                            font-size: 17px;
+                            position: absolute;
+                            left: -20px;
+                            top: -3px;
+                        }
                     }
                 }
             }

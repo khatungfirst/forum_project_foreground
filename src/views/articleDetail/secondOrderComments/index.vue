@@ -3,10 +3,8 @@ import { useRouter } from 'vue-router';
 import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
+import '@/assets/css/icon/iconfont.css';
 import { useMessage } from 'naive-ui';
-import { Icon } from '@vicons/utils';
-import { LikeOutlined, MessageOutlined } from '@vicons/antd';
-import { EllipsisH } from '@vicons/fa';
 
 //---------------------------------声明----------------------------------------
 const prop = defineProps({
@@ -157,9 +155,7 @@ const handleMaskClick = () => {
                     @click="like(likeObj)"
                     :style="{ color: likeStatus === 1 ? '#19A059' : '#8a919f' }"
                 >
-                    <Icon size="20">
-                        <LikeOutlined />
-                    </Icon>
+                    <i class="iconfont">&#xe616;</i>
                     <span v-if="likeCounts === 0">点赞</span>
                     <span v-else>{{ likeCounts }}</span>
                 </span>
@@ -170,9 +166,7 @@ const handleMaskClick = () => {
                         isOverlayVisible = !isOverlayVisible;
                     "
                 >
-                    <Icon size="18">
-                        <MessageOutlined />
-                    </Icon>
+                    <i class="iconfont">&#xe6b3;</i>
                     回复
                 </span>
             </div>
@@ -180,13 +174,11 @@ const handleMaskClick = () => {
         <div class="more">
             <n-popconfirm :positive-text="null" :negative-text="null" :show-icon="false">
                 <template #trigger>
-                    <Icon size="18">
-                        <EllipsisH />
-                    </Icon>
+                    <i class="iconfont">&#xe61e;</i>
                 </template>
                 <div class="button-container">
-                    <n-button text :block="true" @click="deleteFun">删除</n-button>
-                    <n-button text :block="true" @click="report">举报</n-button>
+                    <n-button text :block="true" @click="deleteFun" style="margin-top: 10px">删除</n-button>
+                    <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button>
                 </div>
             </n-popconfirm>
         </div>
@@ -250,6 +242,10 @@ const handleMaskClick = () => {
     }
     .more {
         width: 40px;
+
+        .iconfont:hover {
+            cursor: pointer;
+        }
     }
 }
 </style>

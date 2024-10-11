@@ -166,7 +166,7 @@ const handlePreview = async () => {
         <P>标签管理</P>
         <div class="tag">
             <span>
-                <i class="iconfont">&#xe640;</i>
+                <i class="iconfont" style="color: red">&#xe640;</i>
                 兴趣标签
             </span>
             <div class="tag-right">

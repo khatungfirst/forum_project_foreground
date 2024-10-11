@@ -16,7 +16,7 @@ import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
 import MarkdownViewer from '@/views/components/markdownViewer/index.vue';
 import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.vue';
 import { useMessage } from 'naive-ui';
-import { LikeTwotone, MessageTwotone, StarTwotone, WarningFilled, EyeOutlined } from '@vicons/antd'; // 导入点赞的图标
+import { LikeFilled, MessageTwotone, StarFilled, WarningFilled, EyeOutlined } from '@vicons/antd'; // 导入点赞的图标
 import { Icon } from '@vicons/utils';
 // import MarkdownIt from 'markdown-it';
 
@@ -335,7 +335,7 @@ onBeforeUnmount(() => {
                     <span>作者名</span>
                 </div>
                 <IconWrapper
-                    :icon="LikeTwotone"
+                    :icon="LikeFilled"
                     :color="currentIcon[0] ? '#19A059' : iconColor"
                     :size="24"
                     @click="handleLike"
@@ -351,7 +351,7 @@ onBeforeUnmount(() => {
                     :showBadge="true"
                 />
                 <IconWrapper
-                    :icon="StarTwotone"
+                    :icon="StarFilled"
                     :color="currentIcon[1] ? '#19A059' : iconColor"
                     :size="24"
                     @click="handleCollection"
@@ -511,6 +511,7 @@ onBeforeUnmount(() => {
             margin-bottom: 20px;
 
             .message {
+                color: #8a919f;
                 display: flex;
                 align-items: center;
                 margin-bottom: 50px;
@@ -535,6 +536,7 @@ onBeforeUnmount(() => {
             .tags {
                 display: flex;
                 margin-bottom: 20px;
+                color: #8a919f;
 
                 span {
                     height: 36px;
