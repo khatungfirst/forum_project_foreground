@@ -45,6 +45,10 @@ const routes = [
         component: () => import('../../views/findPassword/index.vue')
     },
     {
+        path: '/chooseTag',
+        component: () => import('../../views/chooseTag/index.vue')
+    },
+    {
         path: '/navigation',
         component: () => import('../../views/components/navigation/index.vue'),
         children: [
