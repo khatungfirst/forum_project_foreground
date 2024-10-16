@@ -1,23 +1,15 @@
 <script setup>
 import { defineProps, computed, defineEmits } from 'vue';
-// 定义可以触发的事件
 const emit = defineEmits(['follow']);
 const props = defineProps({
-    tags: {
-        type: Array,
-        required: true,
-        default: () => []
-    },
-    // 定义一个事件 prop
-    onFollow: {
-        type: Function,
-        default: () => {}
+    tag: {
+        type: Object,
+        required: true
     }
 });
 
-const handleFollow = (tag) => {
-    // 发射自定义事件，父组件监听并处理
-    emit('follow', tag.id);
+const handleFollow = () => {
+    emit('follow', props.tag.id);
 };
 
 // 截取标签描述的长度
@@ -34,22 +26,24 @@ const truncatedDescriptions = computed(() => {
 <template>
     <div class="tag-item">
         <div class="tag-item-container">
-            <div v-for="tag in props.tags" :key="tag.id" class="tag-item-single">
+            <div class="tag-item-single">
                 <div class="tag-item-info">
-                    <img :src="tag.path" alt="tag image" class="tag-item_avatar" />
+                    <img :src="props.tag.path" alt="tag image" class="tag-item_avatar" />
                     <div class="tag-item-message">
-                        <span class="tag-item_title">{{ tag.name }}</span>
+                        <span class="tag-item_title">{{ props.tag.name }}</span>
                         <div class="tag-item_data">
-                            文章：{{ tag.article_count }} | 热度：{{ tag.heat }} | 人数：{{ tag.fans_count }}
+                            文章：{{ props.tag.article_count }} | 热度：{{ props.tag.heat }} | 人数：{{
+                                props.tag.fans_count
+                            }}
                         </div>
                     </div>
                 </div>
                 <div class="tag-item-description">
-                    <span>{{ tag.description }}</span>
+                    <span>{{ props.tag.description }}</span>
                 </div>
                 <div class="tag-item_follow">
-                    <button class="tag-item_button" @click="handleFollow(tag)">
-                        {{ tag.status === 1 ? '已关注√' : '关注' }}
+                    <button class="tag-item_button" @click="handleFollow">
+                        {{ props.tag.status === 1 ? '已关注√' : '关注' }}
                     </button>
                 </div>
             </div>
@@ -65,7 +59,7 @@ const truncatedDescriptions = computed(() => {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    width: 310px;
+    width: 320px;
     background-color: #ffffff;
 }
 

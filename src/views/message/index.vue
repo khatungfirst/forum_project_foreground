@@ -130,7 +130,7 @@ const goToArticleDetail = (articleId) => {
                         @goToMember="goToMember"
                     ></CommentItem>
                 </n-tab-pane>
-                <n-tab-pane name="点赞" tab="点赞">
+                <n-tab-pane name="点赞" tab="点赞" class="custom-tab">
                     <LikeItem
                         :messageList="likeList"
                         actionType="like"
@@ -138,7 +138,7 @@ const goToArticleDetail = (articleId) => {
                         @goToMember="goToMember"
                     ></LikeItem>
                 </n-tab-pane>
-                <n-tab-pane name="收藏" tab="收藏">
+                <n-tab-pane name="收藏" tab="收藏" class="custom-tab">
                     <LikeItem
                         :messageList="collectList"
                         actionType="collect"
@@ -146,7 +146,7 @@ const goToArticleDetail = (articleId) => {
                         @goToMember="goToMember"
                     ></LikeItem>
                 </n-tab-pane>
-                <n-tab-pane name="粉丝" tab="粉丝">
+                <n-tab-pane name="粉丝" tab="粉丝" class="custom-tab">
                     <followItem :followList="followList" @goToMember="goToMember"></followItem>
                 </n-tab-pane>
             </n-tabs>
@@ -185,5 +185,8 @@ const goToArticleDetail = (articleId) => {
             }
         }
     }
+}
+.n-tabs:deep(.n-tabs-tab__label) {
+    font-size: 18px; /* 你想要的字体大小 */
 }
 </style>

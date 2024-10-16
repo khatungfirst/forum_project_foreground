@@ -8,7 +8,7 @@ const tags = ref([]); // 使用数组初始化
 onMounted(async () => {
     try {
         const response = await getTagList();
-        if (response.code === 2000 && Array.isArray(response.data.tag_list)) {
+        if (response.code === 2000) {
             tags.value = response.data.tag_list;
             console.log(tags);
         } else {
@@ -28,9 +28,11 @@ const follow_tag = async (id) => {
             if (index !== -1) {
                 tags.value[index].is_followed = true;
             } else {
-                // 处理错误情况
-                console.error('Failed to follow tag:', response.message);
+                // 如果找不到标签，可能需要添加新的标签到列表
+                tags.value.push({ id, is_followed: true });
             }
+            // 重新获取整个标签列表
+            await getTagListAgain();
         } else {
             console.error('关注标签失败:', response.message);
         }
@@ -38,11 +40,24 @@ const follow_tag = async (id) => {
         console.error('Error following tag:', error);
     }
 };
+
+const getTagListAgain = async () => {
+    try {
+        const response = await getTagList();
+        if (response.code === 2000) {
+            tags.value = response.data.tag_list;
+        } else {
+            console.error('重新获取标签数据失败');
+        }
+    } catch (error) {
+        console.error('重新请求标签数据出错:', error);
+    }
+};
 </script>
 
 <template>
     <div class="tag-list-container">
-        <TagItem :tags="tags" @follow="follow_tag" />
+        <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" />
     </div>
 </template>
 
@@ -52,5 +67,21 @@ const follow_tag = async (id) => {
     flex-wrap: wrap;
     justify-content: space-between;
     padding: 20px;
+}
+
+.tag-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px;
+    gap: 20px; /* 控制标签之间的间距 */
+}
+
+.tag-item-single {
+    width: calc(33% - 20px); /* 控制每个标签的宽度 */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #ffffff;
 }
 </style>
