@@ -46,6 +46,9 @@ const authorInfo = reactive({
     concern_status: false // 定义是否关注该作者的状态
 });
 
+// 确保 currentTab 在顶层作用域中声明
+const currentTab = ref('评论'); // 默认显示“评论”标签页
+
 // 评论的方法
 const review = () => {
     appear.value = true; // 显示评论盒子
@@ -116,36 +119,38 @@ const goToArticleDetail = (articleId) => {
 
 <template>
     <div>
-        <div class="comment_list">
-            <CommentItem
-                :comment_message="commentList"
-                @likeComment="likeComment"
-                @showCommentBox="review"
-                @goToArticleDetail="goToArticleDetail"
-                @goToMember="goToMember"
-            ></CommentItem>
-            <div class="middle" ref="centerRef">
-                <!-- 评论的盒子 -->
-                <commentDrawer :appear="appear" :childWidth="childWidth" :headShot="authorInfo.head"></commentDrawer>
-            </div>
-            <div>
-                <LikeItem
-                    :messageList="likeList"
-                    actionType="like"
-                    @goToArticleDetail="goToArticleDetail"
-                    @goToMember="goToMember"
-                />
-                <LikeItem
-                    :messageList="collectList"
-                    actionType="collect"
-                    @goToArticleDetail="goToArticleDetail"
-                    @goToMember="goToMember"
-                />
-            </div>
-            <div>
-                <followItem :followList="followList" @goToMember="goToMember"></followItem>
-            </div>
-        </div>
+        <n-card title="" style="margin-bottom: 16px">
+            <n-tabs type="line" animated v-model="currentTab">
+                <n-tab-pane name="评论" tab="评论">
+                    <CommentItem
+                        :comment_message="commentList"
+                        @likeComment="likeComment"
+                        @showCommentBox="review"
+                        @goToArticleDetail="goToArticleDetail"
+                        @goToMember="goToMember"
+                    ></CommentItem>
+                </n-tab-pane>
+                <n-tab-pane name="点赞" tab="点赞">
+                    <LikeItem
+                        :messageList="likeList"
+                        actionType="like"
+                        @goToArticleDetail="goToArticleDetail"
+                        @goToMember="goToMember"
+                    ></LikeItem>
+                </n-tab-pane>
+                <n-tab-pane name="收藏" tab="收藏">
+                    <LikeItem
+                        :messageList="collectList"
+                        actionType="collect"
+                        @goToArticleDetail="goToArticleDetail"
+                        @goToMember="goToMember"
+                    ></LikeItem>
+                </n-tab-pane>
+                <n-tab-pane name="粉丝" tab="粉丝">
+                    <followItem :followList="followList" @goToMember="goToMember"></followItem>
+                </n-tab-pane>
+            </n-tabs>
+        </n-card>
     </div>
 </template>
 

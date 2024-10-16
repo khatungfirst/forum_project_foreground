@@ -1,6 +1,10 @@
 <script setup>
 import { ref } from 'vue';
 import { firstTagList, chooseTag } from '@/config/apis/tag';
+import { useRouter } from 'vue-router';
+
+// 使用 useRouter 钩子
+const router = useRouter();
 // 假设这是从后端获取的标签列表
 const tagList = ref([
     // ... 你的标签数据
@@ -53,12 +57,17 @@ const confirmSelection = async () => {
         const response = await chooseTag(selectedTags.value);
         if (response.code === 2000) {
             console.log('标签提交成功');
+            gotoHome(); // 调用 gotoHome 函数跳转到首页
         } else {
             console.error('提交失败:', response.message);
         }
     } catch (error) {
         console.error('提交标签出错:', error);
     }
+};
+
+const gotoHome = () => {
+    router.push(`/home`);
 };
 </script>
 
@@ -75,9 +84,11 @@ const confirmSelection = async () => {
                 >
                     {{ tag.name }}
                 </div>
-                <span class="random-btn" @click="randomSelect">随机选择5个</span>
-                <span class="confirm-btn" @click="confirmSelection">确定</span>
-                <span class="skip">跳过</span>
+                <div class="action-buttons">
+                    <span class="random-btn" @click="randomSelect">随机选择5个</span>
+                    <span class="confirm-btn" @click="confirmSelection">确定</span>
+                    <span class="skip" @click="gotoHome">跳过</span>
+                </div>
             </div>
         </div>
     </div>
@@ -149,5 +160,9 @@ const confirmSelection = async () => {
 .skip {
     font-weight: 900;
     color: #cecfce;
+}
+
+.action-buttons {
+    margin-top: 18px;
 }
 </style>
