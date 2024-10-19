@@ -57,13 +57,8 @@ const update = async (msg1, msg2) => {
 };
 
 //更新用户表单数据
-const changeForm = (item) => {
-    console.log(userInfo, '111');
-    console.log(oldUserInfo, '3');
-
-    if (userInfo[item] !== oldUserInfo[item] && oldUserInfo[item] !== '') {
-        update('信息更改成功', '信息更改失败');
-    }
+const changeForm = () => {
+    update('信息更改成功', '信息更改失败');
     Object.assign(oldUserInfo, userInfo);
 };
 
@@ -121,29 +116,13 @@ const handlePreview = async (item) => {
                 }"
             >
                 <n-form-item label="用户名" path="nickname" name="nickname">
-                    <n-input
-                        v-model:value="userInfo.nickname"
-                        show-count
-                        maxlength="20"
-                        placeholder=""
-                        @blur="changeForm('nickname')"
-                    />
+                    <n-input v-model:value="userInfo.nickname" show-count maxlength="20" placeholder="" />
                 </n-form-item>
                 <n-form-item label="职业方向" path="career_direction" name="career_direction">
-                    <n-input
-                        v-model:value="userInfo.career_direction"
-                        placeholder=""
-                        @blur="changeForm('career_direction')"
-                    />
+                    <n-input v-model:value="userInfo.career_direction" placeholder="" />
                 </n-form-item>
                 <n-form-item label="个人主页" path="user_home_page">
-                    <n-input
-                        v-model:value="userInfo.user_home_page"
-                        show-count
-                        maxlength="50"
-                        placeholder=""
-                        @blur="changeForm('user_home_page')"
-                    />
+                    <n-input v-model:value="userInfo.user_home_page" show-count maxlength="50" placeholder="" />
                 </n-form-item>
                 <n-form-item label="个人签名" path="user_signature">
                     <n-input
@@ -156,7 +135,6 @@ const handlePreview = async (item) => {
                         }"
                         show-count
                         maxlength="200"
-                        @blur="changeForm('user_signature')"
                     />
                 </n-form-item>
             </n-form>
@@ -168,6 +146,9 @@ const handlePreview = async (item) => {
                 <p class="small">格式：支持JPG、PNG、JPEG</p>
                 <p class="small">大小：5M以内</p>
             </div>
+        </div>
+        <div class="commitButton">
+            <n-button strong secondary round type="primary" @click="changeForm">保存修改</n-button>
         </div>
         <P>标签管理</P>
         <div class="tag">
@@ -208,6 +189,11 @@ const handlePreview = async (item) => {
     .top {
         display: grid;
         grid-template-columns: 3fr 1fr;
+    }
+
+    .commitButton {
+        width: 75%;
+        @include flex;
     }
 
     p {
