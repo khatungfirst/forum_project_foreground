@@ -53,7 +53,8 @@ const sendVerify_code = async () => {
         return;
     }
     try {
-        const response = await verify_code(form.value.email);
+        const email = form.value.email;
+        const response = await verify_code({ email });
 
         if (response.code === 2000) {
             message.success('验证码已发送，请检查您的邮箱');
@@ -61,8 +62,17 @@ const sendVerify_code = async () => {
             message.error(`发送验证码失败: ${response.data.message}`);
         }
     } catch (error) {
-        console.error('请求发送验证码失败:', error);
-        message.error('请求发送验证码失败');
+        console.error(error); // 打印错误对象到控制台
+        if (error.response) {
+            // 服务器有响应，但不是2xx的范围
+            message.error(`请求发送验证码失败: ${error.response.status} ${error.response.data.message}`);
+        } else if (error.request) {
+            // 请求已发出，但没有收到响应
+            message.error('请求发送验证码失败: 无响应');
+        } else {
+            // 在设置请求时出现了一些事情
+            message.error('请求发送验证码失败: ' + error.message);
+        }
     }
 };
 
@@ -70,13 +80,13 @@ const handleResister = async () => {
     try {
         await formRef.value.validate();
         console.log('注册', form.value);
-        const response = await register(
-            form.value.email,
-            form.value.password,
-            form.value.verify_code,
-            form.value.re_password
-        );
-        if (response.code === 200 && response.data) {
+        const response = await register({
+            email: form.value.email,
+            password: form.value.password,
+            verify_code: form.value.verify_code,
+            re_password: form.value.re_password
+        });
+        if (response.code === 2000 && response.data) {
             router.push('/login');
         } else {
             this.$message.error('注册失败:' + response.data.message);

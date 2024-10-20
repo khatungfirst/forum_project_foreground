@@ -16,7 +16,7 @@ export const login = (params: any): Promise<any> => {
  * @param {string} email 邮箱
  * @returns {Promise} 发送验证码的结果
  */
-export const verifyCod = (params: any): Promise<any> => {
+export const verify_code = (params: any): Promise<any> => {
     return $get('/user/req_verify_code', params);
 };
 

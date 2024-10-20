@@ -42,7 +42,7 @@ const handleLogin = async () => {
     try {
         await formRef.value.validate();
         console.log('登录', form.value);
-        const response = await login(form.value.email, form.value.password);
+        const response = await login({ email: form.value.email, password: form.value.password });
         if (response.code === 2000 && response.data) {
             router.push('/home');
         } else {
