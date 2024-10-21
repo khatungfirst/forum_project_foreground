@@ -16,6 +16,8 @@
     "vetur.validation.style": false,
     "[html]": {
         "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "[vue]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
     }
-    
 }

@@ -6,6 +6,7 @@
  * @LastEditors: zhoukai
  * @LastEditTime: 2022-11-28 14:12:26
  */
+// import path = require('path');
 import type { RouteRecordRaw } from 'vue-router';
 
 // * 导入所有router
@@ -27,37 +28,75 @@ const routers404: any = [
     {
         path: '/:pathMatch(.*)*',
         // redirect: '/404'
-        component: () => import('@/views/errPage/err404.vue')
+        component: () => import('../../views/errPage/err404.vue')
     }
 ];
 const routes = [
     {
-        path: '/articledetail/:id',
-        component: () => import('@/views/articleDetail/index.vue')
+        path: '/login',
+        component: () => import('../../views/login/index.vue')
     },
     {
-        path: '/transferPage',
-        component: () => import('@/views/components/transferPage/index.vue')
+        path: '/register',
+        component: () => import('../../views/register/index.vue')
     },
     {
-        path: '/articlerelease/:id',
-        component: () => import('@/views/articleRelease/index.vue')
+        path: '/findPassword',
+        component: () => import('../../views/findPassword/index.vue')
     },
     {
-        path: '/select',
-        component: () => import('@/views/searchPage/index.vue')
+        path: '/chooseTag',
+        component: () => import('../../views/chooseTag/index.vue')
     },
     {
-        path: '/drawer',
-        component: () => import('@/views/articleDetail/firstOrderComments/index.vue')
-    },
-    {
-        path: '/settings/:id',
-        component: () => import('@/views/settings/index.vue')
-    },
-    {
-        path: '/member/:id',
-        component: () => import('@/views/memberCenter/index.vue')
+        path: '/navigation',
+        component: () => import('../../views/components/navigation/index.vue'),
+        children: [
+            {
+                path: '/articledetail/:id',
+                component: () => import('../../views/articleDetail/index.vue')
+            },
+            {
+                path: '/transferPage',
+                component: () => import('../../views/components/transferPage/index.vue')
+            },
+            {
+                path: '/articlerelease/:id',
+                component: () => import('../../views/articleRelease/index.vue')
+            },
+            {
+                path: '/select',
+                component: () => import('../../views/searchPage/index.vue')
+            },
+            {
+                path: '/drawer',
+                component: () => import('../../views/components/markdownViewer/index.vue')
+            },
+            {
+                path: '/settings/:id',
+                component: () => import('../../views/settings/index.vue')
+            },
+            {
+                path: '/member/:id',
+                component: () => import('../../views/memberCenter/index.vue')
+            },
+            {
+                path: '/home',
+                component: () => import('../../views/home/index.vue')
+            },
+            {
+                path: '/tag',
+                component: () => import('../../views/tag/index.vue')
+            },
+            {
+                path: '/tagdetail/:id',
+                component: () => import('../../views/tagDetail/index.vue')
+            },
+            {
+                path: '/message',
+                component: () => import('../../views/message/index.vue')
+            }
+        ]
     }
 ];
 routerArray.push(...routers404);
