@@ -24,3 +24,8 @@ export const concernInter = (params: any): Promise<any> => {
     return $post('/user/follow', params);
 };
 //7、发布评论
+
+//8、文章排行
+export const article_rank = (params: any): Promise<any> => {
+    return $get('/article/search_box', params);
+};
