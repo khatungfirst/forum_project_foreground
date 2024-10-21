@@ -3,14 +3,25 @@ import { ref } from 'vue';
 import { getLetterStatus, changeLetterStatus } from '@/config/apis/settings.ts';
 import { useMessage } from 'naive-ui';
 
+//定义消息提示对象
+const message = useMessage();
+
+//---------------------生命周期---------------------
+
+onMounted(async () => {
+    const { data } = await getLetterStatus(user_id.value);
+    if (data) {
+        letterSelect.value = data.private_settings;
+    }
+});
+
+//---------------------私信设置---------------------
+
 //用户id
 const user_id = ref(0);
 
 //定义私信设置选中项
 const letterSelect = ref('');
-
-//定义消息提示对象
-const message = useMessage();
 
 //定义私信设置的选择项
 const letterArr = [
@@ -31,13 +42,6 @@ const letterArr = [
         label: '关闭'
     }
 ];
-
-onMounted(async () => {
-    const { data } = await getLetterStatus(user_id.value);
-    if (data) {
-        letterSelect.value = data.private_settings;
-    }
-});
 
 //改变私信设置
 const change = async () => {

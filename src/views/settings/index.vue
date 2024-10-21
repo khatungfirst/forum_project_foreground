@@ -1,11 +1,10 @@
 <script setup lang="ts">
-// import { ref } from 'vue';
-// import { useRouter } from 'vue-router';
 import userInfo from '@/views/settings/userInfo/index.vue';
 import numberSettings from '@/views/settings/numberSettings/index.vue';
 import letter from '@/views/settings/letter/index.vue';
+import '@/assets/css/icon/iconfont.css';
 import { Icon } from '@vicons/utils';
-import { LeftOutlined, IdcardTwotone, SettingTwotone, MailOutlined } from '@vicons/antd';
+import { LeftOutlined, MailOutlined } from '@vicons/antd';
 </script>
 <template>
     <div class="wrap">
@@ -23,18 +22,14 @@ import { LeftOutlined, IdcardTwotone, SettingTwotone, MailOutlined } from '@vico
                     <n-tabs type="card" animated placement="left">
                         <n-tab-pane name="oasis">
                             <template #tab>
-                                <Icon :size="20">
-                                    <IdcardTwotone />
-                                </Icon>
+                                <i class="iconfont" style="font-size: 18px">&#xe608;</i>
                                 <span>个人资料</span>
                             </template>
                             <userInfo></userInfo>
                         </n-tab-pane>
                         <n-tab-pane name="the beatles">
                             <template #tab>
-                                <Icon :size="20">
-                                    <SettingTwotone />
-                                </Icon>
+                                <i class="iconfont" style="font-size: 18px">&#xe6e7;</i>
                                 <span>账号设置</span>
                             </template>
                             <numberSettings></numberSettings>

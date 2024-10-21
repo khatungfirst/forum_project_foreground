@@ -1,7 +1,9 @@
 <script lang="ts" setup>
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 import { getImageUrl } from '@/config/apis/publicArticle';
+import { publicComments } from '@/config/apis/comments';
 import type { UploadFileInfo } from 'naive-ui';
+import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { CaretDownFilled, CloseCircleTwotone } from '@vicons/antd';
 import { SmileOutlined, FileImageOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
@@ -9,26 +11,78 @@ import data from 'emoji-mart-vue-fast/data/all.json';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
 
-const prop = defineProps<{
-    appear: boolean;
-    childWidth: number;
-    headShot: string;
-}>();
+const prop = defineProps({
+    appear: {
+        type: Boolean,
+        default: false
+    },
+    childWidth: {
+        type: Number,
+        default: 0
+    },
+    headShot: {
+        type: String,
+        default: ''
+    },
+    item: {
+        type: Object as () => {
+            content: string;
+            path: string;
+            article_id: number;
+            user_id: number;
+            highest_id: number;
+            parent_id: number;
+            parent_user_id: number;
+        },
+        required: true,
+        default: () => ({
+            article_id: 0,
+            user_id: 0,
+            highest_id: 0,
+            parent_id: 0,
+            parent_user_id: 0
+        })
+    }
+});
 
-// 使用ref来创建一个响应式的数据属性
-const inputValue = ref('');
+//定义消息提示对象
+const message = useMessage();
 
-//输入框中的字数
-const fontNumber = computed(() => inputValue.value.length);
-
-//控制emoji表情是否出现
-const emoji = ref(false);
+//----------------------------------------评论图片---------------------------------
 
 //存放上传图片的url路径
 const uploadedImages = ref<{ id: string; url: string }[]>([]);
-console.log(uploadedImages);
 
 const fileListRef = ref<UploadFileInfo[]>([]);
+
+function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefined> {
+    if (!file) return undefined;
+
+    // // 这里我们仅返回一个固定的 URL 字符串作为示例
+    return new Promise((resolve, reject) => {
+        // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
+        const fd = new FormData();
+        fd.append('files', file);
+        fd.append('width', '200');
+        getImageUrl(fd)
+            .then((response) => {
+                if (response && response.data) {
+                    // 如果成功获取到 URL，则解析 Promise
+                    resolve(response.data);
+                    uploadedImages.value.push(...response.data);
+                } else {
+                    // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
+                    reject(new Error('Failed to retrieve thumbnail URL'));
+                }
+            })
+            .catch((error) => {
+                // 如果 getImageUrl 抛出错误，则拒绝 Promise
+                reject(error);
+            });
+    });
+}
+
+//-----------------------------------emoji表情的相关设置------------------------------
 
 const emojiI18n = {
     search: '搜索',
@@ -50,40 +104,50 @@ const emojiI18n = {
     }
 };
 
+//控制emoji表情是否出现
+const emoji = ref(false);
+
 //控制emoji组件是否出现的点击事件
 const emojiClick = () => {
     emoji.value = !emoji.value;
 };
 const emojiIndex = new EmojiIndex(data);
-// 选中emoji
+
+//----------------------------------------发布评论--------------------------------------
+
+// 使用ref来创建一个响应式的数据属性
+const inputValue = ref('');
+
+//输入框中的字数
+const fontNumber = computed(() => inputValue.value.length);
+
+const emit = defineEmits(['close-comment']);
+
+//将emoji表情加入到评论中
 const handleEmoji = (e) => {
     console.log(e.native);
     inputValue.value = inputValue.value + e.native;
 };
 
-// 创建一个模拟生成缩略图 URL 的函数
-function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefined> {
-    if (!file) return undefined;
-
-    // // 这里我们仅返回一个固定的 URL 字符串作为示例
-    return new Promise((resolve, reject) => {
-        // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
-        getImageUrl(file)
-            .then((response) => {
-                if (response && response.data && response.data.url) {
-                    // 如果成功获取到 URL，则解析 Promise
-                    resolve(response.data.url);
-                } else {
-                    // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
-                    reject(new Error('Failed to retrieve thumbnail URL'));
-                }
-            })
-            .catch((error) => {
-                // 如果 getImageUrl 抛出错误，则拒绝 Promise
-                reject(error);
-            });
+const publicFirst = async () => {
+    console.log(uploadedImages.value);
+    const commentDetail = reactive({
+        content: inputValue.value,
+        path: uploadedImages.value,
+        article_id: prop.item.article_id,
+        user_id: prop.item.user_id,
+        highest_id: prop.item.highest_id,
+        parent_id: prop.item.parent_id,
+        parent_user_id: prop.item.parent_user_id
     });
-}
+
+    try {
+        await publicComments(commentDetail);
+        emit('close-comment');
+    } catch (error) {
+        message.error('点赞失败');
+    }
+};
 </script>
 <template>
     <div class="drawer" v-if="prop.appear" :style="{ width: prop.childWidth + 'px' }">
@@ -138,7 +202,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                         字数不能超过1000字
                     </n-tooltip>
 
-                    <n-button strong secondary round type="primary" size="small">发布</n-button>
+                    <n-button strong secondary round type="primary" size="small" @click="publicFirst">发布</n-button>
                 </div>
             </div>
         </div>
@@ -215,7 +279,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
                 }
 
                 .n-upload :deep(.n-upload-trigger + .n-upload-file-list) {
-                    width: 500px;
+                    width: 300px;
                     display: inline-block;
                 }
 

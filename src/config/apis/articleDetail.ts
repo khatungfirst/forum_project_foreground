@@ -1,5 +1,4 @@
-import { $get } from '@/packages/request';
-import { $post } from '@/packages/request';
+import { $get, $post } from '@/packages/request';
 
 // 1、获取初始化的文章、作者、相关推荐的信息
 export const getArticleDetail = (params: any): Promise<any> => {

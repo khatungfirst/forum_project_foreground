@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import {
     getArticleDetail,
     getAuthorDetail,
@@ -8,75 +8,25 @@ import {
     collectionInter,
     concernInter
 } from '@/config/apis/articleDetail';
+import { getFirstOrderComments } from '@/config/apis/comments';
 import { debounce } from '@/utils/debounce.ts';
 import IconWrapper from '@/views/components/icon/IconWrapper.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
 import MarkdownViewer from '@/views/components/markdownViewer/index.vue';
+import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.vue';
 import { useMessage } from 'naive-ui';
-import { LikeTwotone, MessageTwotone, StarTwotone, WarningFilled, EyeOutlined } from '@vicons/antd'; // 导入点赞的图标
+import { LikeFilled, MessageTwotone, StarFilled, WarningFilled, EyeOutlined } from '@vicons/antd';
 import { Icon } from '@vicons/utils';
 // import MarkdownIt from 'markdown-it';
-
-//定义图标颜色的属性
-const iconColor = '#8A919F';
-
-//定义一个响应式数组来跟踪每个图标的状态
-const currentIcon = ref([false, false]);
 
 //定义router
 const router = useRouter();
 
-//定义控制评论页面的出现
-const appear = ref(false);
-
-//定义是否显示遮罩层的方法
-const isOverlayVisible = ref(false);
-
-//定义一个变量接收中间盒子的宽度
-const centerRef = ref<HTMLElement | null>(null);
-
-//定义评论子盒子的宽度
-const childWidth = ref(0);
-
-//定义简洁作者简介是否出现
-const isAuthorInfo = ref(false);
+const route = useRoute();
 
 //定义消息提示对象
 const message = useMessage();
-
-//相关推荐的内容
-const about = ref([]);
-
-//当前登录人的id
-const user_id = ref(0);
-
-// 目录框是否收起的按钮
-const catalogueButton = ref('展开');
-
-//文章对象
-const articleInfo = reactive({
-    id: 4, //定义本篇文章的id
-    likeTotal: 0, //定义本文章的点赞数
-    collections: 0, // //定义本文章的收藏数
-    title: 0, //文章标题
-    time: '', //发布日期
-    views_count: 0, //浏览量
-    tags: [], //标签
-    content: '<p><br><p/>' //文章内容
-});
-
-//作者对象
-const authorInfo = reactive({
-    author_id: 0, //当前作者的id
-    head: '', //作者头像
-    nickname: '', //作者昵称
-    signature: '', //作者个签
-    author_article: 0, //作者文章数
-    author_read: 0, //作者阅读数
-    fans_count: 0, //作者粉丝数
-    concern_status: false //定义是否关注该作者的状态
-});
 
 //文章内容（计算属性来转换markdown语言）
 // const contents = computed(() => {
@@ -86,9 +36,43 @@ const authorInfo = reactive({
 //     return result;
 // });
 
+// ---------------------------生命周期---------------------------------
+
 onMounted(async () => {
     initArticle();
     authorInit();
+    initComments();
+    await nextTick(); // 确保 DOM 更新完成
+    updateChildWidth();
+    //监听中间窗口的变化
+    window.addEventListener('resize', updateChildWidth);
+    //监听页面滚动到位置
+    window.addEventListener('scroll', handleScroll);
+});
+
+onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateChildWidth);
+    window.removeEventListener('scroll', handleScroll);
+});
+
+// ---------------------------文章模块---------------------------------
+
+//定义图标颜色的属性
+const iconColor = '#8A919F';
+
+//定义一个响应式数组来跟踪每个图标的状态
+const currentIcon = ref([false, false]);
+
+//文章对象
+const articleInfo = reactive({
+    id: route.params.id, //定义本篇文章的id
+    likeTotal: 0, //定义本文章的点赞数
+    collections: 0, // //定义本文章的收藏数
+    title: 0, //文章标题
+    time: '', //发布日期
+    views_count: 0, //浏览量
+    tags: [], //标签
+    content: '<p><br><p/>' //文章内容
 });
 
 //文章相关内容初始化的方法
@@ -109,23 +93,6 @@ const initArticle = async () => {
         articleInfo.tags = article.tags;
         articleInfo.views_count = article.views_count;
         about.value = articleData.data.about;
-    }
-};
-
-//作者相关内容的初始化方法
-const authorInit = async () => {
-    const authorId = {
-        author_id: authorInfo.author_id
-    };
-    const authorData = await getAuthorDetail(authorId);
-    if (authorData) {
-        const data = authorData.data;
-        authorInfo.head = data.head_shot;
-        authorInfo.nickname = data.nickname;
-        authorInfo.signature = data.signature;
-        authorInfo.author_article = data.author_article;
-        authorInfo.author_read = data.author_read;
-        authorInfo.concern_status = data.concern_status;
     }
 };
 
@@ -152,16 +119,6 @@ const like = async () => {
 // 应用防抖到点赞函数
 const debouncedLikePost = debounce(like, 300);
 
-// 直接返回防抖后的函数作为事件处理函数
-const handleLike = debouncedLikePost;
-
-//评论的方法
-const review = () => {
-    appear.value = !appear.value;
-    isOverlayVisible.value = !isOverlayVisible.value;
-    console.log('review');
-};
-
 //收藏的方法
 const collect = async () => {
     //
@@ -186,18 +143,50 @@ const collect = async () => {
 // 应用防抖到收藏函数
 const debouncedCollectionPost = debounce(collect, 500);
 
-// 直接返回防抖后的函数作为事件处理函数
-const handleCollection = debouncedCollectionPost;
-
 //注意的方法
 const attention = () => {
     console.log('attention');
 };
 
-//跳转到登录页面的方法
-const login = () => {
-    router.push('/login');
+// ---------------------------作者、相关推荐模块---------------------------------
+
+//相关推荐的内容
+const about = ref([]);
+
+//定义简洁作者简介是否出现
+const isAuthorInfo = ref(false);
+
+//作者对象
+const authorInfo = reactive({
+    author_id: 0, //当前作者的id
+    head: '', //作者头像
+    nickname: '', //作者昵称
+    signature: '', //作者个签
+    author_article: 0, //作者文章数
+    author_read: 0, //作者阅读数
+    fans_count: 0, //作者粉丝数
+    concern_status: false //定义是否关注该作者的状态
+});
+
+//作者相关内容的初始化方法
+const authorInit = async () => {
+    const authorId = {
+        author_id: authorInfo.author_id
+    };
+    const authorData = await getAuthorDetail(authorId);
+    if (authorData) {
+        const data = authorData.data;
+        authorInfo.head = data.head_shot;
+        authorInfo.nickname = data.nickname;
+        authorInfo.signature = data.signature;
+        authorInfo.author_article = data.author_article;
+        authorInfo.author_read = data.author_read;
+        authorInfo.concern_status = data.concern_status;
+    }
 };
+
+//当前登录人的id
+const user_id = ref(0);
 
 //关注的方法
 const concern = async () => {
@@ -222,21 +211,65 @@ const concern = async () => {
 // 应用防抖到关注函数
 const debouncedConcernPost = debounce(concern, 500);
 
-// 直接返回防抖后的函数作为事件处理函数
-const handleConcern = debouncedConcernPost;
-
 //私信的方法
 const personalLetter = () => {
     message.warning('私信功能暂未开放，敬请期待吧！');
 };
 
-//控制目录框是否展开
-const catalogueControl = () => {
-    if (catalogueButton.value === '收起') {
-        catalogueButton.value = '展开';
+//页面滚动到一定位置触发的事件：作者信息的位置
+const handleScroll = () => {
+    if (window.scrollY >= 200) {
+        isAuthorInfo.value = true;
     } else {
-        catalogueButton.value = '收起';
+        isAuthorInfo.value = false;
     }
+};
+
+//跳转到对应推荐文章的文章详情
+const recommendedArtical = (id) => {
+    router.push(`/articledetail/${id}`);
+};
+
+// ---------------------------评论模块---------------------------------
+
+//定义控制评论页面的出现
+const appear = ref(false);
+
+//定义是否显示遮罩层的变量
+const isOverlayVisible = ref(false);
+
+//定义一个变量接收中间盒子的宽度
+const centerRef = ref<HTMLElement | null>(null);
+
+//定义评论子盒子的宽度
+const childWidth = ref(0);
+
+//一级评论接收数组
+const commentsList = ref([]);
+
+//评论总条数
+const commentTotal = ref(0);
+
+//评论相关数据
+const commentInfo = reactive({
+    article_id: 0,
+    offset: 1,
+    limit: 4,
+    user_id: 0
+});
+
+//评论相关初始化方法
+const initComments = async () => {
+    const { data } = await getFirstOrderComments(commentInfo);
+    if (data) {
+        commentsList.value = data.firstCommentsList;
+        commentTotal.value = data.commentsTotal;
+    }
+};
+
+//跳转到登录页面的方法
+const login = () => {
+    router.push('/login');
 };
 
 //定义遮罩层的点击事件
@@ -252,30 +285,40 @@ const updateChildWidth = () => {
     }
 };
 
-//页面滚动到一定位置触发的事件
-const handleScroll = () => {
-    if (window.scrollY >= 200) {
-        isAuthorInfo.value = true;
-    } else {
-        isAuthorInfo.value = false;
-    }
+//发表评论的方法
+const review = () => {
+    appear.value = !appear.value;
+    isOverlayVisible.value = !isOverlayVisible.value;
 };
 
-// 监听窗口调整
-onMounted(async () => {
-    await nextTick(); // 确保 DOM 更新完成
-    updateChildWidth();
-    //监听中间窗口的变化
-    window.addEventListener('resize', updateChildWidth);
-    //监听页面滚动到位置
-    window.addEventListener('scroll', handleScroll);
-});
+//删除评论
+const deleteFirst = (id) => {
+    commentsList.value = commentsList.value.filter((item) => item.id !== id);
+};
 
-// 移除监听
-onBeforeUnmount(() => {
-    window.removeEventListener('resize', updateChildWidth);
-    window.removeEventListener('scroll', handleScroll);
-});
+//评论的下拉事件
+const handleLoad = async () => {
+    commentInfo.offset = commentInfo.offset + 1;
+    const { data } = await getFirstOrderComments(commentInfo);
+    if (data) {
+        commentsList.value.push(...data.firstCommentsList);
+    }
+};
+const handleLoadComment = debounce(handleLoad, 200);
+
+// ---------------------------目录模块---------------------------------
+
+// 目录框是否收起的按钮
+const catalogueButton = ref('展开');
+
+//控制目录框是否展开
+const catalogueControl = () => {
+    if (catalogueButton.value === '收起') {
+        catalogueButton.value = '展开';
+    } else {
+        catalogueButton.value = '收起';
+    }
+};
 </script>
 <template>
     <div class="wrap">
@@ -287,10 +330,10 @@ onBeforeUnmount(() => {
                     <span>作者名</span>
                 </div>
                 <IconWrapper
-                    :icon="LikeTwotone"
+                    :icon="LikeFilled"
                     :color="currentIcon[0] ? '#19A059' : iconColor"
                     :size="24"
-                    @click="handleLike"
+                    @click="debouncedLikePost"
                     :badgeValue="articleInfo.likeTotal"
                     :showBadge="true"
                 />
@@ -303,10 +346,10 @@ onBeforeUnmount(() => {
                     :showBadge="true"
                 />
                 <IconWrapper
-                    :icon="StarTwotone"
+                    :icon="StarFilled"
                     :color="currentIcon[1] ? '#19A059' : iconColor"
                     :size="24"
-                    @click="handleCollection"
+                    @click="debouncedCollectionPost"
                     :badgeValue="articleInfo.collections"
                     :showBadge="true"
                 />
@@ -345,7 +388,7 @@ onBeforeUnmount(() => {
                 </div>
             </div>
             <div class="reviewModule">
-                <h3>评论</h3>
+                <h3>评论 {{ commentTotal }}</h3>
                 <div class="loginRegist">
                     <n-avatar round size="large" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
                     <div class="loginBgc">
@@ -355,10 +398,25 @@ onBeforeUnmount(() => {
                 </div>
                 <div class="review-detail">
                     <p>最新</p>
+                    <div class="alone-comments">
+                        <n-infinite-scroll :distance="0" @load="handleLoadComment">
+                            <FirstOrderComments
+                                :item="item"
+                                v-for="(item, index) in commentsList"
+                                :key="index"
+                                @delete-firComments="deleteFirst"
+                            ></FirstOrderComments>
+                        </n-infinite-scroll>
+                    </div>
                 </div>
             </div>
             <!-- 评论的盒子 -->
-            <commentDrawer :appear="appear" :childWidth="childWidth" :headShot="authorInfo.head"></commentDrawer>
+            <commentDrawer
+                :appear="appear"
+                :childWidth="childWidth"
+                :headShot="authorInfo.head"
+                @close-comment="handleMaskClick"
+            ></commentDrawer>
         </div>
         <div class="right">
             <div class="author-detail" ref="authorDetail">
@@ -369,12 +427,14 @@ onBeforeUnmount(() => {
                         secondary
                         round
                         type="primary"
-                        @click="handleConcern"
+                        @click="debouncedConcernPost"
                         v-if="!authorInfo.concern_status"
                     >
                         关注
                     </n-button>
-                    <n-button strong secondary round type="primary" @click="concern" v-else>已关注</n-button>
+                    <n-button strong secondary round type="primary" @click="debouncedConcernPost" v-else>
+                        已关注
+                    </n-button>
                     <n-button tertiary round type="primary" @click="personalLetter">私信</n-button>
                 </div>
             </div>
@@ -399,7 +459,12 @@ onBeforeUnmount(() => {
                     <p>相关推荐</p>
                 </div>
                 <ul>
-                    <li class="about-detail" v-for="(item, index) in about" :key="index">
+                    <li
+                        class="about-detail"
+                        v-for="(item, index) in about"
+                        :key="index"
+                        @click="recommendedArtical(item.id)"
+                    >
                         <p>{{ item.title }}</p>
                         <p class="bottom">
                             <span>{{ item.views_count }}阅读</span>
@@ -415,18 +480,10 @@ onBeforeUnmount(() => {
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
 .wrap {
-    @include all;
     display: flex;
     background-color: #f2f3f5;
 
-    .overlay {
-        position: fixed; /* 固定定位 */
-        top: 0;
-        left: 0;
-        @include all;
-        background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色 */
-        z-index: 998; /* 确保在最上层 */
-    }
+    @include overlay;
 
     .left {
         width: 10%;
@@ -456,6 +513,7 @@ onBeforeUnmount(() => {
             margin-bottom: 20px;
 
             .message {
+                color: #8a919f;
                 display: flex;
                 align-items: center;
                 margin-bottom: 50px;
@@ -480,6 +538,7 @@ onBeforeUnmount(() => {
             .tags {
                 display: flex;
                 margin-bottom: 20px;
+                color: #8a919f;
 
                 span {
                     height: 36px;

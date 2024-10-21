@@ -2,11 +2,18 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-//定义距离回到首页的秒数
-const seconds = ref(5);
-
 //定义路由对象
 const router = useRouter();
+
+onMounted(() => {
+    // 组件挂载后启动倒计时
+    startCountdown();
+});
+
+//--------------------倒计时------------------------------
+
+//定义距离回到首页的秒数
+const seconds = ref(5);
 
 //倒计时的方法
 const startCountdown = () => {
@@ -21,6 +28,8 @@ const startCountdown = () => {
     }
 };
 
+//-------------------回到首页 or 继续发布---------------------
+
 //回到首页的点击事件
 const back = () => {
     router.push('/articledetail');
@@ -30,11 +39,6 @@ const back = () => {
 const continuePublic = () => {
     router.push('/articlerelease/0');
 };
-
-onMounted(() => {
-    // 组件挂载后启动倒计时
-    startCountdown();
-});
 </script>
 <template>
     <div class="wrap">

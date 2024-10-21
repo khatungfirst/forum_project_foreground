@@ -1,21 +1,4 @@
 //目录预览
-<template>
-    <div>
-        <div class="toc">
-            <ul>
-                <li
-                    v-for="(item, index) in tableOfContents"
-                    :key="index"
-                    :style="{ paddingLeft: (item.level - 1) * 15 + 'px' }"
-                >
-                    <a :href="'#' + item.id">{{ item.title }}</a>
-                </li>
-            </ul>
-        </div>
-        <!-- <div v-html="renderedMarkdown"></div> -->
-    </div>
-</template>
-
 <script lang="ts" setup>
 import { ref, watch, defineProps } from 'vue';
 
@@ -66,27 +49,43 @@ watch(
     { immediate: true }
 );
 </script>
+<template>
+    <div>
+        <div class="toc">
+            <ul>
+                <li
+                    v-for="(item, index) in tableOfContents"
+                    :key="index"
+                    :style="{ paddingLeft: (item.level - 1) * 15 + 'px' }"
+                >
+                    <a :href="'#' + item.id">{{ item.title }}</a>
+                </li>
+            </ul>
+        </div>
+        <!-- <div v-html="renderedMarkdown"></div> -->
+    </div>
+</template>
 
-<style scoped>
+<style scoped lang="scss">
 .toc {
     margin-bottom: 1em;
-}
 
-.toc ul {
-    list-style-type: none;
-    padding-left: 0;
-}
+    ul {
+        list-style-type: none;
+        padding-left: 0;
 
-.toc li {
-    margin: 0.5em 0;
-}
+        li {
+            margin: 0.5em 0;
 
-.toc a {
-    text-decoration: none;
-}
+            a {
+                text-decoration: none;
+            }
 
-.toc a:hover {
-    text-decoration: underline;
-    color: #007bff; /* 悬停时的颜色 */
+            a:hover {
+                text-decoration: underline;
+                color: #007bff; /* 悬停时的颜色 */
+            }
+        }
+    }
 }
 </style>

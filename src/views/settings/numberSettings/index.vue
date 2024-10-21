@@ -4,6 +4,20 @@ import { getNumberData, changeNumberData } from '@/config/apis/settings.ts';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 
+//定义消息提示对象
+const message = useMessage();
+
+//------------------------------生命周期--------------------------------
+
+onMounted(async () => {
+    const { data } = await getNumberData(numberSettings.id);
+    //把data中的属性值复制给numberSettings
+    Object.assign(numberSettings, data);
+    // numberSettings = data;
+});
+
+//--------------------------编辑用户的微博、github、密码--------------------------------
+
 //获取到微博输入框
 const weiboInputInstRef = ref<InputInst | null>(null);
 
@@ -22,9 +36,6 @@ const passwordInputInstRef = ref<InputInst | null>(null);
 ///密码输入框是否禁用
 const passwordStatus = ref(true);
 
-//定义消息提示对象
-const message = useMessage();
-
 //账号设置的各个属性
 const numberSettings = reactive({
     id: 0,
@@ -33,13 +44,6 @@ const numberSettings = reactive({
     weibo_link: '',
     github_link: '',
     password: ''
-});
-
-onMounted(async () => {
-    const { data } = await getNumberData(numberSettings.id);
-    //把data中的属性值复制给numberSettings
-    Object.assign(numberSettings, data);
-    // numberSettings = data;
 });
 
 //获取焦点后编辑信息

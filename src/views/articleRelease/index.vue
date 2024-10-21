@@ -1,44 +1,51 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useRouter, onBeforeRouteLeave } from 'vue-router';
-import { getTypeTag, publicArticles } from '@/config/apis/publicArticle.ts';
+import { getTypeTag, publicArticles, getImageUrl } from '@/config/apis/publicArticle';
 import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
+import useUpload from '@/hooks/useUpload';
 import 'bytemd/dist/index.css';
-import type { UploadFileInfo } from 'naive-ui';
 import { useMessage, useDialog } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
 
-//计算标题的字数
-const titleNUmber = computed(() => articleData.title.length);
-
-//接受上次markdown中的数据
-const content1 = ref('');
-
-//定义上次的标题
-const title1 = ref('');
-
-//控制卡片显示的变量
-const cardDisplay = ref(false);
-
-//定义分类下拉框中的内容
-const typeOptions = ref([]);
-
-//定义标签下拉框中的内容
-const tagOptions = ref([]);
-
 //定义消息提示对象
 const message = useMessage();
-
-//定义弹窗对象
-const dialog = useDialog();
 
 //定义路由对象
 const router = useRouter();
 
-//判断当前处于编辑状态还是保存状态
-const isSave = ref(false);
+// 定义事件处理函数
+const beforeUnloadHandler = (e) => {
+    e.preventDefault(); // 阻止默认行为（在某些浏览器中可能不起作用）
+    e.returnValue = ''; // 设置返回值（但请注意，现代浏览器可能不支持直接修改returnValue）
+    return '您页面上的修改还未保存，确定离开页面吗？'; // 返回一个字符串可能不会在所有浏览器中触发对话框
+};
+
+//---------------------------------生命周期---------------------------------
+
+onMounted(async () => {
+    const { data } = await getTypeTag();
+    if (data) {
+        typeOptions.value = data.categories;
+        tagOptions.value = data.tags;
+    }
+    init();
+    window.addEventListener('beforeunload', beforeUnloadHandler);
+    // 添加键盘事件监听器
+    document.addEventListener('keydown', saveContent);
+    // 设置定时器
+});
+
+// 在组件卸载时移除事件监听器，防止内存泄漏
+onUnmounted(() => {
+    window.removeEventListener('beforeunload', beforeUnloadHandler);
+    // 移除键盘事件监听器
+    document.removeEventListener('keydown', saveContent);
+});
+
+//----------------------------------初始化----------------------------------
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
@@ -54,84 +61,6 @@ const articleData = reactive({
     published_at: '' //文章发布时间字段
 });
 
-//制定表单的的校验规则
-const rules = {
-    categories: { required: true, trigger: ['blur', 'input'], message: '请输入要选择的分类' },
-    text: { required: true, trigger: ['blur', 'input'], message: '请输入文章摘要' }
-};
-
-// 路由离开守卫
-onBeforeRouteLeave(async (to, from, next) => {
-    if (articleData.status === 'private') {
-        next();
-    } else {
-        const shouldLeave = await new Promise((resolve) => {
-            dialog.warning({
-                title: '注意',
-                content: '您的文章还没保存，是否要保存？',
-                positiveText: '保存',
-                negativeText: '取消',
-                maskClosable: false,
-                onEsc: () => {
-                    console.log('通过 esc 关闭');
-                    resolve(false); // 假设 ESC 也被视为取消
-                },
-                onPositiveClick: () => {
-                    console.log('222');
-                    resolve(true); // 用户确认离开
-                }
-            });
-        });
-
-        if (shouldLeave) {
-            next(); // 用户确认离开，继续路由跳转
-        } else {
-            next(false); // 用户选择不离开，阻止路由跳转
-        }
-    }
-});
-
-//文件上传声明的属性
-const showModalRef = ref(false);
-const previewImageUrlRef = ref('');
-const previewFileList = ref([]);
-const showModal = showModalRef;
-const previewImageUrl = previewImageUrlRef;
-
-//生命周期
-onMounted(async () => {
-    const { data } = await getTypeTag();
-    if (data) {
-        typeOptions.value = data.categories;
-        tagOptions.value = data.tags;
-    }
-    init();
-    window.addEventListener('beforeunload', beforeUnloadHandler);
-    window.addEventListener('unload', unloadHandler);
-    // 添加键盘事件监听器
-    document.addEventListener('keydown', saveContent);
-    // 设置定时器
-});
-
-// 在组件卸载时移除事件监听器，防止内存泄漏
-onUnmounted(() => {
-    window.removeEventListener('beforeunload', beforeUnloadHandler);
-    window.removeEventListener('unload', unloadHandler);
-    // 移除键盘事件监听器
-    document.removeEventListener('keydown', saveContent);
-});
-
-//用watch去监控标题是否发生更改
-watch(
-    () => articleData.title, //articleData.title 本身不是一个响应式引用（ref），而是一个响应式对象（reactive）的属性
-    (newValue, oldValue) => {
-        console.log(newValue, oldValue);
-        title1.value = newValue;
-        isSave.value = false;
-    }
-);
-
-//初始化的方法
 const init = async () => {
     const id = {
         article_id: articleData.article_id
@@ -149,6 +78,11 @@ const init = async () => {
         articleData.published_at = data.published_at;
     }
 };
+
+//----------------------------------保存文章内容------------------------------
+
+//判断当前处于编辑状态还是保存状态
+const isSave = ref(false);
 
 // 保存内容的方法
 const save = async () => {
@@ -168,13 +102,48 @@ const saveContent = (e) => {
     if (key === 83 && e.ctrlKey) {
         if (articleData.title === '' && articleData.content === '<p><br></p>') {
             isSave.value = false;
-            console.log('目前为空');
         } else {
             save();
         }
         e.preventDefault();
     }
 };
+
+//--------------------------------发布文章-------------------------------------
+
+//计算标题的字数
+const titleNUmber = computed(() => articleData.title.length);
+
+//接受上次markdown中的数据
+const content1 = ref('');
+
+//定义上次的标题
+const title1 = ref('');
+
+//控制卡片显示的变量
+const cardDisplay = ref(false);
+
+//定义分类下拉框中的内容
+const typeOptions = ref([]);
+
+//定义标签下拉框中的内容
+const tagOptions = ref([]);
+
+//制定表单的的校验规则
+const rules = {
+    categories: { required: true, trigger: ['blur', 'input'], message: '请输入要选择的分类' },
+    text: { required: true, trigger: ['blur', 'input'], message: '请输入文章摘要' }
+};
+
+//用watch去监控标题是否发生更改
+watch(
+    () => articleData.title, //articleData.title 本身不是一个响应式引用（ref），而是一个响应式对象（reactive）的属性
+    (newValue, oldValue) => {
+        console.log(newValue, oldValue);
+        title1.value = newValue;
+        isSave.value = false;
+    }
+);
 
 //获取到markdown中输入的数据
 const getMessage = (msg: string) => {
@@ -186,11 +155,17 @@ const getMessage = (msg: string) => {
         title1.value === articleData.title
     ) {
         isSave.value = true;
-        console.log(content1, 'save1');
     } else {
         isSave.value = false;
         content1.value = articleData.content;
     }
+};
+
+//获取上传封面图的链接
+const { image_url, getUrl } = useUpload();
+const getImage = async (item) => {
+    await getUrl(item);
+    articleData.image_url = image_url.value;
 };
 
 //页面上发布按钮的点击事件
@@ -217,41 +192,6 @@ const publicArticle = async () => {
     } else {
         message.error('请把信息补充完整');
     }
-};
-
-//文件上传的相关方法
-const handlePreview = (file: UploadFileInfo) => {
-    const { url } = file;
-    console.log(url, 'url');
-
-    previewImageUrlRef.value = url as string;
-    showModalRef.value = true;
-};
-
-//定义文件上传后的图片显示
-const handleFinish = ({ file, event }: { file: UploadFileInfo; event?: ProgressEvent }) => {
-    const { data } = JSON.parse((event?.target as XMLHttpRequest).response);
-    articleData.image_url = data.url;
-    console.log(data.url);
-    // message.success((event?.target as XMLHttpRequest).response);
-    const ext = file.name.split('.')[1];
-    file.name = `更名.${ext}`;
-    file.url = data.url;
-    return file;
-};
-
-// 定义事件处理函数
-const beforeUnloadHandler = (e) => {
-    e.preventDefault(); // 阻止默认行为（在某些浏览器中可能不起作用）
-    e.returnValue = ''; // 设置返回值（但请注意，现代浏览器可能不支持直接修改returnValue）
-    return '您页面上的修改还未保存，确定离开页面吗？'; // 返回一个字符串可能不会在所有浏览器中触发对话框
-};
-
-const unloadHandler = (e) => {
-    // 注意：unload事件的处理函数通常不会阻止页面卸载，
-    // 因为浏览器会忽略事件处理函数中阻止默认行为的尝试。
-    // 这里主要是为了演示如何添加和移除事件监听器。
-    console.log(e, '页面正在卸载...');
 };
 </script>
 <template>
@@ -290,17 +230,9 @@ const unloadHandler = (e) => {
                     </n-form-item>
                     <div class="upload">
                         <span>封面图</span>
-                        <n-upload
-                            action="http://127.0.0.1:4523/m1/4891553-4547208-default/produce_image_url"
-                            method="get"
-                            :default-file-list="previewFileList"
-                            list-type="image-card"
-                            @preview="handlePreview"
-                            @finish="handleFinish"
-                            max="1"
-                        />
-                        <n-modal v-model:show="showModal" preset="card" style="width: 600px" title="一张很酷的图片">
-                            <img :src="previewImageUrl" style="width: 100%" />
+                        <n-upload @change="getImage" list-type="image-card" max="1" />
+                        <n-modal preset="card" style="width: 600px" title="封面图">
+                            <img :src="articleData.image_url" style="width: 100%" />
                         </n-modal>
                     </div>
                     <n-p depth="3" style="margin: 8px 0 0 0">格式：png,jpg,gif 大小不大于：2M尺寸：192*128px</n-p>

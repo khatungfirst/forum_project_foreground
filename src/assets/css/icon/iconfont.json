@@ -6,6 +6,62 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "1614455",
+      "name": "删除",
+      "font_class": "shanchu",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "23367",
+      "name": "编辑",
+      "font_class": "edit",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "1315194",
+      "name": "更多",
+      "font_class": "gengduo-01",
+      "unicode": "e61e",
+      "unicode_decimal": 58910
+    },
+    {
+      "icon_id": "2742627",
+      "name": "地球",
+      "font_class": "diqiu",
+      "unicode": "e668",
+      "unicode_decimal": 58984
+    },
+    {
+      "icon_id": "8138007",
+      "name": "系统设置-账号设置",
+      "font_class": "xitongshezhi-zhanghaoshezhi",
+      "unicode": "e6e7",
+      "unicode_decimal": 59111
+    },
+    {
+      "icon_id": "8185792",
+      "name": "身份证",
+      "font_class": "shenfenzheng",
+      "unicode": "e608",
+      "unicode_decimal": 58888
+    },
+    {
+      "icon_id": "8575170",
+      "name": "点赞",
+      "font_class": "dianzan",
+      "unicode": "e616",
+      "unicode_decimal": 58902
+    },
+    {
+      "icon_id": "11594393",
+      "name": "评论",
+      "font_class": "pinglun",
+      "unicode": "e6b3",
+      "unicode_decimal": 59059
+    },
+    {
       "icon_id": "8796463",
       "name": "必选",
       "font_class": "bixuan",

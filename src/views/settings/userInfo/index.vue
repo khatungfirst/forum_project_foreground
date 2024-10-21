@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
 import { getUserInfo, changeUserInfo } from '@/config/apis/settings.ts';
-import { getImageUrl } from '@/config/apis/publicArticle';
+import useUpload from '@/hooks/useUpload';
 import { useMessage } from 'naive-ui';
 import '@/assets/css/icon/iconfont.css';
 
 //定义消息提示对象
 const message = useMessage();
 
-// const showModalRef = ref(false);
+//-----------------------------------个人资料-------------------------------------
+
+onMounted(async () => {
+    const { data } = await getUserInfo(userInfo.id);
+    if (data) {
+        Object.assign(userInfo, data);
+    }
+});
 
 //定义个人资料的所有信息
 const userInfo = reactive({
@@ -39,23 +46,6 @@ const rules = {
     }
 };
 
-onMounted(async () => {
-    const { data } = await getUserInfo(userInfo.id);
-    if (data) {
-        Object.assign(userInfo, data);
-    }
-});
-
-//计算属性，处理过的标签
-const processedTags = computed(() => {
-    return userInfo.all_tag_names.map((tag) => {
-        console.log(tag);
-
-        const isSelected = userInfo.user_tags.includes(tag);
-        return { tag, isSelected };
-    });
-});
-
 //将更新用户数据的操作提取成一个方法
 const update = async (msg1, msg2) => {
     const { code } = await changeUserInfo(userInfo);
@@ -67,15 +57,22 @@ const update = async (msg1, msg2) => {
 };
 
 //更新用户表单数据
-const changeForm = (item) => {
-    console.log(userInfo, '111');
-    console.log(oldUserInfo, '3');
-
-    if (userInfo[item] !== oldUserInfo[item] && oldUserInfo[item] !== '') {
-        update('信息更改成功', '信息更改失败');
-    }
+const changeForm = () => {
+    update('信息更改成功', '信息更改失败');
     Object.assign(oldUserInfo, userInfo);
 };
+
+//-----------------------------------标签-------------------------------------
+
+//计算属性，处理过的标签
+const processedTags = computed(() => {
+    return userInfo.all_tag_names.map((tag) => {
+        console.log(tag);
+
+        const isSelected = userInfo.user_tags.includes(tag);
+        return { tag, isSelected };
+    });
+});
 
 //添加标签的方法
 const addTags = async (item) => {
@@ -89,10 +86,14 @@ const handleClose = async (e) => {
     update('删除标签成功', '删除标签失败');
 };
 
+//---------------------------------上传头像-----------------------------------
+
+const { image_url, getUrl } = useUpload();
+
 //上传图片预览图
-const handlePreview = async () => {
-    const { data } = await getImageUrl();
-    userInfo.path = data.url;
+const handlePreview = async (item) => {
+    await getUrl(item);
+    userInfo.path = image_url.value;
     update('更改头像成功', '更改头像失败');
     // showModalRef.value = true;
 };
@@ -115,29 +116,13 @@ const handlePreview = async () => {
                 }"
             >
                 <n-form-item label="用户名" path="nickname" name="nickname">
-                    <n-input
-                        v-model:value="userInfo.nickname"
-                        show-count
-                        maxlength="20"
-                        placeholder=""
-                        @blur="changeForm('nickname')"
-                    />
+                    <n-input v-model:value="userInfo.nickname" show-count maxlength="20" placeholder="" />
                 </n-form-item>
                 <n-form-item label="职业方向" path="career_direction" name="career_direction">
-                    <n-input
-                        v-model:value="userInfo.career_direction"
-                        placeholder=""
-                        @blur="changeForm('career_direction')"
-                    />
+                    <n-input v-model:value="userInfo.career_direction" placeholder="" />
                 </n-form-item>
                 <n-form-item label="个人主页" path="user_home_page">
-                    <n-input
-                        v-model:value="userInfo.user_home_page"
-                        show-count
-                        maxlength="50"
-                        placeholder=""
-                        @blur="changeForm('user_home_page')"
-                    />
+                    <n-input v-model:value="userInfo.user_home_page" show-count maxlength="50" placeholder="" />
                 </n-form-item>
                 <n-form-item label="个人签名" path="user_signature">
                     <n-input
@@ -150,12 +135,11 @@ const handlePreview = async () => {
                         }"
                         show-count
                         maxlength="200"
-                        @blur="changeForm('user_signature')"
                     />
                 </n-form-item>
             </n-form>
             <div class="head">
-                <n-upload list-type="image-card" @change="handlePreview" method="get">
+                <n-upload list-type="image-card" @change="handlePreview">
                     <n-avatar round size="large" :src="userInfo.path" style="width: 100%; height: 100%" />
                 </n-upload>
                 <p>上传头像</p>
@@ -163,10 +147,13 @@ const handlePreview = async () => {
                 <p class="small">大小：5M以内</p>
             </div>
         </div>
+        <div class="commitButton">
+            <n-button strong secondary round type="primary" @click="changeForm">保存修改</n-button>
+        </div>
         <P>标签管理</P>
         <div class="tag">
             <span>
-                <i class="iconfont">&#xe640;</i>
+                <i class="iconfont" style="color: red">&#xe640;</i>
                 兴趣标签
             </span>
             <div class="tag-right">
@@ -202,6 +189,11 @@ const handlePreview = async () => {
     .top {
         display: grid;
         grid-template-columns: 3fr 1fr;
+    }
+
+    .commitButton {
+        width: 75%;
+        @include flex;
     }
 
     p {

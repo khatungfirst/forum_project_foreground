@@ -12,19 +12,15 @@ const prop = defineProps({
     }
 });
 
+//--------------------------------------生命周期-------------------------------------
+
+onMounted(async () => {
+    init();
+});
+
+//---------------------------------------初始化-------------------------------------
 //用来存放后端传来的相关数据
 const selectData = ref([]);
-
-//是否正在加载
-const isLoading = ref(false);
-
-//获取到最外层盒子的对象
-const dataContainer = ref(null);
-
-//表示是否还有数据
-const noMore = ref(false);
-
-const threshold = ref(200);
 
 const dataObj = reactive({
     keyword: '',
@@ -34,11 +30,6 @@ const dataObj = reactive({
     kind: '0'
 });
 
-onMounted(async () => {
-    init();
-});
-
-//获取页面中初始化数据
 const init = async () => {
     console.log(111);
     const { data } = await getSelectArticle(dataObj);
@@ -47,11 +38,17 @@ const init = async () => {
     }
 };
 
-//获取页面中加载后对应的数据的方法
-const loadInit = async () => {
-    console.log(threshold.value, '*****');
+//----------------------------------加载后获取数据-------------------------------------
+//是否正在加载
+const isLoading = ref(false);
 
-    console.log(22);
+//表示是否还有数据
+const noMore = ref(false);
+
+//获取到最外层盒子的对象
+const dataContainer = ref(null);
+
+const loadInit = async () => {
     if (isLoading.value) return;
     isLoading.value = true;
     setTimeout(async () => {

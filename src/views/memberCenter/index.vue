@@ -7,6 +7,7 @@ import { getMemberInfo, editSignature, getArticleInfo, deleteArticle, getConcern
 import { concernInter } from '@/config/apis/articleDetail';
 import { getNumberData } from '@/config/apis/settings.ts';
 import { debounce } from '@/utils/debounce.ts';
+import '@/assets/css/icon/iconfont.css';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -15,13 +16,10 @@ import {
     LikeTwotone,
     EyeOutlined,
     HeartFilled,
-    GlobalOutlined,
     WeiboOutlined,
     GithubFilled,
-    DeleteTwotone,
     SearchOutlined
 } from '@vicons/antd';
-import { Edit } from '@vicons/fa';
 
 //定义路由对象
 const router = useRouter();
@@ -29,29 +27,15 @@ const router = useRouter();
 //定义消息提示对象
 const message = useMessage();
 
-//文章数组
-const articleArr = ref([]);
+//------------------------生命周期---------------------
 
-//关注列表数组
-const fansArr = ref([]);
+onMounted(async () => {
+    userInfo();
+    articleInit();
+    linkInit();
+});
 
-//控制个签是否可编辑
-const isEdit = ref(true);
-
-//获取到输入框
-const inputInstRef = ref<InputInst | null>(null);
-
-//是否正在加载
-const isLoading = ref(false);
-
-//表示是否还有数据
-const noMore = ref(false);
-
-//控制搜索框的宽度
-const inputWidth = ref('0px'); // 初始宽度为 0
-
-//搜索框输入的内容
-const inputValue = ref('');
+//------------------------用户模块---------------------
 
 //定义当前会员中心人员的各种信息
 const user = reactive({
@@ -72,44 +56,17 @@ const user = reactive({
     github_link: ''
 });
 
-//定义文章的筛选条件
-const aticleType = reactive({
-    id: user.id,
-    type: '文章',
-    page: 1,
-    limit: 4,
-    keyword: ''
-});
+//控制个签是否可编辑
+const isEdit = ref(true);
 
-//定义文章的筛选条件
-const fansType = reactive({
-    id: user.id,
-    page: 1,
-    limit: 4,
-    keyword: ''
-});
-
-onMounted(async () => {
-    userInfo();
-    articleInit();
-    linkInit();
-});
-
-//----------------------初始化的一些方法------------------------
+//获取到输入框
+const inputInstRef = ref<InputInst | null>(null);
 
 //初始化用户数据
 const userInfo = async () => {
     const { data } = await getMemberInfo(user.id);
     if (data) {
         Object.assign(user, data);
-    }
-};
-
-//初始化文章的信息
-const articleInit = async () => {
-    const { data } = await getArticleInfo(aticleType);
-    if (data) {
-        articleArr.value = data.dataList;
     }
 };
 
@@ -120,16 +77,6 @@ const linkInit = async () => {
     user.weibo_link = data.weibo_link;
     user.github_link = data.github_link;
 };
-
-//初始化关注列表
-const fansList = async () => {
-    const { data } = await getConcernList(fansType);
-    if (data) {
-        fansArr.value = data.concernList;
-    }
-};
-
-//------------------------用户信息编辑模块---------------------
 
 //编辑个签
 const edit = () => {
@@ -172,7 +119,69 @@ const settinngs = () => {
     router.push(`/settings/${user.id}`);
 };
 
-//------------------文章模块------------------------------
+//--------------------关注列表模块------------------------
+
+//定义文章的筛选条件
+const fansType = reactive({
+    id: user.id,
+    page: 1,
+    limit: 4,
+    keyword: ''
+});
+
+//是否正在加载
+const isLoading = ref(false);
+
+//表示是否还有数据
+const noMore = ref(false);
+
+//关注列表数组
+const fansArr = ref([]);
+
+//初始化关注列表
+const fansList = async () => {
+    const { data } = await getConcernList(fansType);
+    if (data) {
+        fansArr.value = data.concernList;
+    }
+};
+
+//下拉加载关注列表数据
+const fansLoadInit = async () => {
+    if (isLoading.value) return;
+    isLoading.value = true;
+
+    setTimeout(async () => {
+        fansType.page++;
+        const { data } = await getConcernList(fansType);
+        if (data) {
+            fansArr.value.push(...data.concernList);
+            isLoading.value = false;
+        }
+    }, 1000);
+};
+
+//------------------文章列表模块------------------------------
+
+//定义文章的筛选条件
+const aticleType = reactive({
+    id: user.id,
+    type: '文章',
+    page: 1,
+    limit: 4,
+    keyword: ''
+});
+
+//文章数组
+const articleArr = ref([]);
+
+//初始化文章的信息
+const articleInit = async () => {
+    const { data } = await getArticleInfo(aticleType);
+    if (data) {
+        articleArr.value = data.dataList;
+    }
+};
 
 //发表文章按钮
 const pubicArticle = () => {
@@ -207,21 +216,6 @@ const loadInit = async () => {
     }, 1000);
 };
 
-//下拉加载关注列表数据
-const fansLoadInit = async () => {
-    if (isLoading.value) return;
-    isLoading.value = true;
-
-    setTimeout(async () => {
-        fansType.page++;
-        const { data } = await getConcernList(fansType);
-        if (data) {
-            fansArr.value.push(...data.concernList);
-            isLoading.value = false;
-        }
-    }, 1000);
-};
-
 //编辑本篇文章
 const editTotal = (id) => {
     event.stopPropagation();
@@ -239,7 +233,14 @@ const deleteArticles = async (id) => {
     }
 };
 
-//-------------------- 搜索模块 -----------------------
+//-------------------- 搜索模块 ---------------------------
+
+//控制搜索框的宽度
+const inputWidth = ref('0px'); // 初始宽度为 0
+
+//搜索框输入的内容
+const inputValue = ref('');
+
 // 鼠标悬停时输入框设置宽度
 const expandInput = () => {
     inputWidth.value = '200px';
@@ -278,16 +279,12 @@ const searchFun = () => {
                             :disabled="isEdit"
                             @blur="commitSignature"
                         />
-                        <Icon size="16" color="#cbcbcb" @click="edit">
-                            <Edit />
-                        </Icon>
+                        <i class="iconfont" @click="edit" style="color: #cbcbcb">&#xe602;</i>
                     </div>
                     <div class="left-right">
                         <div class="icons">
                             <a :href="user.blog_link">
-                                <Icon size="18">
-                                    <GlobalOutlined />
-                                </Icon>
+                                <i class="iconfont">&#xe668;</i>
                             </a>
                             <a :href="user.weibo_link">
                                 <Icon size="18">
@@ -340,12 +337,20 @@ const searchFun = () => {
                                     </template>
                                     <template #edit>
                                         <n-tag type="success" class="edit">
-                                            <Icon size="21" color="##19a059" @click="editTotal(item.id)">
-                                                <Edit />
-                                            </Icon>
-                                            <Icon size="21" color="##19a059" @click="deleteArticles(item.id)">
-                                                <DeleteTwotone />
-                                            </Icon>
+                                            <i
+                                                class="iconfont"
+                                                @click="editTotal(item.id)"
+                                                style="color: #19a059; font-size: 21px"
+                                            >
+                                                &#xe602;
+                                            </i>
+                                            <i
+                                                class="iconfont"
+                                                @click="deleteArticles(item.id)"
+                                                style="color: #19a059; font-size: 21px"
+                                            >
+                                                &#xe624;
+                                            </i>
                                         </n-tag>
                                     </template>
                                 </Article>
@@ -452,6 +457,13 @@ const searchFun = () => {
                         width: 100px;
                     }
 
+                    .iconfont {
+                        margin-left: 5px;
+                    }
+                    .iconfont:hover {
+                        cursor: pointer;
+                    }
+
                     @include border;
 
                     .n-input :deep(.n-input-wrapper) {
@@ -471,6 +483,17 @@ const searchFun = () => {
                     .n-button {
                         margin-top: 40px;
                         width: 80px;
+                    }
+
+                    .icons {
+                        position: relative;
+
+                        .iconfont {
+                            font-size: 17px;
+                            position: absolute;
+                            left: -20px;
+                            top: -3px;
+                        }
                     }
                 }
             }

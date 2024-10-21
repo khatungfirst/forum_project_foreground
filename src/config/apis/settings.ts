@@ -1,5 +1,4 @@
-import { $get } from '@/packages/request';
-import { $post } from '@/packages/request';
+import { $get, $post } from '@/packages/request';
 
 //获取私信设置的初始状态
 export const getLetterStatus = (params: any): Promise<any> => {
