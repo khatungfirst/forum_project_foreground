@@ -1,0 +1,1 @@
+import{$ as r,a as e}from"./Icon-c4d83487.js";const n=t=>r("/article/detail",t),a=t=>r("/user/article_user_detail",t),o=t=>e("/article/like",t),l=t=>e("/article/collection",t),s=t=>e("/author/concern",t);export{a,l as b,s as c,n as g,o as l};
