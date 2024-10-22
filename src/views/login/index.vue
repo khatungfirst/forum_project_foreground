@@ -4,8 +4,12 @@ import { NForm, NFormItem, NInput, NButton } from 'naive-ui';
 import { useRouter } from 'vue-router';
 import { login } from '../../config/apis/login';
 import { useMessage } from 'naive-ui';
+import { useUserStore } from '@/config/store/userStore';
 const router = useRouter();
 const formRef = ref(null);
+
+const userStore = useUserStore();
+
 const form = ref({
     email: '',
     password: ''
@@ -41,9 +45,14 @@ watch(
 const handleLogin = async () => {
     try {
         await formRef.value.validate();
-        console.log('登录', form.value);
         const response = await login({ email: form.value.email, password: form.value.password });
         if (response.code === 2000 && response.data) {
+            userStore.setToken(response.data.token); // 存储令牌
+            userStore.setUserInfo(response.data.UserInfo); // 存储用户信息
+            // 验证 token 是否存储成功
+            const storedToken = userStore.getToken();
+            console.log('Token is stored:', storedToken);
+            // 重新定向
             router.push('/home');
         } else {
             message.error('登录失败: ' + response.data.message);

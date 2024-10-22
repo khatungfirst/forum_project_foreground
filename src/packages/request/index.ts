@@ -12,6 +12,7 @@
 import axios from 'axios';
 // 扩展过得 AxiosRequestConfig 类型定义
 import type { AxiosRequestConfigNew } from './type';
+import type { AxiosRequestConfig } from 'axios';
 // QS 模块
 import QS from 'qs';
 // 请求库loading
@@ -22,7 +23,9 @@ import { addPendingMap, removePendingRequest } from './cancel';
 import { againRequest } from './retry';
 // http错误状态码处理
 import { httpErrorStatusHandle } from './httpErrorStatusHandle';
+import { useUserStore } from '@/config/store/userStore';
 
+const userStore = useUserStore();
 //  将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
 axios.defaults.baseURL = '/proxy_url' || import.meta.env.VITE_APP_AXIOS_BASEURL;
 // 表示跨域请求时是否需要使用凭证
@@ -30,6 +33,12 @@ axios.defaults.withCredentials = true;
 // 请求超时时间设定
 axios.defaults.timeout = 10000;
 
+// 扩展 AxiosRequestConfig 类型
+declare module 'axios' {
+    export interface AxiosRequestConfig {
+        enableCancelModel?: boolean;
+    }
+}
 /**
  * 是否开启取消重复请求模式, 默认为 true。
  * 开启该功能则意味着同一个请求如果是 pending 中，则后续发的与该请求【重复的请求】①都会被取消。
@@ -78,7 +87,7 @@ const enableErrorMessage = true;
 
 /** 拦截器之请求拦截器 */
 axios.interceptors.request.use(
-    function (config: AxiosRequestConfigNew) {
+    (config) => {
         // 显示loading
         loading.show();
 
@@ -90,10 +99,19 @@ axios.interceptors.request.use(
             addPendingMap(config);
         }
 
+        // 从pinia store 获取 token
+        const token = userStore.getToken();
+
+        // 如果token存在, 则添加到请求头
+
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
+
         // 在发送请求之前做些什么
         return config;
     },
-    function (error) {
+    (error) => {
         // 隐藏loading
         loading.hide();
 
