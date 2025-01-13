@@ -28,6 +28,7 @@ import { useUserStore } from '@/config/store/userStore';
 const userStore = useUserStore();
 //  将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
 axios.defaults.baseURL = '/proxy_url' || import.meta.env.VITE_APP_AXIOS_BASEURL;
+
 // 表示跨域请求时是否需要使用凭证
 axios.defaults.withCredentials = true;
 // 请求超时时间设定
