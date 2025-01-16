@@ -5,6 +5,9 @@ import { useRouter } from 'vue-router';
 //定义路由对象
 const router = useRouter();
 
+//辨别是否继续倒计时
+const flag = ref(0);
+
 onMounted(() => {
     // 组件挂载后启动倒计时
     startCountdown();
@@ -20,11 +23,15 @@ const startCountdown = () => {
     if (seconds.value > 0) {
         setTimeout(() => {
             seconds.value--; // 倒计时减1
-            startCountdown(); // 递归调用，直到剩余时间为0
+            if (flag.value === 0) {
+                startCountdown(); // 递归调用，直到剩余时间为0
+            }
         }, 1000); // 每隔1秒更新一次
     }
+    console.log('倒计时');
+
     if (seconds.value === 0) {
-        router.push('/articledetail');
+        router.push('/home');
     }
 };
 
@@ -32,11 +39,14 @@ const startCountdown = () => {
 
 //回到首页的点击事件
 const back = () => {
-    router.push('/articledetail');
+    flag.value = 1;
+    router.push('/home');
 };
 
 //继续发布的点击事件
 const continuePublic = () => {
+    console.log('重新发布');
+    flag.value = 1;
     router.push('/articlerelease/0');
 };
 </script>
@@ -57,6 +67,7 @@ const continuePublic = () => {
     flex-direction: column;
     position: relative;
     top: 13%;
+    height: 85vh;
     p {
         font-size: 23px;
         color: #19a059;

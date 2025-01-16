@@ -5,11 +5,18 @@ import letter from '@/views/settings/letter/index.vue';
 import '@/assets/css/icon/iconfont.css';
 import { Icon } from '@vicons/utils';
 import { LeftOutlined, MailOutlined } from '@vicons/antd';
+
+const route = useRouter();
+
+//返回首页的方法
+const goBack = () => {
+    route.push('/home');
+};
 </script>
 <template>
     <div class="wrap">
         <div class="top">
-            <span>
+            <span @click="goBack">
                 <Icon :size="12">
                     <LeftOutlined />
                 </Icon>

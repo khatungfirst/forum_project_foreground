@@ -1,8 +1,8 @@
 import { $get, $post } from '@/packages/request';
 
 //获取私信设置的初始状态
-export const getLetterStatus = (params: any): Promise<any> => {
-    return $get(`/user/private_settings/${params}`);
+export const getLetterStatus = (): Promise<any> => {
+    return $get('/user/private_settings');
 };
 
 //更改私信设置的状态
@@ -11,8 +11,8 @@ export const changeLetterStatus = (params: any): Promise<any> => {
 };
 
 ///获取到账号管理的各项数据
-export const getNumberData = (params: any): Promise<any> => {
-    return $get(`/user/account_settings/${params}`);
+export const getNumberData = (): Promise<any> => {
+    return $get('/user/account_settings');
 };
 
 //改变账号管理的数据
@@ -21,8 +21,8 @@ export const changeNumberData = (params: any): Promise<any> => {
 };
 
 //获取到个人资料的数据
-export const getUserInfo = (params: any): Promise<any> => {
-    return $get(`/user/form_personal_data/${params}`);
+export const getUserInfo = (): Promise<any> => {
+    return $get('/user/form_personal_data');
 };
 
 //更新个人资料
