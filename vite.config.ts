@@ -24,9 +24,10 @@ import { visualizer } from 'rollup-plugin-visualizer';
  */
 import Unocss from 'unocss/vite';
 
-const RegImg = /\.(png|jpe?g|gif|svg)(\?.*)?$/;
+const RegImg = /\.(png|jpe?g|gif|svg|ico)(\?.*)?$/;
 const RegMedia = /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/;
 const RegFonts = /\.(woff2?|eot|ttf|otf)(\?.*)?$/;
+const RegVideo = /\.(mp4|webm|ogg)$/;
 
 // https://vitejs.dev/config/
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -35,6 +36,7 @@ export default defineConfig(({ command, mode }) => {
     // 设置第三个参数为 '' 来加载所有环境变量，而不管是否有 `VITE_` 前缀。
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const env = loadEnv(mode, process.cwd(), '');
+    console.log(mode, '环境');
 
     return {
         // 开发或生产环境服务的公共基础路径。
@@ -137,6 +139,10 @@ export default defineConfig(({ command, mode }) => {
                         // media
                         if (assetInfo.name && RegMedia.test(assetInfo.name)) {
                             return 'assets/media/[name]-[hash][extname]';
+                        }
+                        // video
+                        if (assetInfo.name && RegVideo.test(assetInfo.name)) {
+                            return 'assets/videos/[name]-[hash][extname]';
                         }
                         // fonts
                         if (assetInfo.name && RegFonts.test(assetInfo.name)) {
