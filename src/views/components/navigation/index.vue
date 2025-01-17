@@ -103,7 +103,7 @@ const switchTab = (tabName) => {
 .search-input {
     margin-right: 10px;
     padding-left: 24px;
-    font-size: 16px;
+    font-size: 14px;
     border: 1px solid #ccc;
     border-radius: 25px;
     width: 180px;
