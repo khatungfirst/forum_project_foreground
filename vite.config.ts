@@ -161,7 +161,7 @@ export default defineConfig(({ command, mode }) => {
             hmr: true, //热更新
             // 为开发服务器配置自定义代理规则。文档【https://cn.vitejs.dev/config/server-options.html#server-proxy】
             proxy: {
-                '/proxy_url': {
+                '^/proxy_url': {
                     target: env.VITE_APP_PROXY_URL,
                     changeOrigin: true,
                     rewrite: (path) => path.replace(/^\/proxy_url/, '')
