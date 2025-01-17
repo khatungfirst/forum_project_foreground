@@ -24,11 +24,14 @@ const mode = ref('simple');
 // 模拟 ajax 异步获取内容
 onMounted(() => {
     setTimeout(async () => {
-        const id = {
-            article_id: prop.article_id
-        };
-        const articleData = await getArticleDetail(id);
-        valueHtml.value = articleData.data.article.content;
+        if (prop.article_id !== 0) {
+            const id = {
+                article_id: prop.article_id
+            };
+            const articleData = await getArticleDetail(id);
+            valueHtml.value = articleData.data.article.content;
+        }
+
         // valueHtml.value = '<p>模拟 Ajax 异步设置内容</p>';
     }, 1500);
 });
@@ -98,7 +101,7 @@ const customPaste = async (editor, event, callback) => {
             :defaultConfig="editorConfig"
             :mode="mode"
             v-model="valueHtml"
-            style="height: 400px; overflow-y: hidden"
+            style="height: 720px; overflow-y: hidden"
             @onCreated="handleCreated"
             @onChange="handleChange"
             @onDestroyed="handleDestroyed"

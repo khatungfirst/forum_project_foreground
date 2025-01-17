@@ -10,7 +10,7 @@ const message = useMessage();
 //------------------------------生命周期--------------------------------
 
 onMounted(async () => {
-    const { data } = await getNumberData(numberSettings.id);
+    const { data } = await getNumberData();
     //把data中的属性值复制给numberSettings
     Object.assign(numberSettings, data);
     // numberSettings = data;

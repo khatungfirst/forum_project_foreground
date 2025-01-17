@@ -75,7 +75,7 @@ const routes = [
                 component: () => import('../../views/components/markdownViewer/index.vue')
             },
             {
-                path: '/settings/:id',
+                path: '/settings',
                 component: () => import('../../views/settings/index.vue')
             },
             {
