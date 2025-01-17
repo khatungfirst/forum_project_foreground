@@ -11,7 +11,7 @@ const message = useMessage();
 //-----------------------------------个人资料-------------------------------------
 
 onMounted(async () => {
-    const { data } = await getUserInfo(userInfo.id);
+    const { data } = await getUserInfo();
     if (data) {
         Object.assign(userInfo, data);
     }

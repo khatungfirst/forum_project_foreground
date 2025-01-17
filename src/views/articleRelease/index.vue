@@ -16,6 +16,8 @@ const message = useMessage();
 //定义路由对象
 const router = useRouter();
 
+const route = useRoute();
+
 // 定义事件处理函数
 const beforeUnloadHandler = (e) => {
     e.preventDefault(); // 阻止默认行为（在某些浏览器中可能不起作用）
@@ -49,7 +51,7 @@ onUnmounted(() => {
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
-    user_id: 1,
+    user_id: route.params.id,
     article_id: 0, //存放当前文章的id
     title: '', //标题输入的数据
     status: '', //定义文章的状态(初始是草稿状态)
@@ -62,20 +64,24 @@ const articleData = reactive({
 });
 
 const init = async () => {
-    const id = {
-        article_id: articleData.article_id
-    };
-    const articleDatas = await getArticleDetail(id);
-    if (articleDatas) {
-        const data = articleDatas.data.article;
-        articleData.title = data.title;
-        articleData.content = data.content;
-        articleData.category_id = data.category_id;
-        articleData.tags = data.tags;
-        articleData.image_url = data.image_url;
-        articleData.summary = data.summary;
-        articleData.article_id = data.id;
-        articleData.published_at = data.published_at;
+    if (articleData.article_id !== 0) {
+        console.log(articleData.article_id, '--------');
+
+        const id = {
+            article_id: articleData.article_id
+        };
+        const articleDatas = await getArticleDetail(id);
+        if (articleDatas) {
+            const data = articleDatas.data.article;
+            articleData.title = data.title;
+            articleData.content = data.content;
+            articleData.category_id = data.category_id;
+            articleData.tags = data.tags;
+            articleData.image_url = data.image_url;
+            articleData.summary = data.summary;
+            articleData.article_id = data.id;
+            articleData.published_at = data.published_at;
+        }
     }
 };
 
@@ -175,7 +181,6 @@ const releaseCard = () => {
 
 //真正发布的按钮的点击事件
 const publicArticle = async () => {
-    console.log(articleData, '111111');
     articleData.status = 'private';
     if (
         articleData.category_id !== null &&
@@ -184,7 +189,8 @@ const publicArticle = async () => {
         articleData.content !== ''
     ) {
         const { code } = await publicArticles(articleData);
-        if (code === 200) {
+        if (code === 2000) {
+            console.log(articleData, '111111');
             message.success('发布成功');
             articleData.status = 'private';
             router.push('/transferPage');

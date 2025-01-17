@@ -9,16 +9,13 @@ const message = useMessage();
 //---------------------生命周期---------------------
 
 onMounted(async () => {
-    const { data } = await getLetterStatus(user_id.value);
+    const { data } = await getLetterStatus();
     if (data) {
         letterSelect.value = data.private_settings;
     }
 });
 
 //---------------------私信设置---------------------
-
-//用户id
-const user_id = ref(0);
 
 //定义私信设置选中项
 const letterSelect = ref('');
@@ -46,7 +43,6 @@ const letterArr = [
 //改变私信设置
 const change = async () => {
     const obj = {
-        id: user_id.value,
         private_settings: letterSelect.value
     };
     const { code } = await changeLetterStatus(obj);
