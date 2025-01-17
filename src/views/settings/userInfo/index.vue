@@ -13,7 +13,12 @@ const message = useMessage();
 onMounted(async () => {
     const { data } = await getUserInfo();
     if (data) {
-        Object.assign(userInfo, data);
+        const { all_tag_names, ...rest } = data;
+        if (all_tag_names !== null) {
+            all_tag_names.value = all_tag_names;
+        }
+        Object.assign(userInfo, rest);
+        console.log(userInfo, '------');
     }
 });
 
@@ -25,9 +30,11 @@ const userInfo = reactive({
     user_home_page: '',
     user_signature: '',
     user_tags: [],
-    all_tag_names: [],
     path: ''
 });
+
+//定义所有标签的数组
+const all_tag_names = ref([]);
 
 //定义更改前的个人资料的所有信息
 const oldUserInfo = reactive({ ...userInfo });
@@ -66,7 +73,7 @@ const changeForm = () => {
 
 //计算属性，处理过的标签
 const processedTags = computed(() => {
-    return userInfo.all_tag_names.map((tag) => {
+    return all_tag_names.value.map((tag) => {
         console.log(tag);
 
         const isSelected = userInfo.user_tags.includes(tag);

@@ -27,21 +27,21 @@ const goBack = () => {
             <div class="left">
                 <n-space vertical>
                     <n-tabs type="card" animated placement="left">
-                        <n-tab-pane name="oasis">
+                        <n-tab-pane name="oasis" tab="Oasis">
                             <template #tab>
                                 <i class="iconfont" style="font-size: 18px">&#xe608;</i>
                                 <span>个人资料</span>
                             </template>
                             <userInfo></userInfo>
                         </n-tab-pane>
-                        <n-tab-pane name="the beatles">
+                        <n-tab-pane name="the beatles" tab="the Beatles">
                             <template #tab>
                                 <i class="iconfont" style="font-size: 18px">&#xe6e7;</i>
                                 <span>账号设置</span>
                             </template>
                             <numberSettings></numberSettings>
                         </n-tab-pane>
-                        <n-tab-pane name="jay chou">
+                        <n-tab-pane name="jay chou" tab="Jay Chou">
                             <template #tab>
                                 <Icon :size="20">
                                     <MailOutlined />
