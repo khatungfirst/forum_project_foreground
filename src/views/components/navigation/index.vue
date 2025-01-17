@@ -26,7 +26,6 @@ const switchTab = (tabName) => {
     <n-config-provider :theme="theme ? theme.value : null">
         <div class="nav-container">
             <div class="nav">
-                <img src="../../public/static/img/favicon.ico" alt="" />
                 <span class="title">HelloWorld</span>
                 <div class="tabs">
                     <router-link
