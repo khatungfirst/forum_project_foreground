@@ -1,6 +1,7 @@
 <!-- Home.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { NTabs, NTabPane } from 'naive-ui';
 import AuthorRankItem from '../components/AuthorRankItem/index.vue';
 import ArticleRankItem from '../components/ArticleRankItem/index.vue';
@@ -10,7 +11,9 @@ import { author_rank } from '@/config/apis/author';
 import { article_rank } from '@/config/apis/articleDetail';
 import { debounce } from '../../utils/debounce';
 import { concernInter } from '@/config/apis/articleDetail';
-
+import { getSelectArticle } from '@/config/apis/select';
+import { NButton } from 'naive-ui';
+const router = useRouter();
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
 const category_id = ref('1');
@@ -106,6 +109,10 @@ const followAuthor = async (authorId) => {
         alert(`${action}出错: ${error.message}`);
     }
 };
+
+const handleReleaseArticle = () => {
+    router.push({ path: '/articlerelease/0' }); // 路由跳转发布文章页
+};
 </script>
 
 <template>
@@ -160,9 +167,14 @@ const followAuthor = async (authorId) => {
             <div class="author-rank-list">
                 <AuthorRankItem :authors="authors" @follow="followAuthor" />
             </div>
-        </div>
-        <div class="icon">
-            <i class="iconfont icon-bianji"></i>
+
+            <div class="publish-icon-border" @click="handleReleaseArticle">
+                <i class="iconfont icon-bianji"></i>
+            </div>
+            <n-button strong secondary round type="primary" class="button hide-button">
+                <i class="iconfont icon-bianji"></i>
+                <span class="publish-text">发文</span>
+            </n-button>
         </div>
     </div>
 </template>
@@ -216,12 +228,37 @@ const followAuthor = async (authorId) => {
     padding: 20px;
 }
 
-.icon {
-    margin-top: 20px;
-    text-align: center;
+.iconfont {
+    font-size: 24px;
+    color: #19a059;
 }
 
-.iconfont {
+.publish-icon-border {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border-radius: 50%;
+    margin-top: 20px;
+    margin-left: 220px;
+    cursor: pointer; /* 添加鼠标停显示为手型 */
+    position: relative; /* 相对定位，为子元素做准备 */
+}
+.button {
+    display: none;
+}
+.publish-icon-border:hover ~ .button {
+    display: block; /* 鼠标悬停上时显示按钮 */
+    position: relative;
+    top: -65px; /* 向上移动10px */
+    left: 180px;
+    transform: translateX(-50%); /* 水平居中 */
+    opacity: 1; /* 文字不透明度 */
+}
+
+.iconfont.icon-bianji {
     font-size: 24px;
     color: #19a059;
 }

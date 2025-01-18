@@ -51,6 +51,7 @@ const handleLogin = async () => {
             userStore.setUserInfo(response.data.UserInfo); // 存储用户信息
             // 验证 token 是否存储成功
             const storedToken = userStore.getToken();
+            // userStore().login(response.data);
             console.log('Token is stored:', storedToken);
             // 重新定向
             router.push('/home');
