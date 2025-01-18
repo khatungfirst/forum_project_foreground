@@ -1,3 +1,4 @@
+<!-- Home.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { NTabs, NTabPane } from 'naive-ui';
@@ -8,6 +9,7 @@ import Article from '../components/article/index.vue';
 import { author_rank } from '@/config/apis/author';
 import { article_rank } from '@/config/apis/articleDetail';
 import { debounce } from '../../utils/debounce';
+import { concernInter } from '@/config/apis/articleDetail';
 
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
@@ -79,25 +81,29 @@ const tabMiddle = (value) => {
     init();
 };
 
-const followAuthor = async (id) => {
-    const author = authors.value.find((author) => author.id === id);
-    if (author && author.is_followed === 2) {
-        alert('您无法关注自己');
-        return;
-    }
+const followAuthor = async (authorId) => {
+    const author = authors.value.find((author) => author.id === authorId);
+    if (!author) return;
+
+    const isCurrentlyFollowed = author.is_followed === 1;
+    const action = isCurrentlyFollowed ? '取消关注' : '关注';
+    const newFollowState = isCurrentlyFollowed ? 2 : 1; // 未关注为2，已关注为1
+
     try {
-        const response = await concernInter(id);
+        const response = await concernInter({ followed_id: authorId });
         if (response.code === 2000) {
-            console.log('作者关注成功');
-            const index = authors.value.findIndex((author) => author.id === id);
-            if (index !== -1) {
-                authors.value[index].is_followed = 1;
-            }
+            console.log(`${action}作者成功`);
+            // 更新前端状态
+            author.is_followed = newFollowState;
         } else {
-            console.error('关注作者失败:', response.message);
+            // 接口调用失败，打印错误信息
+            console.error(`${action}作者失败`, response.message);
+            alert(`${action}失败: ${response.message}`);
         }
     } catch (error) {
-        console.error('关注作者出错:', error);
+        // 捕获异常，打印错误堆栈信息并提示用户
+        console.error(`${action}作者出错`, error);
+        alert(`${action}出错: ${error.message}`);
     }
 };
 </script>
@@ -125,13 +131,13 @@ const followAuthor = async (id) => {
             <div class="search-mid">
                 <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
                     <n-tab-pane name="0" tab="">
-                        <img src="../../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
+                        <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                         </n-infinite-scroll>
                     </n-tab-pane>
                     <n-tab-pane name="1" tab="">
-                        <img src="../../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
+                        <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                         </n-infinite-scroll>
@@ -154,6 +160,9 @@ const followAuthor = async (id) => {
             <div class="author-rank-list">
                 <AuthorRankItem :authors="authors" @follow="followAuthor" />
             </div>
+        </div>
+        <div class="icon">
+            <i class="iconfont icon-bianji"></i>
         </div>
     </div>
 </template>
@@ -205,5 +214,15 @@ const followAuthor = async (id) => {
 .loading {
     text-align: center;
     padding: 20px;
+}
+
+.icon {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.iconfont {
+    font-size: 24px;
+    color: #19a059;
 }
 </style>

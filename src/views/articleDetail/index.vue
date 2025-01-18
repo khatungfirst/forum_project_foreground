@@ -558,6 +558,7 @@ const catalogueControl = () => {
         .reviewModule {
             padding: 20px;
             background-color: #fff;
+
             h3 {
                 margin-bottom: 20px;
             }
