@@ -5,10 +5,11 @@ import Home from '../../../views/home/index.vue';
 import Tag from '../../../views/tag/index.vue';
 // 导入图标库的图标
 import { IosSearch } from '@vicons/ionicons4';
+import { useUserStore } from '@/config/store/userStore';
 const router = useRouter();
 const activeTab = ref('home');
 const keyword = ref(''); // 定义搜索框内容变量
-
+const userStore = useUserStore();
 const currentComponent = computed(() => {
     if (router.currentRoute.path === '/home') {
         return Home;
@@ -34,10 +35,18 @@ const handleSearch = () => {
         console.log('执行了搜索', keyword.value);
         // 检查搜索框是否有内容
         // router.push(`/select?keyword=${keyword.value}`); // 路由跳转搜索页
-        router.push('/select');
+        // router.push('/select');
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
     } else {
         console.log('搜索为空', keyword.value);
+    }
+};
+
+const handleLogin = () => {
+    if (userStore.isLoggedIn) {
+        router.push('/profile'); // 跳转到用户资料页
+    } else {
+        // 执行登录逻辑
     }
 };
 </script>
@@ -80,7 +89,9 @@ const handleSearch = () => {
                         <n-icon :component="IosSearch" />
                     </template>
                 </n-input>
-                <n-button @click="handleLogin" class="common-button">登录注册</n-button>
+                <n-button @click="handleLogin" class="common-button">
+                    {{ isLoggedIn ? '用户头像' : '登录注册' }}
+                </n-button>
             </div>
         </div>
         <div class="content">
