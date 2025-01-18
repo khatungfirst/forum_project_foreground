@@ -13,15 +13,16 @@ const emit = defineEmits(['follow']);
 
 const followedStates = ref(props.authors.map((author) => author.is_followed));
 
-const toggleFollow = (author) => {
+const toggleFollow = async (author) => {
     if (author.is_followed === 2) {
         alert('您无法关注自己');
         return;
     }
-    const index = props.authors.indexOf(author);
-    followedStates.value[index] = !followedStates.value[index];
+    // const index = props.authors.indexOf(author);
+    // followedStates.value[index] = author.is_followed === 0 ? 1 : 2; // 切换关注状态
+    // emit('follow', { id: author.id, is_followed: followedStates.value[index] });
+    // console.log(`Toggle follow for ${author.nickname}`);
     emit('follow', author.id);
-    console.log(`Toggle follow for ${author.nickname}`);
 };
 
 const processedAuthors = computed(() => {
@@ -61,7 +62,7 @@ const processedAuthors = computed(() => {
                     <div class="author-rank-item_follow">
                         <button class="author-rank-item_button" @click="toggleFollow(author)">
                             <!-- 根据 author.is_followed 的值显示不同的文本 -->
-                            {{ author.is_followed === 0 || author.is_followed === 2 ? '+关注' : '已关注√' }}
+                            {{ author.is_followed === 1 ? '已关注√' : '+关注' }}
                         </button>
                     </div>
                 </div>

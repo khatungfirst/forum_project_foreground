@@ -28,6 +28,7 @@
         "@bytemd/plugin-gfm": "latest",
         "@bytemd/vue-next": "latest",
         "@types/qs": "^6.9.7",
+        "@vicons/ionicons4": "^0.13.0",
         "@wangeditor/editor": "^5.1.23",
         "@wangeditor/editor-for-vue": "^5.1.12",
         "axios": "^1.2.1",

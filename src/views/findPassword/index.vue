@@ -4,7 +4,7 @@ import { NForm, NFormItem, NInput, NButton } from 'naive-ui';
 // import { Visibility } from '@vicons/ionicons5';
 import { useRouter } from 'vue-router';
 import { useMessage } from 'naive-ui';
-import { register, verify_code } from '../../config/apis/login';
+import { forgot_password, verify_code } from '../../config/apis/login';
 const router = useRouter();
 const formRef = ref(null);
 const form = ref({
@@ -53,7 +53,8 @@ const sendVerify_code = async () => {
         return;
     }
     try {
-        const response = await verify_code(form.value.email);
+        const email = form.value.email;
+        const response = await verify_code({ email });
 
         if (response.code === 2000) {
             message.success('验证码已发送，请检查您的邮箱');
@@ -66,17 +67,16 @@ const sendVerify_code = async () => {
     }
 };
 
-const handleResister = async () => {
+const resetPassword = async () => {
     try {
         await formRef.value.validate();
-        console.log('注册', form.value);
-        const response = await register(
-            form.value.email,
-            form.value.password,
-            form.value.verify_code,
-            form.value.re_password
-        );
-        if (response.code === 200 && response.data) {
+        const response = await forgot_password({
+            email: form.value.email,
+            verify_code: form.value.verify_code,
+            password: form.value.password,
+            re_password: form.value.re_password
+        });
+        if (response.code === 2000 && response.data) {
             router.push('/login');
         } else {
             this.$message.error('注册失败:' + response.data.message);
@@ -125,7 +125,7 @@ onMounted(() => {
             </n-form-item>
             <n-form-item>
                 <div class="button-wrapper">
-                    <n-button @click="handleResister" class="common-button">登陆</n-button>
+                    <n-button @click="resetPassword" class="common-button">重置密码</n-button>
                 </div>
             </n-form-item>
         </n-form>
