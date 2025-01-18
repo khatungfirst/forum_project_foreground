@@ -145,7 +145,7 @@ const followAuthor = async (authorId) => {
                 </n-tabs>
                 <div class="loading" v-if="isLoading && !noMore">
                     <span class="videos">
-                        <video src="../../../assets/images/loading.mp4" autoplay loop muted></video>
+                        <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
                     </span>
                     <span class="text">正在全力加载中...</span>
                 </div>
