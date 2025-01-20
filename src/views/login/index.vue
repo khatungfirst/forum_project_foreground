@@ -47,8 +47,10 @@ const handleLogin = async () => {
         await formRef.value.validate();
         const response = await login({ email: form.value.email, password: form.value.password });
         if (response.code === 2000 && response.data) {
+            console.log('Token is stored:', response.data.userinfo);
+
             userStore.setToken(response.data.token); // 存储令牌
-            userStore.setUserInfo(response.data.UserInfo); // 存储用户信息
+            userStore.setUserInfo(response.data.userinfo); // 存储用户信息
             // 验证 token 是否存储成功
             const storedToken = userStore.getToken();
             // userStore().login(response.data);
