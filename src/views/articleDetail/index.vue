@@ -72,7 +72,8 @@ const articleInfo = reactive({
     time: '', //发布日期
     views_count: 0, //浏览量
     tags: [], //标签
-    content: '<p><br><p/>' //文章内容
+    content: '<p><br><p/>', //文章内容
+    author_id: 0
 });
 
 //文章相关内容初始化的方法
@@ -93,7 +94,9 @@ const initArticle = async () => {
         articleInfo.tags = article.tags;
         articleInfo.views_count = article.views_count;
         about.value = articleData.data.about;
+        articleInfo.author_id = articleData.user_id;
     }
+    console.log('2222');
 };
 
 //点赞的方法
@@ -104,12 +107,13 @@ const like = async () => {
     } else {
         articleInfo.likeTotal = articleInfo.likeTotal - 1;
     }
-    const data = ref({
+    const data = {
         article_id: articleInfo.id,
         like_status: currentIcon.value[0]
-    });
+    };
     const { code } = await likeInter(data);
-    if (code === 200 && currentIcon.value[0] === true) {
+    console.log(currentIcon.value[0], '点赞状态');
+    if (code === 2000 && currentIcon.value[0] === true) {
         message.success('点赞成功');
     } else {
         message.success('取消点赞成功');
@@ -133,7 +137,7 @@ const collect = async () => {
         collection_status: currentIcon.value[1]
     });
     const { code } = await collectionInter(data);
-    if (code === 200 && currentIcon.value[1] === true) {
+    if (code === 2000 && currentIcon.value[1] === true) {
         message.success('收藏成功');
     } else {
         message.success('取消收藏成功');
@@ -158,7 +162,7 @@ const isAuthorInfo = ref(false);
 
 //作者对象
 const authorInfo = reactive({
-    author_id: 0, //当前作者的id
+    author_id: 1, //当前作者的id
     head: '', //作者头像
     nickname: '', //作者昵称
     signature: '', //作者个签
@@ -171,7 +175,7 @@ const authorInfo = reactive({
 //作者相关内容的初始化方法
 const authorInit = async () => {
     const authorId = {
-        author_id: authorInfo.author_id
+        author_id: articleInfo.author_id
     };
     const authorData = await getAuthorDetail(authorId);
     if (authorData) {
@@ -179,8 +183,8 @@ const authorInit = async () => {
         authorInfo.head = data.head_shot;
         authorInfo.nickname = data.nickname;
         authorInfo.signature = data.signature;
-        authorInfo.author_article = data.author_article;
-        authorInfo.author_read = data.author_read;
+        authorInfo.author_article = data.article_count;
+        authorInfo.author_read = data.reads_count;
         authorInfo.concern_status = data.concern_status;
     }
 };
@@ -250,20 +254,25 @@ const commentsList = ref([]);
 //评论总条数
 const commentTotal = ref(0);
 
+//控制是否显示去登录模块
+const LoginVis = ref(true);
+
 //评论相关数据
 const commentInfo = reactive({
     article_id: 0,
     offset: 1,
-    limit: 4,
-    user_id: 0
+    limit: 4
 });
 
 //评论相关初始化方法
 const initComments = async () => {
+    if (localStorage.getItem('token')) {
+        LoginVis.value = false;
+    }
     const { data } = await getFirstOrderComments(commentInfo);
     if (data) {
-        commentsList.value = data.firstCommentsList;
-        commentTotal.value = data.commentsTotal;
+        commentsList.value = data.first_comments_list;
+        commentTotal.value = data.comments_total;
     }
 };
 
@@ -389,7 +398,7 @@ const catalogueControl = () => {
             </div>
             <div class="reviewModule">
                 <h3>评论 {{ commentTotal }}</h3>
-                <div class="loginRegist">
+                <div class="loginRegist" v-if="LoginVis">
                     <n-avatar round size="large" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
                     <div class="loginBgc">
                         <n-button strong secondary round type="primary" @click="login">登录注册</n-button>
@@ -448,7 +457,7 @@ const catalogueControl = () => {
                     </template>
                     <n-collapse-item title="目录" @click="catalogueControl">
                         <div class="catalogue-detail">
-                            <MarkdownViewer content="<h1>voluptate</h1><h2>234</h2><h3>34</h3><p>5</p>" />
+                            <MarkdownViewer :content="articleInfo.content" />
                         </div>
                     </n-collapse-item>
                 </n-collapse>

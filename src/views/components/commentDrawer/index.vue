@@ -36,8 +36,8 @@ const prop = defineProps({
         },
         required: true,
         default: () => ({
-            article_id: 0,
-            user_id: 0,
+            article_id: 2,
+            user_id: 1,
             highest_id: 0,
             parent_id: 0,
             parent_user_id: 0

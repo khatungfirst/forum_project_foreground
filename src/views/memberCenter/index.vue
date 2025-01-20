@@ -39,7 +39,7 @@ onMounted(async () => {
 
 //定义当前会员中心人员的各种信息
 const user = reactive({
-    id: 0,
+    id: 1,
     head_shot: '',
     nickname: '',
     signature: '',
@@ -62,9 +62,18 @@ const isEdit = ref(true);
 //获取到输入框
 const inputInstRef = ref<InputInst | null>(null);
 
+//控制当前页面的用户是否是当前登录的用户
+const isSelf = ref(true);
+
 //初始化用户数据
 const userInfo = async () => {
-    const { data } = await getMemberInfo(user.id);
+    if (user.id !== 1) {
+        //=========================
+        isSelf.value = false;
+    }
+    const { data } = await getMemberInfo({
+        id: user.id
+    });
     if (data) {
         Object.assign(user, data);
     }
@@ -72,7 +81,7 @@ const userInfo = async () => {
 
 //初始化微博、博客链接
 const linkInit = async () => {
-    const { data } = await getNumberData(user.id);
+    const { data } = await getNumberData();
     user.blog_link = data.blog_link;
     user.weibo_link = data.weibo_link;
     user.github_link = data.github_link;
@@ -89,7 +98,10 @@ const edit = () => {
 //输入框失焦后提交编辑的个签
 const commitSignature = async () => {
     isEdit.value = true;
-    const { code } = await editSignature(user.signature);
+    const signature = {
+        signature: user.signature
+    };
+    const { code } = await editSignature(signature);
     if (code === 2000) {
         message.success('更改个签成功');
     } else {
@@ -116,14 +128,14 @@ const concern = debounce(concernFun, 500);
 
 //设置按钮
 const settinngs = () => {
-    router.push(`/settings/${user.id}`);
+    router.push(`/settings`);
 };
 
 //--------------------关注列表模块------------------------
 
 //定义文章的筛选条件
 const fansType = reactive({
-    id: user.id,
+    userId: user.id,
     page: 1,
     limit: 4,
     keyword: ''
@@ -229,7 +241,7 @@ const deleteArticles = async (id) => {
     if (code === 2000) {
         message.success('删除成功');
     } else {
-        message.error('s删除失败');
+        message.error('删除失败');
     }
 };
 
@@ -279,7 +291,7 @@ const searchFun = () => {
                             :disabled="isEdit"
                             @blur="commitSignature"
                         />
-                        <i class="iconfont" @click="edit" style="color: #cbcbcb">&#xe602;</i>
+                        <i class="iconfont" @click="edit" style="color: #cbcbcb" v-if="isSelf">&#xe602;</i>
                     </div>
                     <div class="left-right">
                         <div class="icons">
@@ -297,11 +309,29 @@ const searchFun = () => {
                                 </Icon>
                             </a>
                         </div>
-                        <n-button tertiary round type="primary" @click="settinngs">设置</n-button>
-                        <n-button tertiary round type="primary" @click="concern" v-if="!user.concern_status">
+                        <n-button tertiary round type="primary" @click="settinngs" class="settings" v-if="isSelf">
+                            设置
+                        </n-button>
+                        <n-button
+                            tertiary
+                            round
+                            type="primary"
+                            @click="concern"
+                            v-if="!user.concern_status && !isSelf"
+                            class="concern"
+                        >
                             关注
                         </n-button>
-                        <n-button tertiary round type="primary" @click="concern" v-else>已关注</n-button>
+                        <n-button
+                            tertiary
+                            round
+                            type="primary"
+                            @click="concern"
+                            v-if="user.concern_status && !isSelf"
+                            class="concern"
+                        >
+                            已关注
+                        </n-button>
                     </div>
                 </n-card>
                 <n-card size="huge" class="article-card">
@@ -444,8 +474,8 @@ const searchFun = () => {
                 margin-bottom: 20px;
 
                 .left-left {
-                    width: 80%;
-
+                    width: 75%;
+                    padding-top: 10px;
                     .n-avatar {
                         float: left;
                         width: 80px;
@@ -485,13 +515,22 @@ const searchFun = () => {
                         width: 80px;
                     }
 
+                    .concern {
+                        margin-left: 20px;
+                    }
+
                     .icons {
                         position: relative;
+                        display: flex;
+                        flex-direction: row-reverse;
+                        a {
+                            margin-right: 10px;
+                        }
 
                         .iconfont {
                             font-size: 17px;
                             position: absolute;
-                            left: -20px;
+                            right: 95px;
                             top: -3px;
                         }
                     }
@@ -500,7 +539,7 @@ const searchFun = () => {
 
             .information :deep(.n-card__content) {
                 display: grid;
-                grid-template-columns: 5fr 1fr;
+                grid-template-columns: 4fr 1fr;
             }
 
             .article-card {
