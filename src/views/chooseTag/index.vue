@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 // 假设这是从后端获取的标签列表
 const tagList = ref([
-    // ... 你的标签数据
+    //标签数据
 ]);
 // 存储选中的标签
 const selectedTags = ref([]);
@@ -16,6 +16,7 @@ onMounted(async () => {
     const tagResponse = await firstTagList();
     if (tagResponse.code === 2000) {
         tagList.value = tagResponse.data.tags;
+        console.log(tagResponse.data.tags, 'tagList');
     } else {
         console.error('获取标签列表失败');
     }
@@ -52,9 +53,10 @@ const randomSelect = () => {
 
 // 确定并提交选中的标签
 const confirmSelection = async () => {
+    const selectedIds = selectedTags.value.map((tag) => tag.id);
     try {
         // 假设这是提交选中标签的API
-        const response = await chooseTag(selectedTags.value);
+        const response = await chooseTag({ tagIds: selectedIds });
         if (response.code === 2000) {
             console.log('标签提交成功');
             gotoHome(); // 调用 gotoHome 函数跳转到首页
