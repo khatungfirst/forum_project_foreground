@@ -22,5 +22,5 @@ export const editSignature = (params: any): Promise<any> => {
 
 //5、删除文章
 export const deleteArticle = (params: any): Promise<any> => {
-    return $post('/article/delete', params);
+    return $post('/delete_article', params);
 };
