@@ -9,7 +9,7 @@
 // import path = require('path');
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
-import { useUserStore } from '../stores/userStore';
+import { useUserStore } from '../../config/store/userStore';
 // * 导入所有router
 // * 处理路由
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

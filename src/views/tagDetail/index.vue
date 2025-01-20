@@ -2,10 +2,15 @@
 import { ref, onMounted } from 'vue';
 import Article from '../components/article/index.vue';
 import TagItem from '../components/tagDetail/index.vue';
-import { getTagList, Tag_follow } from '../../config/apis/tag';
+import { getTagList, Tag_follow, getArticleByTag } from '../../config/apis/tag';
 
 const tags = ref([]); // 使用数组初始化
-
+const dataObj = ref({
+    id: route.query.id,
+    kind: 0,
+    page: 1,
+    limit: 4
+});
 onMounted(async () => {
     try {
         console.log('111');
@@ -18,6 +23,18 @@ onMounted(async () => {
         }
     } catch (error) {
         console.error('请求标签数据出错:', error);
+    }
+    try {
+        console.log('111');
+        const response = await getArticleByTag();
+        if (response.code === 2000) {
+            articles.value = response.data.article_list;
+            console.log(tags);
+        } else {
+            console.error('获取标签下的文章失败');
+        }
+    } catch (error) {
+        console.error('请求标签下的文章出错:', error);
     }
 });
 
@@ -42,18 +59,18 @@ const follow_tag = async (id) => {
 };
 
 const articles = ref([
-    {
-        id: '1',
-        title: 'GSAdmin一键代码生成工具',
-        summary: 'GSAdmin是一个基于Vue3的后台管理系统模板，支持一键代码生成。',
-        nickname: '作者名',
-        published_at: '2024-04-24',
-        views_count: 1000,
-        likes_count: 50,
-        image_url: 'path/to/image1.jpg',
-        tags: [{ ID: 101 }, { ID: 102 }],
-        status: false
-    }
+    // {
+    //     id: '1',
+    //     title: 'GSAdmin一键代码生成工具',
+    //     summary: 'GSAdmin是一个基于Vue3的后台管理系统模板，支持一键代码生成。',
+    //     nickname: '作者名',
+    //     published_at: '2024-04-24',
+    //     views_count: 1000,
+    //     likes_count: 50,
+    //     image_url: 'path/to/image1.jpg',
+    //     tags: [{ ID: 101 }, { ID: 102 }],
+    //     status: false
+    // }
 ]);
 </script>
 

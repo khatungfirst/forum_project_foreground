@@ -2,9 +2,9 @@
 import { ref, onMounted } from 'vue';
 import { getTagList, Tag_follow } from '../../config/apis/tag';
 import TagItem from '../components/tags/index.vue';
-
+import { useRouter } from 'vue-router';
 const tags = ref([]); // 使用数组初始化
-
+const router = useRouter();
 onMounted(async () => {
     try {
         const response = await getTagList();
@@ -53,11 +53,16 @@ const getTagListAgain = async () => {
         console.error('重新请求标签数据出错:', error);
     }
 };
+
+// 点击标签跳转到此标签的标签详情页，携带id
+const handleDetail = (id) => {
+    router.push({ path: `/tagDetail/${id}` });
+};
 </script>
 
 <template>
     <div class="tag-list-container">
-        <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" />
+        <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" @click="handleDetail(tag.id)" />
     </div>
 </template>
 
