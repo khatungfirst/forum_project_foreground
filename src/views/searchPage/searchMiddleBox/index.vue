@@ -12,6 +12,8 @@ const prop = defineProps({
     }
 });
 
+const route = useRoute();
+
 //--------------------------------------生命周期-------------------------------------
 
 onMounted(async () => {
@@ -23,7 +25,7 @@ onMounted(async () => {
 const selectData = ref([]);
 
 const dataObj = reactive({
-    keyword: '',
+    keyword: route.query.keyword,
     category_id: prop.category_id,
     page: 1,
     limit: 4,
@@ -38,6 +40,15 @@ const init = async () => {
     }
 };
 
+watch(
+    () => route.query.keyword,
+    (newVal, oldVal) => {
+        dataObj.keyword = route.query.keyword;
+        init();
+        console.log(newVal, oldVal, '======');
+    },
+    { immediate: true }
+);
 //----------------------------------加载后获取数据-------------------------------------
 //是否正在加载
 const isLoading = ref(false);

@@ -51,7 +51,7 @@ onUnmounted(() => {
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
-    user_id: route.params.id,
+    user_id: 1,
     article_id: 0, //存放当前文章的id
     title: '', //标题输入的数据
     status: '', //定义文章的状态(初始是草稿状态)
@@ -64,9 +64,9 @@ const articleData = reactive({
 });
 
 const init = async () => {
+    articleData.article_id = +route.params.id;
     if (articleData.article_id !== 0) {
-        console.log(articleData.article_id, '--------');
-
+        console.log('获取到');
         const id = {
             article_id: articleData.article_id
         };

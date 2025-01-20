@@ -48,8 +48,10 @@ const checkDetail = () => {
     <ul class="content" @click="checkDetail">
         <li class="whole">
             <div class="left">
-                <h3>{{ prop.item.title }}</h3>
-                <slot name="type"></slot>
+                <div class="left-left">
+                    <h3>{{ prop.item.title }}</h3>
+                    <slot name="type"></slot>
+                </div>
                 <n-ellipsis :line-clamp="2" style="color: #868686; font-size: 14px; margin: 8px 0px">
                     {{ prop.item.summary }}
 
@@ -85,7 +87,7 @@ const checkDetail = () => {
             </div>
             <div class="right" v-if="prop.item.image_url !== ''">
                 <slot class="edit" name="edit"></slot>
-                <img :src="prop.item.image_url" alt="" />
+                <img src="https://t7.baidu.com/it/u=1819248061,230866778&fm=193&f=GIF" alt="" />
             </div>
         </li>
     </ul>
@@ -112,6 +114,11 @@ const checkDetail = () => {
 
     .left {
         flex: 1;
+
+        .left-left {
+            height: 20px;
+            margin-bottom: 10px;
+        }
 
         h3 {
             float: left;

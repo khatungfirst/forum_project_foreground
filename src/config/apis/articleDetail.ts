@@ -7,7 +7,7 @@ export const getArticleDetail = (params: any): Promise<any> => {
 
 //2、获取初始化作者的信息
 export const getAuthorDetail = (params: any): Promise<any> => {
-    return $get('/user/article_user_detail', params);
+    return $get('/user/init_userinfo', params);
 };
 
 //3、获取初始化评论的数据

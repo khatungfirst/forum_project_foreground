@@ -1,8 +1,8 @@
-import { $get, $post } from '@/packages/request';
+import { $get, $post, $http } from '@/packages/request';
 
 //1、获取用户的初始化信息
 export const getMemberInfo = (params: any): Promise<any> => {
-    return $get('/init_userinfo', params);
+    return $get('/user/init_userinfo', params);
 };
 
 //2、获取文章或者收藏的对应数据
@@ -17,7 +17,7 @@ export const getConcernList = (params: any): Promise<any> => {
 
 //4、编辑个签
 export const editSignature = (params: any): Promise<any> => {
-    return $post('/edit_signature', params);
+    return $http('/user/edit_signature', params);
 };
 
 //5、删除文章

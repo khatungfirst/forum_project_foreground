@@ -10,15 +10,17 @@ const message = useMessage();
 
 //-----------------------------------个人资料-------------------------------------
 
+//定义所有标签的数组
+const all_tag = ref([]);
+
 onMounted(async () => {
     const { data } = await getUserInfo();
     if (data) {
         const { all_tag_names, ...rest } = data;
         if (all_tag_names !== null) {
-            all_tag_names.value = all_tag_names;
+            all_tag.value = all_tag_names;
         }
         Object.assign(userInfo, rest);
-        console.log(userInfo, '------');
     }
 });
 
@@ -32,9 +34,6 @@ const userInfo = reactive({
     user_tags: [],
     path: ''
 });
-
-//定义所有标签的数组
-const all_tag_names = ref([]);
 
 //定义更改前的个人资料的所有信息
 const oldUserInfo = reactive({ ...userInfo });
@@ -73,16 +72,26 @@ const changeForm = () => {
 
 //计算属性，处理过的标签
 const processedTags = computed(() => {
-    return all_tag_names.value.map((tag) => {
+    console.log('进到标签里');
+    console.log(all_tag.value, '标签');
+    return all_tag.value.map((tag) => {
         console.log(tag);
-
-        const isSelected = userInfo.user_tags.includes(tag);
-        return { tag, isSelected };
+        if (userInfo.user_tags) {
+            const isSelected = userInfo.user_tags.includes(tag);
+            return { tag, isSelected };
+        } else {
+            return { tag, isSelected: false };
+        }
     });
 });
 
 //添加标签的方法
 const addTags = async (item) => {
+    console.log(userInfo.user_tags, '===========');
+
+    if (userInfo.user_tags === null) {
+        userInfo.user_tags = [];
+    }
     userInfo.user_tags.push(item.tag);
     update('添加标签成功', '添加标签失败');
 };
