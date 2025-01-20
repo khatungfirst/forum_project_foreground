@@ -28,7 +28,9 @@ const getRankColor = (rank) => {
     <div class="article-rank-item">
         <div class="article-rank-item_container">
             <div class="article-rank-item_header">
+                <i class="iconfont icon-zuozhe"></i>
                 <span>文章榜单</span>
+                <i class="iconfont icon-gengxin"></i>
             </div>
             <hr class="article-rank-divider" />
             <div class="article-rank-item_content">
@@ -117,5 +119,18 @@ const getRankColor = (rank) => {
 .article-rank-more {
     text-align: center;
     color: #a9a5a5;
+}
+
+.icon-zuozhe {
+    font-size: 24px;
+    color: #19a059;
+    /* margin-right: 10px; */
+}
+
+.icon-gengxin {
+    font-size: 24px;
+    color: #a9a5a5;
+    float: right;
+    margin-right: 20px;
 }
 </style>

@@ -13,6 +13,8 @@ import {
     follow_message
 } from '@/config/apis/message';
 
+import { concernInter } from '@/config/apis/articleDetail';
+
 const router = useRouter();
 
 const commentList = ref([]); // 存储评论消息

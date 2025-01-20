@@ -21,13 +21,18 @@ const truncatedDescriptions = computed(() => {
         return { ...tag, description: truncatedDescription };
     });
 });
+
+// 点击标签跳转到此标签的标签详情页，携带id
+const handleDetail = (id) => {
+    router.push({ path: `/tagDetail/${id}` });
+};
 </script>
 
 <template>
     <div class="tag-item">
         <div class="tag-item-container">
             <div class="tag-item-single">
-                <div class="tag-item-info">
+                <div class="tag-item-info" @click="handleDetail(tag.id)">
                     <img :src="props.tag.path" alt="tag image" class="tag-item_avatar" />
                     <div class="tag-item-message">
                         <span class="tag-item_title">{{ props.tag.name }}</span>
@@ -80,6 +85,7 @@ const truncatedDescriptions = computed(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
+    cursor: pointer;
 }
 
 .tag-item_avatar {
