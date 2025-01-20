@@ -10,6 +10,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['likeComment', 'showCommentBox']);
+
+// const enterMemberCenter = (id) => {
+//     router.push({ path: `/member/${id}` });
+// };
 </script>
 
 <template>
@@ -50,6 +54,7 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .comment-content {
@@ -60,6 +65,7 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
     font-size: 16px;
     color: #000000;
     margin-right: 15px;
+    cursor: pointer;
 }
 
 .commented {

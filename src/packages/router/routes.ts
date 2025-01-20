@@ -35,6 +35,10 @@ const routers404: any = [
 
 const routes = [
     {
+        path: '/',
+        redirect: '/login'
+    },
+    {
         path: '/login',
         component: () => import('../../views/login/index.vue')
     },

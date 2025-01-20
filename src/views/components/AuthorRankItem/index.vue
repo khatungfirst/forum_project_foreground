@@ -1,6 +1,7 @@
 <script setup>
 import { ref, defineProps, computed, defineEmits } from 'vue';
-
+import { useRouter } from 'vue-router';
+const router = useRouter();
 const props = defineProps({
     authors: {
         type: Array,
@@ -38,17 +39,28 @@ const processedAuthors = computed(() => {
         };
     });
 });
+
+const enterMemberCenter = (id) => {
+    router.push({ path: `/member/${id}` });
+};
 </script>
 
 <template>
     <div class="author-rank-item">
         <div class="author-rank-item_container">
             <div class="author-rank-item_header">
+                <i class="iconfont icon-zuozhe1"></i>
                 <span>作家榜单</span>
+                <i class="iconfont icon-gengxin"></i>
             </div>
             <hr class="author-rank-divider" />
             <div class="author-rank-item_content">
-                <div v-for="author in processedAuthors" :key="author.id" class="author-rank-item_single">
+                <div
+                    v-for="author in processedAuthors"
+                    :key="author.id"
+                    class="author-rank-item_single"
+                    @click="enterMemberCenter(author.id)"
+                >
                     <img
                         v-if="author.avatar_path"
                         :src="author.avatar_path"
@@ -108,6 +120,7 @@ const processedAuthors = computed(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
 }
 
 .author-rank_avatar {
@@ -164,5 +177,23 @@ const processedAuthors = computed(() => {
 .author-rank-more {
     text-align: center;
     color: #a9a5a5;
+}
+
+.iconfont {
+    font-size: 24px;
+    color: #19a059;
+    margin-right: 10px;
+}
+
+.iconfont .icon-zuozhe1 {
+    font-size: 24px;
+    color: #19a059;
+}
+
+.icon-gengxin {
+    font-size: 24px;
+    color: #a9a5a5;
+    float: right;
+    margin-right: 20px;
 }
 </style>

@@ -55,6 +55,7 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .message-content {
@@ -65,11 +66,13 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
     font-size: 16px;
     color: #000000;
     margin-right: 15px;
+    cursor: pointer;
 }
 
 .actioned {
     font-size: 16px;
     color: #474646;
+    cursor: pointer;
 }
 
 .date {

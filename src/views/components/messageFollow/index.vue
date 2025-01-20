@@ -42,6 +42,7 @@ const emit = defineEmits(['goToMember']);
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    cursor: pointer;
 }
 
 .follow-avatar img {
