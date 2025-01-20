@@ -28,6 +28,9 @@ const route = useRoute();
 //定义消息提示对象
 const message = useMessage();
 
+//区分该文章作者是否是当前登录的用户
+const isPerson = ref(false);
+
 //文章内容（计算属性来转换markdown语言）
 // const contents = computed(() => {
 //     const md = new MarkdownIt();
@@ -40,7 +43,7 @@ const message = useMessage();
 
 onMounted(async () => {
     initArticle();
-    authorInit();
+    // authorInit();
     initComments();
     await nextTick(); // 确保 DOM 更新完成
     updateChildWidth();
@@ -94,9 +97,9 @@ const initArticle = async () => {
         articleInfo.tags = article.tags;
         articleInfo.views_count = article.views_count;
         about.value = articleData.data.about;
-        articleInfo.author_id = articleData.user_id;
+        articleInfo.author_id = article.user_id;
+        authorInit();
     }
-    console.log('2222');
 };
 
 //点赞的方法
@@ -162,7 +165,7 @@ const isAuthorInfo = ref(false);
 
 //作者对象
 const authorInfo = reactive({
-    author_id: 1, //当前作者的id
+    author_id: articleInfo.author_id, //当前作者的id
     head: '', //作者头像
     nickname: '', //作者昵称
     signature: '', //作者个签
@@ -187,10 +190,14 @@ const authorInit = async () => {
         authorInfo.author_read = data.reads_count;
         authorInfo.concern_status = data.concern_status;
     }
+    console.log(articleInfo.author_id, '000000');
+    if (articleInfo.author_id === +localStorage.getItem('userId')) {
+        isPerson.value = true;
+    }
 };
 
 //当前登录人的id
-const user_id = ref(0);
+const user_id = articleInfo.author_id; //作者id
 
 //关注的方法
 const concern = async () => {
@@ -202,9 +209,9 @@ const concern = async () => {
     } else {
         authorInfo.fans_count++;
     }
-    const data = ref({
-        user_id: user_id.value
-    });
+    const data = {
+        followed_id: user_id
+    };
     const { code } = await concernInter(data);
     if (code === 2000 && authorInfo.concern_status === true) {
         message.success('关注成功');
@@ -430,7 +437,7 @@ const catalogueControl = () => {
         <div class="right">
             <div class="author-detail" ref="authorDetail">
                 <authorMessage :authorInfo="authorInfo"></authorMessage>
-                <div class="bottom">
+                <div class="bottom" v-if="!isPerson">
                     <n-button
                         strong
                         secondary
@@ -601,7 +608,7 @@ const catalogueControl = () => {
 
         .author-detail {
             width: 70%;
-            height: 200px;
+            // height: 200px;
             background-color: #fff;
             margin-bottom: 20px;
             padding: 10px;

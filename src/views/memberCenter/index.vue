@@ -24,6 +24,8 @@ import {
 //定义路由对象
 const router = useRouter();
 
+const routes = useRoute();
+
 //定义消息提示对象
 const message = useMessage();
 
@@ -39,7 +41,7 @@ onMounted(async () => {
 
 //定义当前会员中心人员的各种信息
 const user = reactive({
-    id: 1,
+    id: routes.params.id,
     head_shot: '',
     nickname: '',
     signature: '',
@@ -67,8 +69,7 @@ const isSelf = ref(true);
 
 //初始化用户数据
 const userInfo = async () => {
-    if (user.id !== 1) {
-        //=========================
+    if (+user.id !== 1) {
         isSelf.value = false;
     }
     const { data } = await getMemberInfo({
@@ -137,7 +138,7 @@ const settinngs = () => {
 const fansType = reactive({
     userId: user.id,
     page: 1,
-    limit: 4,
+    limit: 5,
     keyword: ''
 });
 
@@ -169,8 +170,15 @@ const fansLoadInit = async () => {
         if (data) {
             fansArr.value.push(...data.concernList);
             isLoading.value = false;
+            if (data.total === 0) {
+                console.log(data.total, '数据条数');
+                noMore.value = true;
+            }
         }
     }, 1000);
+    setTimeout(() => {
+        noMore.value = false;
+    }, 2000);
 };
 
 //------------------文章列表模块------------------------------
@@ -180,7 +188,7 @@ const aticleType = reactive({
     id: user.id,
     type: '文章',
     page: 1,
-    limit: 4,
+    limit: 5,
     keyword: ''
 });
 
@@ -224,8 +232,15 @@ const loadInit = async () => {
         if (data) {
             articleArr.value.push(...data.dataList);
             isLoading.value = false;
+            if (data.dataList.length === 0) {
+                console.log(data.dataList.length, '数据条数');
+                noMore.value = true;
+            }
         }
     }, 1000);
+    setTimeout(() => {
+        noMore.value = false;
+    }, 2000);
 };
 
 //编辑本篇文章
@@ -334,7 +349,7 @@ const searchFun = () => {
                         </n-button>
                     </div>
                 </n-card>
-                <n-card size="huge" class="article-card">
+                <n-card size="huge" class="article-card" ref="scrollContainer">
                     <n-tabs type="line" animated @update:value="tabChange">
                         <template #suffix>
                             <div class="searchModule" @mouseover="expandInput" @mouseleave="shrinkInput">
@@ -570,6 +585,8 @@ const searchFun = () => {
                     background-color: #daf0e4;
                     position: absolute;
                     right: 50px;
+                    top: 0px;
+                    z-index: 999;
                 }
 
                 @include loading;

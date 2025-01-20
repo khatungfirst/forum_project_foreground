@@ -85,8 +85,8 @@ const checkDetail = () => {
                     </ul>
                 </div>
             </div>
+            <slot class="edit" name="edit"></slot>
             <div class="right" v-if="prop.item.image_url !== ''">
-                <slot class="edit" name="edit"></slot>
                 <img src="https://t7.baidu.com/it/u=1819248061,230866778&fm=193&f=GIF" alt="" />
             </div>
         </li>
@@ -168,6 +168,7 @@ const checkDetail = () => {
         position: relative;
         /* float: right; */
         margin-left: 8px;
+
         img {
             width: 165px;
             height: 130px;

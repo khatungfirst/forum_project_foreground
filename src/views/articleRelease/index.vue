@@ -51,7 +51,7 @@ onUnmounted(() => {
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
-    user_id: 1,
+    user_id: localStorage.getItem('userId'),
     article_id: 0, //存放当前文章的id
     title: '', //标题输入的数据
     status: '', //定义文章的状态(初始是草稿状态)

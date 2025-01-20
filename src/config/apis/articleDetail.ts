@@ -1,4 +1,4 @@
-import { $get, $post } from '@/packages/request';
+import { $get, $post, $http } from '@/packages/request';
 
 // 1、获取初始化的文章、作者、相关推荐的信息
 export const getArticleDetail = (params: any): Promise<any> => {
@@ -21,7 +21,7 @@ export const collectionInter = (params: any): Promise<any> => {
 };
 //6、关注
 export const concernInter = (params: any): Promise<any> => {
-    return $post('/user/click_attention', params);
+    return $http('/user/click_attention', params);
 };
 //7、发布评论
 
