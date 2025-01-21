@@ -2,22 +2,27 @@
 import { ref, onMounted } from 'vue';
 import Article from '../components/article/index.vue';
 import TagItem from '../components/tagDetail/index.vue';
+import CurrentTagItem from '../components/CurrentTagItem/CurrentTagItem.vue';
 import { getTagList, Tag_follow, getArticleByTag } from '../../config/apis/tag';
-
+import { useRoute } from 'vue-router';
+const route = useRoute();
 const tags = ref([]); // 使用数组初始化
 const dataObj = ref({
-    id: route.query.id,
+    id: route.params.id,
     kind: 0,
     page: 1,
     limit: 4
 });
+
+const currentTag = ref(null); // 存储当前标签的详细信息
 onMounted(async () => {
     try {
-        console.log('111');
         const response = await getTagList();
         if (response.code === 2000 && Array.isArray(response.data.tag_list)) {
             tags.value = response.data.tag_list;
-            console.log(tags);
+            console.log(tags.value, '标签列表');
+            console.log(response.data.tag_list, '传递的标签列表');
+            fetchCurrentTag(route.params.id); // 初始加载时获取当前标签信息
         } else {
             console.error('获取标签数据失败');
         }
@@ -26,10 +31,11 @@ onMounted(async () => {
     }
     try {
         console.log('111');
-        const response = await getArticleByTag();
+        const response = await getArticleByTag(dataObj.value);
         if (response.code === 2000) {
             articles.value = response.data.article_list;
             console.log(tags);
+            fetchCurrentTag(route.params.id);
         } else {
             console.error('获取标签下的文章失败');
         }
@@ -37,6 +43,28 @@ onMounted(async () => {
         console.error('请求标签下的文章出错:', error);
     }
 });
+
+// 监听路由参数变化，重新获取当前标签信息
+watch(
+    () => route.params.id,
+    (newId, oldId) => {
+        if (newId !== oldId) {
+            fetchCurrentTag(newId);
+        }
+    }
+);
+
+const fetchCurrentTag = (tagId) => {
+    const tag = tags.value.find((tag) => tag.id === parseInt(tagId));
+    console.log('tag', tag);
+
+    if (tag) {
+        currentTag.value = tag;
+        console.log('currentTag.value', currentTag.value);
+    } else {
+        console.error('未找到当前标签');
+    }
+};
 
 const follow_tag = async (id) => {
     try {
@@ -76,7 +104,7 @@ const articles = ref([
 
 <template>
     <div class="tag-list-container">
-        <tagItem :tags="tags" @follow="follow_tag" />
+        <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
     </div>
     <div class="tag-articl">
         <Article v-for="article in articles" :key="article.id" :item="article" />

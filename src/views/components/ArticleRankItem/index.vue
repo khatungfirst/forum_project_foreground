@@ -1,6 +1,7 @@
 <script setup>
-import { defineProps, computed } from 'vue';
-
+import { defineProps, computed, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 const props = defineProps({
     articles: {
         type: Array,
@@ -8,8 +9,8 @@ const props = defineProps({
         default: () => []
     }
 });
+const emit = defineEmits(['refresh']);
 
-// 确保 articles 是一个数组
 const processedArticles = computed(() => {
     return props.articles.map((article, index) => ({
         ...article,
@@ -17,10 +18,17 @@ const processedArticles = computed(() => {
     }));
 });
 
-// 定义一个方法来获取排名颜色
 const getRankColor = (rank) => {
     const colors = ['red', 'orange', 'yellow', 'green', 'grey'];
     return colors[rank - 1] || 'black'; // 如果排名超出颜色数组，使用默认黑色
+};
+
+const enterArticleDetail = (id) => {
+    router.push({ path: `/articledetail/${id}` });
+};
+
+const refreshArticles = () => {
+    emit('refresh');
 };
 </script>
 
@@ -30,7 +38,7 @@ const getRankColor = (rank) => {
             <div class="article-rank-item_header">
                 <i class="iconfont icon-zuozhe"></i>
                 <span>文章榜单</span>
-                <i class="iconfont icon-gengxin"></i>
+                <i class="iconfont icon-gengxin" @click="refreshArticles" style="cursor: pointer"></i>
             </div>
             <hr class="article-rank-divider" />
             <div class="article-rank-item_content">
@@ -42,7 +50,7 @@ const getRankColor = (rank) => {
                             {{ article.rank }}
                         </span>
                     </div>
-                    <div class="article-rank-item_info">
+                    <div class="article-rank-item_info" @click="enterArticleDetail(article.id)">
                         <span class="article-rank-item_title">{{ article.title }}</span>
                     </div>
                 </div>
@@ -106,6 +114,7 @@ const getRankColor = (rank) => {
 .article-rank-item_title {
     margin: 0;
     font-size: 15px;
+    cursor: pointer;
 }
 
 .article-rank-divider {
@@ -124,7 +133,6 @@ const getRankColor = (rank) => {
 .icon-zuozhe {
     font-size: 24px;
     color: #19a059;
-    /* margin-right: 10px; */
 }
 
 .icon-gengxin {
@@ -132,5 +140,6 @@ const getRankColor = (rank) => {
     color: #a9a5a5;
     float: right;
     margin-right: 20px;
+    cursor: pointer;
 }
 </style>

@@ -1,10 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { NForm, NFormItem, NInput, NButton } from 'naive-ui';
-// import { Visibility } from '@vicons/ionicons5';
 import { useRouter } from 'vue-router';
 import { useMessage } from 'naive-ui';
 import { verify_code, register } from '../../config/apis/login';
+
 const router = useRouter();
 const formRef = ref(null);
 const form = ref({
@@ -15,10 +15,6 @@ const form = ref({
 });
 
 const message = useMessage(); // 获取消息提示 API
-// 局部注册 NIcon 组件和 Visibility 图标
-// const icons = {
-//     Visibility
-// };
 
 const rules = ref({
     email: [
@@ -47,6 +43,9 @@ watch(
     }
 );
 
+const countdown = ref(60); // 倒计时秒数
+const isCounting = ref(false); // 是否正在倒计时
+
 const sendVerify_code = async () => {
     if (!form.value.email) {
         message.error('请先输入邮箱地址');
@@ -58,6 +57,7 @@ const sendVerify_code = async () => {
 
         if (response.code === 2000) {
             message.success('验证码已发送，请检查您的邮箱');
+            startCountdown(); // 启动倒计时
         } else {
             message.error(`发送验证码失败: ${response.data.message}`);
         }
@@ -76,6 +76,19 @@ const sendVerify_code = async () => {
     }
 };
 
+const startCountdown = () => {
+    isCounting.value = true; // 开始倒计时
+    const interval = setInterval(() => {
+        if (countdown.value > 0) {
+            countdown.value--;
+        } else {
+            clearInterval(interval);
+            isCounting.value = false; // 倒计时结束
+            countdown.value = 60; // 重置倒计时
+        }
+    }, 1000);
+};
+
 const handleResister = async () => {
     try {
         await formRef.value.validate();
@@ -89,17 +102,13 @@ const handleResister = async () => {
         if (response.code === 2000 && response.data) {
             router.push('/login');
         } else {
-            this.$message.error('注册失败:' + response.data.message);
+            message.error('注册失败:' + response.data.message);
         }
     } catch (errors) {
         console.error('注册失败', errors);
-        this.$message.error('请检查表单错误');
+        message.error('请检查表单错误');
     }
 };
-
-// const goToRegister = () => {
-//     router.push('/register');
-// };
 
 onMounted(() => {
     // 可以在此处执行一些初始化逻辑
@@ -112,11 +121,13 @@ onMounted(() => {
             <span :class="{ active: currentRoute === '/login' }" @click="router.push('/login')">登录</span>
             <span :class="{ active: currentRoute === '/register' }" @click="router.push('/register')">注册</span>
         </div>
-        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
+        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleResister">
             <n-form-item label="邮箱" path="email">
                 <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
                     <template #suffix>
-                        <span class="forgot-password-btn" @click="sendVerify_code">发送验证码</span>
+                        <span class="forgot-password-btn" @click="sendVerify_code">
+                            {{ isCounting ? `${countdown}秒后重试` : '发送验证码' }}
+                        </span>
                     </template>
                 </n-input>
             </n-form-item>
@@ -140,9 +151,6 @@ onMounted(() => {
                 </div>
             </n-form-item>
         </n-form>
-        <!-- <div class="register" @click="goToRegister">
-            <n-button class="common-button">注册</n-button>
-        </div> -->
     </div>
 </template>
 
@@ -198,7 +206,6 @@ onMounted(() => {
 
 .common-button {
     width: 100%;
-    /* margin-top: 20px; */
     background-color: #c5e2d4 !important;
     color: #19a059;
     border: none;
