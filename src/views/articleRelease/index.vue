@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
-import { useRouter, onBeforeRouteLeave } from 'vue-router';
-import { getTypeTag, publicArticles, getImageUrl } from '@/config/apis/publicArticle';
+import { useRouter } from 'vue-router';
+import { getTypeTag, publicArticles } from '@/config/apis/publicArticle';
 import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
 import useUpload from '@/hooks/useUpload';
 import 'bytemd/dist/index.css';
-import { useMessage, useDialog } from 'naive-ui';
+import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
 
@@ -55,7 +55,7 @@ const articleData = reactive({
     article_id: 0, //存放当前文章的id
     title: '', //标题输入的数据
     status: '', //定义文章的状态(初始是草稿状态)
-    category_id: 0, //定义用户选择的分类
+    category_id: null, //定义用户选择的分类
     summary: '', //定义文章摘要
     content: '', //markdown里的内容
     tags: [], // 定义用户选择的标签
@@ -68,7 +68,7 @@ const init = async () => {
     if (articleData.article_id !== 0) {
         console.log('获取到');
         const id = {
-            article_id: articleData.article_id
+            id: articleData.article_id
         };
         const articleDatas = await getArticleDetail(id);
         if (articleDatas) {
@@ -135,6 +135,9 @@ const typeOptions = ref([]);
 //定义标签下拉框中的内容
 const tagOptions = ref([]);
 
+//选择发布文章的状态
+const checkedValue = ref<string | null>(null);
+
 //制定表单的的校验规则
 const rules = {
     categories: { required: true, trigger: ['blur', 'input'], message: '请输入要选择的分类' },
@@ -150,6 +153,12 @@ watch(
         isSave.value = false;
     }
 );
+
+//切换文章发布类型
+const handleChange = (e: Event) => {
+    checkedValue.value = (e.target as HTMLInputElement).value;
+    articleData.status = checkedValue.value;
+};
 
 //获取到markdown中输入的数据
 const getMessage = (msg: string) => {
@@ -181,7 +190,7 @@ const releaseCard = () => {
 
 //真正发布的按钮的点击事件
 const publicArticle = async () => {
-    articleData.status = 'private';
+    // articleData.status = 'private';
     if (
         articleData.category_id !== null &&
         articleData.summary !== '' &&
@@ -190,9 +199,8 @@ const publicArticle = async () => {
     ) {
         const { code } = await publicArticles(articleData);
         if (code === 2000) {
-            console.log(articleData, '111111');
             message.success('发布成功');
-            articleData.status = 'private';
+            // articleData.status = 'private';
             router.push('/transferPage');
         }
     } else {
@@ -262,6 +270,24 @@ const publicArticle = async () => {
                             }"
                         />
                     </n-form-item>
+                    <n-space>
+                        <n-radio
+                            :checked="checkedValue === 'public'"
+                            value="public"
+                            name="basic-demo"
+                            @change="handleChange"
+                        >
+                            公开发布
+                        </n-radio>
+                        <n-radio
+                            :checked="checkedValue === 'private'"
+                            value="private"
+                            name="basic-demo"
+                            @change="handleChange"
+                        >
+                            私有发布
+                        </n-radio>
+                    </n-space>
                 </n-form>
                 <div class="bottom">
                     <n-button tertiary round type="primary" @click="releaseCard">取消</n-button>
@@ -343,6 +369,12 @@ const publicArticle = async () => {
                 .n-input :deep(.n-form-item-label--left-mark) {
                     width: 90px;
                 }
+            }
+
+            .n-space {
+                width: 190px;
+                margin: 0 auto;
+                margin-bottom: 30px;
             }
         }
 
