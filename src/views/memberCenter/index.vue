@@ -227,13 +227,14 @@ const loadInit = async () => {
     isLoading.value = true;
 
     setTimeout(async () => {
-        aticleType.page++;
         const { data } = await getArticleInfo(aticleType);
         if (data) {
-            articleArr.value.push(...data.dataList);
+            if (data.dataList.length > 0) {
+                aticleType.page++;
+                articleArr.value.push(...data.dataList);
+            }
             isLoading.value = false;
             if (data.dataList.length === 0) {
-                console.log(data.dataList.length, '数据条数');
                 noMore.value = true;
             }
         }
@@ -252,7 +253,9 @@ const editTotal = (id) => {
 //删除文章
 const deleteArticles = async (id) => {
     event.stopPropagation();
-    const { code } = await deleteArticle(id);
+    const { code } = await deleteArticle({
+        id: id
+    });
     if (code === 2000) {
         message.success('删除成功');
     } else {
@@ -282,6 +285,7 @@ const shrinkInput = () => {
 const searchFun = () => {
     if (aticleType.type !== '') {
         aticleType.keyword = inputValue.value;
+        aticleType.page = 1;
         articleInit();
     } else {
         fansType.keyword = inputValue.value;

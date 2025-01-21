@@ -11,6 +11,8 @@ import data from 'emoji-mart-vue-fast/data/all.json';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
 
+const route = useRoute();
+
 const prop = defineProps({
     appear: {
         type: Boolean,
@@ -29,15 +31,13 @@ const prop = defineProps({
             content: string;
             path: string;
             article_id: number;
-            user_id: number;
             highest_id: number;
             parent_id: number;
             parent_user_id: number;
         },
         required: true,
         default: () => ({
-            article_id: 2,
-            user_id: 1,
+            article_id: 0,
             highest_id: 0,
             parent_id: 0,
             parent_user_id: 0
@@ -134,18 +134,19 @@ const publicFirst = async () => {
     const commentDetail = reactive({
         content: inputValue.value,
         path: uploadedImages.value,
-        article_id: prop.item.article_id,
-        user_id: prop.item.user_id,
+        article_id: +route.params.id,
         highest_id: prop.item.highest_id,
         parent_id: prop.item.parent_id,
         parent_user_id: prop.item.parent_user_id
     });
 
     try {
-        await publicComments(commentDetail);
-        emit('close-comment');
+        const { code } = await publicComments(commentDetail);
+        if (code === 2000) {
+            emit('close-comment');
+        }
     } catch (error) {
-        message.error('点赞失败');
+        message.error('发布评论失败');
     }
 };
 </script>
