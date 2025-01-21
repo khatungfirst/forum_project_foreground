@@ -26,7 +26,7 @@ onMounted(() => {
     setTimeout(async () => {
         if (prop.article_id !== 0) {
             const id = {
-                article_id: prop.article_id
+                id: prop.article_id
             };
             const articleData = await getArticleDetail(id);
             valueHtml.value = articleData.data.article.content;

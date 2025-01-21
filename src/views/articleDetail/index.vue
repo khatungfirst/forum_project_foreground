@@ -76,7 +76,8 @@ const articleInfo = reactive({
     views_count: 0, //浏览量
     tags: [], //标签
     content: '<p><br><p/>', //文章内容
-    author_id: 0
+    author_id: 0,
+    nickname: ''
 });
 
 //文章相关内容初始化的方法
@@ -98,6 +99,7 @@ const initArticle = async () => {
         articleInfo.views_count = article.views_count;
         about.value = articleData.data.about;
         articleInfo.author_id = article.user_id;
+        articleInfo.nickname = article.nickname;
         authorInit();
     }
 };
@@ -135,10 +137,10 @@ const collect = async () => {
     } else {
         articleInfo.collections = articleInfo.collections - 1;
     }
-    const data = ref({
+    const data = {
         article_id: articleInfo.id,
         collection_status: currentIcon.value[1]
-    });
+    };
     const { code } = await collectionInter(data);
     if (code === 2000 && currentIcon.value[1] === true) {
         message.success('收藏成功');
@@ -266,7 +268,7 @@ const LoginVis = ref(true);
 
 //评论相关数据
 const commentInfo = reactive({
-    article_id: 0,
+    article_id: +route.params.id,
     offset: 1,
     limit: 4
 });
@@ -292,6 +294,7 @@ const login = () => {
 const handleMaskClick = () => {
     isOverlayVisible.value = false;
     appear.value = false;
+    initComments();
 };
 
 // 获取中间盒子的宽度
@@ -384,7 +387,7 @@ const catalogueControl = () => {
                 <h2>{{ articleInfo.title }}</h2>
                 <div class="message">
                     <n-ellipsis style="max-width: 240px">
-                        {{ authorInfo.nickname }}
+                        {{ articleInfo.nickname }}
                     </n-ellipsis>
                     <!-- <span class="nickName">{{ authorInfo.nickname }}</span> -->
                     <span class="nickName">{{ articleInfo.time }}</span>
