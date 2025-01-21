@@ -1,5 +1,7 @@
 <script setup>
 import { defineProps, computed, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
 const emit = defineEmits(['follow']);
 const props = defineProps({
     tag: {

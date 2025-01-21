@@ -1,7 +1,8 @@
 <script setup>
-import { ref, defineProps, computed, defineEmits } from 'vue';
+import { ref, defineProps, computed, defineEmits, watch } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
+
 const props = defineProps({
     authors: {
         type: Array,
@@ -14,16 +15,25 @@ const emit = defineEmits(['follow']);
 
 const followedStates = ref(props.authors.map((author) => author.is_followed));
 
+watch(
+    () => props.authors,
+    (newAuthors) => {
+        followedStates.value = newAuthors.map((author) => author.is_followed);
+    },
+    { deep: true }
+);
+
 const toggleFollow = async (author) => {
     if (author.is_followed === 2) {
         alert('您无法关注自己');
         return;
     }
-    // const index = props.authors.indexOf(author);
-    // followedStates.value[index] = author.is_followed === 0 ? 1 : 2; // 切换关注状态
-    // emit('follow', { id: author.id, is_followed: followedStates.value[index] });
-    // console.log(`Toggle follow for ${author.nickname}`);
-    emit('follow', author.id);
+    const index = props.authors.indexOf(author);
+    const newFollowState = author.is_followed === 0 ? 1 : 0; // 切换关注状态
+    followedStates.value[index] = newFollowState;
+    emit('follow', { id: author.id, is_followed: newFollowState });
+    console.log(`Toggle follow for ${author.nickname}`);
+    console.log('author.is_followed', author.is_followed);
 };
 
 const processedAuthors = computed(() => {
@@ -43,6 +53,10 @@ const processedAuthors = computed(() => {
 const enterMemberCenter = (id) => {
     router.push({ path: `/member/${id}` });
 };
+
+const refreshAuthors = () => {
+    emit('refresh');
+};
 </script>
 
 <template>
@@ -51,24 +65,22 @@ const enterMemberCenter = (id) => {
             <div class="author-rank-item_header">
                 <i class="iconfont icon-zuozhe1"></i>
                 <span>作家榜单</span>
-                <i class="iconfont icon-gengxin"></i>
+                <i class="iconfont icon-gengxin" @click="refreshAuthors"></i>
             </div>
             <hr class="author-rank-divider" />
             <div class="author-rank-item_content">
-                <div
-                    v-for="author in processedAuthors"
-                    :key="author.id"
-                    class="author-rank-item_single"
-                    @click="enterMemberCenter(author.id)"
-                >
+                <div v-for="author in processedAuthors" :key="author.id" class="author-rank-item_single">
                     <img
                         v-if="author.avatar_path"
                         :src="author.avatar_path"
                         alt="Author avatar"
                         class="author-rank_avatar"
+                        @click="enterMemberCenter(author.id)"
                     />
                     <div class="author-rank-item_info">
-                        <span class="author-rank-item_title">{{ author.nickname }}</span>
+                        <span class="author-rank-item_title" @click="enterMemberCenter(author.id)">
+                            {{ author.nickname }}
+                        </span>
                         <p class="author-rank-item_career">{{ author.career_direction }}</p>
                     </div>
                     <div class="author-rank-item_follow">
@@ -195,5 +207,6 @@ const enterMemberCenter = (id) => {
     color: #a9a5a5;
     float: right;
     margin-right: 20px;
+    cursor: pointer;
 }
 </style>

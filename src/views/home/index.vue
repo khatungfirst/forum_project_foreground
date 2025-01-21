@@ -1,4 +1,3 @@
-<!-- Home.vue -->
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
@@ -13,6 +12,7 @@ import { debounce } from '../../utils/debounce';
 import { concernInter } from '@/config/apis/articleDetail';
 import { getSelectArticle } from '@/config/apis/select';
 import { NButton } from 'naive-ui';
+
 const router = useRouter();
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
@@ -27,6 +27,8 @@ const dataObj = ref({
     limit: 4,
     kind: '0'
 });
+const currentPage = ref(1); // 当前作者页码
+const currentArticlePage = ref(1); // 当前文章页码
 
 onMounted(async () => {
     await fetchAuthors();
@@ -35,16 +37,23 @@ onMounted(async () => {
 });
 
 const fetchAuthors = async () => {
-    const response = await author_rank({ page: 1, limit: 5 });
+    const response = await author_rank({ page: currentPage.value, limit: 5 });
     if (response.code === 2000) {
-        authors.value = response.data.user_heat_rank;
+        // 过滤掉 null 值
+        const validAuthors = response.data.user_heat_rank.filter((author) => author !== null);
+        // 清理 avatar_path 字段
+        const cleanedAuthors = validAuthors.map((author) => ({
+            ...author,
+            avatar_path: author.avatar_path ? author.avatar_path.replace(/<[^>]*>/g, '') : null
+        }));
+        authors.value = cleanedAuthors;
     } else {
         console.error('获取作家排名失败');
     }
 };
 
 const fetchArticles = async () => {
-    const response = await article_rank({ page: 1, limit: 5 });
+    const response = await article_rank({ page: currentArticlePage.value, limit: 5 });
     if (response.code === 2000) {
         articles.value = response.data.selectedList;
     } else {
@@ -84,34 +93,41 @@ const tabMiddle = (value) => {
     init();
 };
 
-const followAuthor = async (authorId) => {
-    const author = authors.value.find((author) => author.id === authorId);
+const followAuthor = async (payload) => {
+    const { id, is_followed } = payload;
+    const author = authors.value.find((author) => author.id === id);
     if (!author) return;
 
-    const isCurrentlyFollowed = author.is_followed === 1;
-    const action = isCurrentlyFollowed ? '取消关注' : '关注';
-    const newFollowState = isCurrentlyFollowed ? 2 : 1; // 未关注为2，已关注为1
-
     try {
-        const response = await concernInter({ followed_id: authorId });
+        const response = await concernInter({ followed_id: id });
         if (response.code === 2000) {
-            console.log(`${action}作者成功`);
+            console.log(`关注作者成功`);
             // 更新前端状态
-            author.is_followed = newFollowState;
+            author.is_followed = is_followed;
         } else {
             // 接口调用失败，打印错误信息
-            console.error(`${action}作者失败`, response.message);
-            alert(`${action}失败: ${response.message}`);
+            console.error(`关注作者失败`, response.message);
+            alert(`关注失败: ${response.message}`);
         }
     } catch (error) {
         // 捕获异常，打印错误堆栈信息并提示用户
-        console.error(`${action}作者出错`, error);
-        alert(`${action}出错: ${error.message}`);
+        console.error(`关注作者出错`, error);
+        alert(`关注出错: ${error.message}`);
     }
 };
 
 const handleReleaseArticle = () => {
     router.push({ path: '/articlerelease/0' }); // 路由跳转发布文章页
+};
+
+const refreshAuthors = () => {
+    currentPage.value = (currentPage.value % 4) + 1; // 1, 2, 3, 4, 1, 2, 3, 4, ...
+    fetchAuthors();
+};
+
+const refreshArticles = () => {
+    currentArticlePage.value = (currentArticlePage.value % 4) + 1; // 1, 2, 3, 4, 1, 2, 3, 4, ...
+    fetchArticles();
 };
 </script>
 
@@ -162,18 +178,18 @@ const handleReleaseArticle = () => {
         <!-- 侧边栏（作家榜单与文章榜单） -->
         <div class="side-bar">
             <div class="article-rank-list">
-                <ArticleRankItem :articles="articles" />
+                <ArticleRankItem :articles="articles" @refresh="refreshArticles" />
             </div>
             <div class="author-rank-list">
-                <AuthorRankItem :authors="authors" @follow="followAuthor" />
+                <AuthorRankItem :authors="authors" @follow="followAuthor" @refresh="refreshAuthors" />
             </div>
 
             <div class="publish-icon-border" @click="handleReleaseArticle">
                 <i class="iconfont icon-bianji"></i>
             </div>
-            <n-button strong secondary round type="primary" class="button hide-button">
+            <n-button strong secondary round type="primary" class="button hide-button" @click="refreshAuthors">
                 <i class="iconfont icon-bianji"></i>
-                <span class="publish-text">发文</span>
+                <span class="publish-text">刷新作家榜单</span>
             </n-button>
         </div>
     </div>
