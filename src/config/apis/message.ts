@@ -24,3 +24,8 @@ export const collect_message = (params: any): Promise<any> => {
 export const follow_message = (params: any): Promise<any> => {
     return $get('/message/follow', params);
 };
+
+// 实时推送消息
+export const get_latest_message = (params: any): Promise<any> => {
+    return $get('/message/sse', params);
+};

@@ -1,5 +1,6 @@
 // stores/userStore.ts
 import { defineStore } from 'pinia';
+import { getUserInfo } from '../apis/settings';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -24,6 +25,10 @@ export const useUserStore = defineStore('user', {
             this.userInfo = userinfo;
             // 同时将用户 ID 存储到 LocalStorage
             localStorage.setItem('userId', userinfo.id);
+            localStorage.setItem('userInfo', JSON.stringify(userinfo));
+        },
+        getUserInfo() {
+            return this.userInfo || JSON.parse(localStorage.getItem('userInfo') || 'null');
         },
         clear() {
             this.token = '';

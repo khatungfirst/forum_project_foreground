@@ -29,6 +29,8 @@ const dataObj = ref({
 });
 const currentPage = ref(1); // 当前作者页码
 const currentArticlePage = ref(1); // 当前文章页码
+const isAuthorDataShort = ref(false); // 作者数据是否不足五条
+const isArticleDataShort = ref(false); // 文章数据是否不足五条
 
 onMounted(async () => {
     await fetchAuthors();
@@ -39,14 +41,13 @@ onMounted(async () => {
 const fetchAuthors = async () => {
     const response = await author_rank({ page: currentPage.value, limit: 5 });
     if (response.code === 2000) {
-        // 过滤掉 null 值
         const validAuthors = response.data.user_heat_rank.filter((author) => author !== null);
-        // 清理 avatar_path 字段
         const cleanedAuthors = validAuthors.map((author) => ({
             ...author,
             avatar_path: author.avatar_path ? author.avatar_path.replace(/<[^>]*>/g, '') : null
         }));
         authors.value = cleanedAuthors;
+        isAuthorDataShort.value = cleanedAuthors.length < 5; // 记录数据是否不足五条
     } else {
         console.error('获取作家排名失败');
     }
@@ -56,6 +57,7 @@ const fetchArticles = async () => {
     const response = await article_rank({ page: currentArticlePage.value, limit: 5 });
     if (response.code === 2000) {
         articles.value = response.data.selectedList;
+        isArticleDataShort.value = response.data.selectedList.length < 5; // 记录数据是否不足五条
     } else {
         console.error('获取文章排名失败');
     }
@@ -102,15 +104,12 @@ const followAuthor = async (payload) => {
         const response = await concernInter({ followed_id: id });
         if (response.code === 2000) {
             console.log(`关注作者成功`);
-            // 更新前端状态
             author.is_followed = is_followed;
         } else {
-            // 接口调用失败，打印错误信息
             console.error(`关注作者失败`, response.message);
             alert(`关注失败: ${response.message}`);
         }
     } catch (error) {
-        // 捕获异常，打印错误堆栈信息并提示用户
         console.error(`关注作者出错`, error);
         alert(`关注出错: ${error.message}`);
     }
@@ -121,12 +120,20 @@ const handleReleaseArticle = () => {
 };
 
 const refreshAuthors = () => {
-    currentPage.value = (currentPage.value % 4) + 1; // 1, 2, 3, 4, 1, 2, 3, 4, ...
+    if (isAuthorDataShort.value) {
+        currentPage.value = 1; // 如果数据不足五条，重置页码为 1
+    } else {
+        currentPage.value++; // 递增页码
+    }
     fetchAuthors();
 };
 
 const refreshArticles = () => {
-    currentArticlePage.value = (currentArticlePage.value % 4) + 1; // 1, 2, 3, 4, 1, 2, 3, 4, ...
+    if (isArticleDataShort.value) {
+        currentArticlePage.value = 1; // 如果数据不足五条，重置页码为 1
+    } else {
+        currentArticlePage.value++; // 递增页码
+    }
     fetchArticles();
 };
 </script>
@@ -187,9 +194,9 @@ const refreshArticles = () => {
             <div class="publish-icon-border" @click="handleReleaseArticle">
                 <i class="iconfont icon-bianji"></i>
             </div>
-            <n-button strong secondary round type="primary" class="button hide-button" @click="refreshAuthors">
+            <n-button strong secondary round type="primary" class="button hide-button">
                 <i class="iconfont icon-bianji"></i>
-                <span class="publish-text">刷新作家榜单</span>
+                <span class="publish-text">发文</span>
             </n-button>
         </div>
     </div>

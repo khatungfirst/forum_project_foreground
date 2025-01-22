@@ -1,10 +1,12 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Article from '../components/article/index.vue';
-import TagItem from '../components/tagDetail/index.vue';
 import CurrentTagItem from '../components/CurrentTagItem/CurrentTagItem.vue';
 import { getTagList, Tag_follow, getArticleByTag } from '../../config/apis/tag';
 import { useRoute } from 'vue-router';
+import { NTabs, NTabPane, NInfiniteScroll } from 'naive-ui';
+import _ from 'lodash'; // 导入 Lodash
+
 const route = useRoute();
 const tags = ref([]); // 使用数组初始化
 const dataObj = ref({
@@ -15,13 +17,16 @@ const dataObj = ref({
 });
 
 const currentTag = ref(null); // 存储当前标签的详细信息
+const articles = ref([]); // 存储文章数据
+const isLoading = ref(false);
+const noMore = ref(false);
+const currentTab = ref('0'); // 当前选中的标签
+
 onMounted(async () => {
     try {
         const response = await getTagList();
         if (response.code === 2000 && Array.isArray(response.data.tag_list)) {
             tags.value = response.data.tag_list;
-            console.log(tags.value, '标签列表');
-            console.log(response.data.tag_list, '传递的标签列表');
             fetchCurrentTag(route.params.id); // 初始加载时获取当前标签信息
         } else {
             console.error('获取标签数据失败');
@@ -29,38 +34,30 @@ onMounted(async () => {
     } catch (error) {
         console.error('请求标签数据出错:', error);
     }
-    try {
-        console.log('111');
-        const response = await getArticleByTag(dataObj.value);
-        if (response.code === 2000) {
-            articles.value = response.data.article_list;
-            console.log(tags);
-            fetchCurrentTag(route.params.id);
-        } else {
-            console.error('获取标签下的文章失败');
-        }
-    } catch (error) {
-        console.error('请求标签下的文章出错:', error);
-    }
+    await fetchArticles();
 });
 
-// 监听路由参数变化，重新获取当前标签信息
 watch(
     () => route.params.id,
     (newId, oldId) => {
         if (newId !== oldId) {
             fetchCurrentTag(newId);
+            fetchArticles();
         }
     }
 );
 
+watch(currentTab, async (newTab) => {
+    dataObj.value.kind = newTab === '0' ? 0 : 1;
+    dataObj.value.page = 1; // 重置页码
+    articles.value = []; // 清空文章列表
+    await fetchArticles();
+});
+
 const fetchCurrentTag = (tagId) => {
     const tag = tags.value.find((tag) => tag.id === parseInt(tagId));
-    console.log('tag', tag);
-
     if (tag) {
         currentTag.value = tag;
-        console.log('currentTag.value', currentTag.value);
     } else {
         console.error('未找到当前标签');
     }
@@ -70,12 +67,10 @@ const follow_tag = async (id) => {
     try {
         const response = await Tag_follow({ id: id });
         if (response.code === 2000) {
-            // 更新本地标签数据
             const index = tags.value.findIndex((tag) => tag.id === id);
             if (index !== -1) {
                 tags.value[index].is_followed = true;
             } else {
-                // 处理错误情况
                 console.error('Failed to follow tag:', response.message);
             }
         } else {
@@ -86,36 +81,92 @@ const follow_tag = async (id) => {
     }
 };
 
-const articles = ref([
-    // {
-    //     id: '1',
-    //     title: 'GSAdmin一键代码生成工具',
-    //     summary: 'GSAdmin是一个基于Vue3的后台管理系统模板，支持一键代码生成。',
-    //     nickname: '作者名',
-    //     published_at: '2024-04-24',
-    //     views_count: 1000,
-    //     likes_count: 50,
-    //     image_url: 'path/to/image1.jpg',
-    //     tags: [{ ID: 101 }, { ID: 102 }],
-    //     status: false
-    // }
-]);
+const fetchArticles = async () => {
+    try {
+        const response = await getArticleByTag(dataObj.value);
+        if (response.code === 2000) {
+            articles.value = response.data.article_list;
+        } else {
+            console.error('获取标签下的文章失败');
+        }
+    } catch (error) {
+        console.error('请求标签下的文章出错:', error);
+    }
+};
+
+const loadMoreData = async () => {
+    if (isLoading.value || noMore.value) return;
+    isLoading.value = true;
+    dataObj.value.page++;
+    const response = await getArticleByTag(dataObj.value);
+    if (response.code === 2000 && response.data.article_list.length > 0) {
+        articles.value.push(...response.data.article_list);
+    } else {
+        noMore.value = true;
+        dataObj.value.page--;
+    }
+    isLoading.value = false;
+};
+
+const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 debounce 函数
 </script>
 
 <template>
-    <div class="tag-list-container">
-        <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
-    </div>
-    <div class="tag-articl">
-        <Article v-for="article in articles" :key="article.id" :item="article" />
+    <div class="container">
+        <div class="tag-list-container">
+            <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
+        </div>
+        <div class="search-mid">
+            <n-tabs type="line" animated v-model:value="currentTab">
+                <n-tab-pane name="0" tab="热门">
+                    <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                        <Article v-for="article in articles" :key="article.id" :item="article" />
+                    </n-infinite-scroll>
+                </n-tab-pane>
+                <n-tab-pane name="1" tab="最新">
+                    <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                        <Article v-for="article in articles" :key="article.id" :item="article" />
+                    </n-infinite-scroll>
+                </n-tab-pane>
+            </n-tabs>
+            <div class="loading" v-if="isLoading && !noMore">
+                <span class="videos">
+                    <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
+                </span>
+                <span class="text">正在全力加载中...</span>
+            </div>
+            <div v-if="noMore" class="loading">没有更多了 🤪</div>
+        </div>
     </div>
 </template>
 
 <style scoped>
-.article-list-container {
+.container {
+    padding: 0;
+}
+.tag-list-container {
+    width: 100%;
+}
+
+.search-mid {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 20px;
     padding: 20px;
+    background-color: white;
+    margin-top: 20px;
+    /* width: 560px; */
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+}
+
+.iconfont {
+    font-size: 24px;
+    color: #19a059;
 }
 </style>

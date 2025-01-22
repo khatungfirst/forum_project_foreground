@@ -25,7 +25,7 @@ const emit = defineEmits(['goToMember']);
                 <span class="actioned">关注了你</span>
             </div>
             <div class="follow-actions">
-                <span class="date">{{ follow.created_at }}</span>
+                <span class="date">{{ follow.daily_time }}</span>
             </div>
         </div>
         <div class="follow-button">

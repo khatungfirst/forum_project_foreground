@@ -37,7 +37,7 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
                 </span>
             </div>
             <div class="message-actions">
-                <span class="date">{{ message.created_at }}</span>
+                <span class="date">{{ message.daily_time }}</span>
             </div>
         </div>
     </div>
