@@ -3,7 +3,14 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Article from '@/views/components/article/index.vue';
 import FansInfo from '@/views/components/fansInfo/index.vue';
-import { getMemberInfo, editSignature, getArticleInfo, deleteArticle, getConcernList } from '@/config/apis/member.ts';
+import {
+    getMemberInfo,
+    editSignature,
+    getArticleInfo,
+    deleteArticle,
+    getConcernList,
+    getConcernDetail
+} from '@/config/apis/member.ts';
 import { concernInter } from '@/config/apis/articleDetail';
 import { getNumberData } from '@/config/apis/settings.ts';
 import { debounce } from '@/utils/debounce.ts';
@@ -73,7 +80,7 @@ const userInfo = async () => {
         isSelf.value = false;
     }
     const { data } = await getMemberInfo({
-        id: user.id
+        author_id: user.id
     });
     if (data) {
         Object.assign(user, data);
@@ -148,6 +155,9 @@ const isLoading = ref(false);
 //表示是否还有数据
 const noMore = ref(false);
 
+//关注列表数据id
+const fansId = ref([]);
+
 //关注列表数组
 const fansArr = ref([]);
 
@@ -155,7 +165,13 @@ const fansArr = ref([]);
 const fansList = async () => {
     const { data } = await getConcernList(fansType);
     if (data) {
-        fansArr.value = data.concernList;
+        fansId.value = data.ids.ids;
+        const fansData = await getConcernDetail({
+            ids: fansId.value
+        });
+        if (fansData) {
+            fansArr.value = fansData.data.user_info_list;
+        }
     }
 };
 
@@ -258,6 +274,7 @@ const deleteArticles = async (id) => {
     });
     if (code === 2000) {
         message.success('删除成功');
+        articleArr.value = articleArr.value.filter((item) => item.id !== id);
     } else {
         message.error('删除失败');
     }
@@ -292,6 +309,7 @@ const searchFun = () => {
         fansList();
     }
     inputValue.value = '';
+    fansType.keyword = '';
 };
 </script>
 <template>
@@ -300,9 +318,9 @@ const searchFun = () => {
             <div class="left">
                 <n-card size="huge" class="information">
                     <div class="left-left">
-                        <n-avatar round :size="48" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
+                        <n-avatar round :size="48" :src="user.head_shot" />
                         <n-ellipsis style="max-width: 240px; display: block">{{ user.nickname }}</n-ellipsis>
-                        <n-ellipsis style="max-width: 240px; display: block">{{ user.signature }}</n-ellipsis>
+                        <n-ellipsis style="max-width: 240px; display: block">{{ user.date }} 加入了</n-ellipsis>
                         <n-input
                             ref="inputInstRef"
                             v-model:value="user.signature"

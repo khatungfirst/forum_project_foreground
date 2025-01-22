@@ -17,15 +17,20 @@ export default function (counts: number, likeSta: number) {
     // 点赞的方法
     const like = async (obj: object) => {
         try {
-            await likeComments(obj);
             if (likeStatus.value === 2) {
                 likeStatus.value = 1;
-                likeCounts.value += 1;
-                message.success('点赞成功');
+                const { code } = await likeComments(obj);
+                if (code === 2000) {
+                    likeCounts.value += 1;
+                    message.success('点赞成功');
+                }
             } else {
                 likeStatus.value = 2;
-                likeCounts.value -= 1;
-                message.success('取消点赞成功');
+                const { code } = await likeComments(obj);
+                if (code === 2000) {
+                    likeCounts.value -= 1;
+                    message.success('取消点赞成功');
+                }
             }
         } catch (error: any) {
             console.error('Error:', error); // 记录错误信息
