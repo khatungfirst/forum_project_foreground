@@ -129,7 +129,7 @@ onMounted(async () => {
                 </div>
             </div>
             <div class="actions">
-                <button @click="changeTheme">切换主题</button>
+                <!-- <button @click="changeTheme">切换主题</button> -->
                 <n-input
                     v-model:value="keyword"
                     placeholder="搜一搜..."
@@ -155,9 +155,13 @@ onMounted(async () => {
                     </n-button>
                 </n-dropdown>
 
-                <n-button @click="handleLogin" class="common-button">
-                    {{ userStore.isLoggedIn ? '用户头像' : '登录注册' }}
-                </n-button>
+                <template v-if="userStore.isLoggedIn">
+                    <!-- <img :src="userStore.userInfo.avatar_path" alt="User Avatar" class="user-avatar" /> -->
+                    <n-avatar size="large" round :src="userStore.userInfo.avatar_path" style="margin: 0 20px" />
+                </template>
+                <template v-else>
+                    <n-button @click="handleLogin" class="common-button">登录注册</n-button>
+                </template>
             </div>
         </div>
         <div class="content">
@@ -172,6 +176,7 @@ onMounted(async () => {
     justify-content: space-between;
     align-items: center;
     margin: 15px;
+    padding: 0 30px;
 }
 
 .nav {
