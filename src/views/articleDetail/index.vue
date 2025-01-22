@@ -192,14 +192,10 @@ const authorInit = async () => {
         authorInfo.author_read = data.reads_count;
         authorInfo.concern_status = data.concern_status;
     }
-    console.log(articleInfo.author_id, '000000');
     if (articleInfo.author_id === +localStorage.getItem('userId')) {
         isPerson.value = true;
     }
 };
-
-//当前登录人的id
-const user_id = articleInfo.author_id; //作者id
 
 //关注的方法
 const concern = async () => {
@@ -212,7 +208,7 @@ const concern = async () => {
         authorInfo.fans_count++;
     }
     const data = {
-        followed_id: user_id
+        followed_id: articleInfo.author_id
     };
     const { code } = await concernInter(data);
     if (code === 2000 && authorInfo.concern_status === true) {
@@ -266,6 +262,9 @@ const commentTotal = ref(0);
 //控制是否显示去登录模块
 const LoginVis = ref(true);
 
+//判断新加载是否获得了数据
+const idHavaData = ref(false);
+
 //评论相关数据
 const commentInfo = reactive({
     article_id: +route.params.id,
@@ -280,7 +279,10 @@ const initComments = async () => {
     }
     const { data } = await getFirstOrderComments(commentInfo);
     if (data) {
-        commentsList.value = data.first_comments_list;
+        if (data.first_comments_list.length > 0) {
+            commentsList.value = data.first_comments_list;
+            idHavaData.value = true;
+        }
         commentTotal.value = data.comments_total;
     }
 };
@@ -317,11 +319,20 @@ const deleteFirst = (id) => {
 
 //评论的下拉事件
 const handleLoad = async () => {
-    commentInfo.offset = commentInfo.offset + 1;
-    const { data } = await getFirstOrderComments(commentInfo);
-    if (data) {
-        commentsList.value.push(...data.firstCommentsList);
+    if (idHavaData.value) {
+        commentInfo.offset = commentInfo.offset + 1;
+        const { data } = await getFirstOrderComments(commentInfo);
+        if (data) {
+            if (data.first_comments_list.length > 0) {
+                commentsList.value.push(...data.firstCommentsList);
+                idHavaData.value = true;
+            } else {
+                idHavaData.value = false;
+                commentInfo.offset = commentInfo.offset - 1;
+            }
+        }
     }
+    console.log(commentInfo.offset, 'offset');
 };
 const handleLoadComment = debounce(handleLoad, 200);
 

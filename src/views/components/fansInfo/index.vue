@@ -9,20 +9,20 @@ const prop = defineProps({
     item: {
         type: Object as () => {
             id: number;
-            head_shot: string;
+            avatar_path: string;
             nickname: string;
-            articles_count: number;
+            author_articles: number;
             fans_count: number;
-            concern_status: boolean;
+            is_followed: number;
         },
         required: true,
         default: () => ({
             id: 0,
-            head_shot: '',
+            avatar_path: '',
             nickname: '',
-            articles_count: 0,
+            author_articles: 0,
             fans_count: 0,
-            concern_status: false
+            is_followed: 0
         })
     }
 });
@@ -31,14 +31,17 @@ const message = useMessage();
 
 const router = useRouter();
 
-const concernStatus = ref(prop.item.concern_status);
+const concernStatus = ref(prop.item.is_followed);
+
+const loginId = +localStorage.getItem('userId');
 
 //关注的方法
 const concernFun = async (id) => {
-    const { code } = await concernInter(id);
+    const { code } = await concernInter({
+        followed_id: id
+    });
     if (code === 2000) {
-        concernStatus.value = !concernStatus.value;
-        console.log(concernStatus.value, '*****');
+        concernStatus.value = concernStatus.value === 0 ? 1 : 0;
 
         if (concernStatus.value) {
             message.success('关注成功');
@@ -57,21 +60,37 @@ const routeMember = (id) => {
 };
 </script>
 <template>
-    <div class="fans" @click="routeMember(prop.item.id)">
-        <n-avatar round :size="48" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
+    <div class="fans">
+        <n-avatar round :size="48" :src="prop.item.avatar_path" @click="routeMember(prop.item.id)" />
         <div class="fans-middle">
             <n-ellipsis style="max-width: 240px">
                 {{ prop.item.nickname }}
             </n-ellipsis>
             <p>
-                <span>文章数：{{ prop.item.articles_count }}</span>
+                <span>文章数：{{ prop.item.author_articles }}</span>
                 <span>粉丝数：{{ prop.item.fans_count }}</span>
             </p>
         </div>
-        <n-button strong secondary round type="primary" @click="concern(prop.item.id)" v-if="!concernStatus">
+        <n-button
+            strong
+            secondary
+            round
+            type="primary"
+            @click="concern(prop.item.id)"
+            v-if="concernStatus === 0 && prop.item.id !== loginId"
+        >
             关注
         </n-button>
-        <n-button strong secondary round type="primary" @click="concern(prop.item.id)" v-else>已关注</n-button>
+        <n-button
+            strong
+            secondary
+            round
+            type="primary"
+            @click="concern(prop.item.id)"
+            v-if="concernStatus === 1 && prop.item.id !== loginId"
+        >
+            已关注
+        </n-button>
     </div>
 </template>
 <style scoped lang="scss">

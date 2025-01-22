@@ -74,19 +74,25 @@ onBeforeUnmount(() => {
 //定义接收二级评论的数组
 const commentList = ref([]);
 
+//判断是否有二级评论
+const isSecondComments = ref(false);
+
 //获取评论需要的相关属性
 const commentInfo = reactive({
     highest_id: prop.item.id,
     offset: 1,
-    limit: 2,
-    user_id: 0
+    limit: 2
+    // user_id: 0
 });
 //初始化二级评论
 const getSecondComments = async () => {
     try {
         const { data } = await getSecondOrderComments(commentInfo);
         if (data) {
-            commentList.value.push(...data.secondCommentsList);
+            if (data.second_comments_list.length > 0) {
+                commentList.value.push(...data.second_comments_list);
+                isSecondComments.value = true;
+            }
         }
     } catch (error) {
         console.error('Failed to fetch comments:', error);
@@ -103,7 +109,6 @@ const moreSecondComments = async () => {
 
 //删除二级评论
 const deleteSec = (id) => {
-    console.log(1111);
     commentList.value = commentList.value.filter((item) => item.id !== id);
 };
 
@@ -112,23 +117,34 @@ const deleteSec = (id) => {
 //回复一级评论需要的相关属性
 const commentItems = reactive({
     article_id: prop.item.article_id,
-    user_id: 0, //当前登录
     highest_id: prop.item.highest_id,
     parent_id: prop.item.parent_id,
-    parent_user_id: prop.item.parent_id
+    parent_user_id: prop.item.parent_id,
+    content: '',
+    path: ''
 });
 
 //解构点赞方法
 const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
 const likeObj = {
-    id: 0,
-    status: 1,
-    user_id: 1
+    id: prop.item.id,
+    status: prop.item.status === 2 ? 1 : 2
 };
 
 //跳转到指定用户会员中心
 const jumpMember = (id: number) => {
     router.push(`/member/${id}`);
+};
+
+//--------------------------------回复评论-----------------------------
+
+const responseComments = () => {
+    appear.value = !appear.value;
+    isOverlayVisible.value = !isOverlayVisible.value;
+    commentItems.highest_id = prop.item.id;
+    commentItems.parent_id = prop.item.id;
+    commentItems.parent_user_id = prop.item.user_id;
+    console.log(prop.item);
 };
 
 //--------------------------------删除、举报功能------------------------
@@ -181,17 +197,14 @@ const handleMaskClick = () => {
 <template>
     <div class="f-comments" ref="boxRef">
         <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
-        <n-avatar
-            round
-            size="large"
-            src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-            @click="jumpMember(1)"
-        />
+        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(1)" />
         <div class="avatar-other">
             <div class="first-comment">
                 <div class="comments-detail">
-                    <n-ellipsis style="max-width: 240px">{{ prop.item.nickname }}</n-ellipsis>
-                    <p>{{ prop.item.content }}</p>
+                    <n-ellipsis style="max-width: 240px; margin-bottom: 7px; color: #5d6271">
+                        {{ prop.item.nickname }}
+                    </n-ellipsis>
+                    <p style="font-size: 15px">{{ prop.item.content }}</p>
                     <div class="comment-detail">
                         <span class="small-detail1">{{ prop.item.create_at }}</span>
                         <span
@@ -203,13 +216,7 @@ const handleMaskClick = () => {
                             <span v-if="likeCounts === 0">点赞</span>
                             <span v-else>{{ likeCounts }}</span>
                         </span>
-                        <span
-                            class="small-detail"
-                            @click="
-                                appear = !appear;
-                                isOverlayVisible = !isOverlayVisible;
-                            "
-                        >
+                        <span class="small-detail" @click="responseComments">
                             <i class="iconfont">&#xe6b3;</i>
                             回复
                         </span>
@@ -227,7 +234,7 @@ const handleMaskClick = () => {
                     </n-popconfirm>
                 </div>
             </div>
-            <div class="second-comment">
+            <div class="second-comment" v-if="isSecondComments">
                 <SecondOrderComments
                     :item="item"
                     v-for="(item, index) in commentList"

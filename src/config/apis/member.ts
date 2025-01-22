@@ -10,9 +10,14 @@ export const getArticleInfo = (params: any): Promise<any> => {
     return $get('/article/get_type_data', params);
 };
 
-//3、获取对应关注列表的信息
+//3、获取对应关注列表的id
 export const getConcernList = (params: any): Promise<any> => {
     return $get('/user/attention', params);
+};
+
+//3-2、获取具体关注人员信息
+export const getConcernDetail = (params: any): Promise<any> => {
+    return $http('/user/get_basic_information', params);
 };
 
 //4、编辑个签

@@ -29,18 +29,18 @@ const prop = defineProps({
         required: true,
         default: () => ({
             id: 6,
-            nickname: '似婷婷',
-            parent_nickname: '贲梓妍',
-            create_at: '2024-04-08 03:17:07',
-            article_id: 1,
-            user_id: 53,
-            highest_id: 61,
-            parent_id: 94,
-            content: 'dolore incididunt cillum',
-            likes_count: 10,
-            path: 'Duis culpa irure aliqua',
-            parent_path: 'culpa voluptate irure elit minim',
-            comment_path: 'in nostrud labore ea',
+            nickname: '',
+            parent_nickname: '',
+            create_at: '',
+            article_id: 0,
+            user_id: 0,
+            highest_id: 0,
+            parent_id: 0,
+            content: '',
+            likes_count: 0,
+            path: '',
+            parent_path: '',
+            comment_path: '',
             status: 1,
             parent_user_id: 0
         })
@@ -71,19 +71,19 @@ onBeforeUnmount(() => {
 //发表评论需要的相关属性
 const commentItems = reactive({
     article_id: prop.item.article_id,
-    user_id: 0, //当前登录
     highest_id: prop.item.highest_id,
-    parent_id: prop.item.parent_id,
-    parent_user_id: prop.item.parent_id
+    parent_id: prop.item.id,
+    parent_user_id: prop.item.user_id,
+    content: '',
+    path: ''
 });
 
 //解构点赞评论方法
 const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
 
 const likeObj = {
-    id: 0,
-    status: 1,
-    user_id: 1
+    id: prop.item.id,
+    status: prop.item.status === 2 ? 1 : 2
 };
 
 //删除评论
@@ -104,6 +104,9 @@ const report = () => {
 const jumpMember = (id: number) => {
     router.push(`/member/${id}`);
 };
+
+//判断回复的是自己的评论还是其他人的评论
+const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
 
 //------------------------------确定评论盒子的宽度-------------------------
 
@@ -137,17 +140,18 @@ const handleMaskClick = () => {
 <template>
     <div class="comments" ref="boxRef">
         <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
-        <n-avatar
-            round
-            size="large"
-            src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-            @click="jumpMember(1)"
-        />
+        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(1)" />
         <div class="comments-detail">
             <n-ellipsis style="max-width: 240px">
-                <span class="nickname" @click="jumpMember(1)">{{ prop.item.nickname }}</span>
-                <span>回复</span>
-                <span class="nickname1" @click="jumpMember(2)">{{ prop.item.parent_nickname }} ：</span>
+                <div>
+                    <span class="nickname" @click="jumpMember(1)" style="margin-bottom: 7px; color: #5d6271">
+                        {{ prop.item.nickname }}
+                    </span>
+                    <span v-if="!isResponseSelf">回复</span>
+                    <span class="nickname1" @click="jumpMember(2)" v-if="!isResponseSelf">
+                        {{ prop.item.parent_nickname }} ：
+                    </span>
+                </div>
                 <span>{{ prop.item.content }}</span>
             </n-ellipsis>
             <div class="comment-detail">
