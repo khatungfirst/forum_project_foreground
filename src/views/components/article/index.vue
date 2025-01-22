@@ -15,7 +15,7 @@ const prop = defineProps({
             likes_count: number;
             image_url: string;
             tags: Array<{
-                ID: number;
+                name: string;
             }>;
             id: string;
             status: boolean;
@@ -29,7 +29,7 @@ const prop = defineProps({
             views_count: 0,
             likes_count: 0,
             image_url: '',
-            tags: [{ ID: 0 }],
+            tags: [],
             id: '',
             status: false
         })
@@ -80,7 +80,7 @@ const checkDetail = () => {
                     </span>
                     <ul>
                         <li v-for="(tag, index) in prop.item.tags" :key="index" class="tag">
-                            {{ tag.ID }}
+                            {{ tag.name }}
                         </li>
                     </ul>
                 </div>

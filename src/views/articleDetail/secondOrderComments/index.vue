@@ -108,6 +108,9 @@ const jumpMember = (id: number) => {
 //判断回复的是自己的评论还是其他人的评论
 const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
 
+//判断这个评论是否是自己的评论
+const isSelf = prop.item.user_id === +localStorage.getItem('userId') ? true : false;
+
 //------------------------------确定评论盒子的宽度-------------------------
 
 ///获取中间盒子对象
@@ -148,7 +151,12 @@ const handleMaskClick = () => {
                         {{ prop.item.nickname }}
                     </span>
                     <span v-if="!isResponseSelf">回复</span>
-                    <span class="nickname1" @click="jumpMember(2)" v-if="!isResponseSelf">
+                    <span
+                        class="nickname1"
+                        @click="jumpMember(2)"
+                        v-if="!isResponseSelf"
+                        style="margin-bottom: 7px; color: #5d6271"
+                    >
                         {{ prop.item.parent_nickname }} ：
                     </span>
                 </div>
@@ -177,7 +185,7 @@ const handleMaskClick = () => {
                 </span>
             </div>
         </div>
-        <div class="more">
+        <div class="more" v-if="isSelf">
             <n-popconfirm :positive-text="null" :negative-text="null" :show-icon="false">
                 <template #trigger>
                     <i class="iconfont">&#xe61e;</i>

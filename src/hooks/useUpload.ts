@@ -9,7 +9,7 @@ export default function () {
         fd.append('files', item.file.file);
         fd.append('width', '200');
         const { data } = await getImageUrl(fd);
-        image_url.value = data[0];
+        image_url.value = data[0].url;
         console.log(image_url.value, '000000000');
     };
 

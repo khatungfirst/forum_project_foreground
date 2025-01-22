@@ -356,8 +356,8 @@ const catalogueControl = () => {
         <div class="left">
             <div class="left-contains">
                 <div class="laconicAuthorInfo" v-if="isAuthorInfo">
-                    <n-avatar round size="large" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
-                    <span>作者名</span>
+                    <n-avatar round size="large" :src="authorInfo.head" />
+                    <span>{{ authorInfo.nickname }}</span>
                 </div>
                 <IconWrapper
                     :icon="LikeFilled"
@@ -413,14 +413,14 @@ const catalogueControl = () => {
                 <div class="tags">
                     <span>标签：</span>
                     <ul>
-                        <li v-for="(item, index) in articleInfo.tags" :key="index">{{ item.ID }}</li>
+                        <li v-for="(item, index) in articleInfo.tags" :key="index">{{ item.name }}</li>
                     </ul>
                 </div>
             </div>
             <div class="reviewModule">
                 <h3>评论 {{ commentTotal }}</h3>
                 <div class="loginRegist" v-if="LoginVis">
-                    <n-avatar round size="large" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
+                    <n-avatar round size="large" :src="authorInfo.head" />
                     <div class="loginBgc">
                         <n-button strong secondary round type="primary" @click="login">登录注册</n-button>
                         <span>登录后可评论</span>

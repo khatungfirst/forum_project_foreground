@@ -35,6 +35,9 @@ const concernStatus = ref(prop.item.is_followed);
 
 const loginId = +localStorage.getItem('userId');
 
+//声明一个变量接收粉丝数
+const fansCount = ref(prop.item.fans_count);
+
 //关注的方法
 const concernFun = async (id) => {
     const { code } = await concernInter({
@@ -45,6 +48,7 @@ const concernFun = async (id) => {
 
         if (concernStatus.value) {
             message.success('关注成功');
+            fansCount.value++;
         } else {
             message.success('取消关注成功');
         }
@@ -68,7 +72,7 @@ const routeMember = (id) => {
             </n-ellipsis>
             <p>
                 <span>文章数：{{ prop.item.author_articles }}</span>
-                <span>粉丝数：{{ prop.item.fans_count }}</span>
+                <span>粉丝数：{{ fansCount }}</span>
             </p>
         </div>
         <n-button
