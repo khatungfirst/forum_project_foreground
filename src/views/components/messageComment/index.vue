@@ -33,7 +33,7 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
                 <a href="#">{{ comment.title }}</a>
             </div>
             <div class="comment-actions">
-                <span class="date">{{ comment.created_at }}</span>
+                <span class="date">{{ comment.daily_time }}</span>
                 <button class="like-button" @click="() => emit('likeComment', comment)">
                     {{ comment.likes_count }} 次赞
                 </button>

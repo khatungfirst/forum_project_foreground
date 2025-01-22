@@ -5,10 +5,13 @@ import { useRouter } from 'vue-router';
 import { login } from '../../config/apis/login';
 import { useMessage } from 'naive-ui';
 import { useUserStore } from '@/config/store/userStore';
+import { useMessageStore } from '@/config/store/messageStore';
+
 const router = useRouter();
 const formRef = ref(null);
 
 const userStore = useUserStore();
+const messageStore = useMessageStore();
 
 const form = ref({
     email: '',
@@ -47,14 +50,21 @@ const handleLogin = async () => {
         await formRef.value.validate();
         const response = await login({ email: form.value.email, password: form.value.password });
         if (response.code === 2000 && response.data) {
-            console.log('Token is stored:', response.data.userinfo);
-
             userStore.setToken(response.data.token); // 存储令牌
             userStore.setUserInfo(response.data.userinfo); // 存储用户信息
             // 验证 token 是否存储成功
             const storedToken = userStore.getToken();
             // userStore().login(response.data);
             console.log('Token is stored:', storedToken);
+
+            console.log('getToken:', userStore.getToken());
+            // 确认 messageStore 是否被正确获取
+            console.log('response.data.userinfo:', response.data.userinfo);
+            console.log('userStore.setUserInfo', userStore.setUserInfo);
+            const UserInfo = userStore.getUserInfo();
+            console.log('获得userInfo', UserInfo.avatar_path);
+            // 登录成功后初始化SSE
+            messageStore.initSSE();
             // 重新定向
             router.push('/home');
         } else {

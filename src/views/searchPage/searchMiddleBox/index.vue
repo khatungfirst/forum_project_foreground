@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, defineProps } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
+import { follower_article } from '@/config/apis/articleDetail';
 import Article from '@/views/components/article/index.vue';
 import { debounce } from '@/utils/debounce.ts';
 
@@ -33,7 +34,6 @@ const dataObj = reactive({
 });
 
 const init = async () => {
-    console.log(111);
     const { data } = await getSelectArticle(dataObj);
     if (data) {
         selectData.value = data.selectedList;
@@ -65,8 +65,21 @@ const loadInit = async () => {
     setTimeout(async () => {
         dataObj.page++;
         const { data } = await getSelectArticle(dataObj);
+
         if (data) {
             selectData.value.push(...data.selectedList);
+        } else {
+            dataObj.page--;
+        }
+        const response = await follower_article({
+            page: dataObj.page,
+            limit: dataObj.limit,
+            kind: dataObj.kind
+        });
+        console.log(response.data, '关注的人的文章');
+
+        if (response.code === 2000) {
+            selectData.value = response.data.selectedList;
         } else {
             dataObj.page--;
         }

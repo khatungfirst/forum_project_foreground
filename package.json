@@ -35,6 +35,8 @@
         "bytemd": "latest",
         "dayjs": "^1.11.7",
         "emoji-mart-vue-fast": "^15.0.2",
+        "event-source-polyfill": "^1.0.31",
+        "lodash": "^4.17.21",
         "markdown-it": "^14.1.0",
         "marked": "^14.1.2",
         "nprogress": "^0.2.0",

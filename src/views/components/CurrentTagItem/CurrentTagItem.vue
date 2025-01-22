@@ -45,6 +45,7 @@ const handleFollow = () => {
     flex-direction: column;
     align-items: center;
     width: 100%;
+    background-color: white; /* 设置背景颜色为白色 */
 }
 
 .tag-item-single {
@@ -53,6 +54,8 @@ const handleFollow = () => {
     align-items: center;
     width: 100%;
     margin-bottom: 20px;
+    /* margin: 0; */
+    padding: 40px 0 0 80px;
 }
 
 .tag-item-info {
