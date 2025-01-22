@@ -92,8 +92,11 @@ const getSecondComments = async () => {
             if (data.second_comments_list.length > 0) {
                 commentList.value.push(...data.second_comments_list);
                 isSecondComments.value = true;
+            } else {
+                isSecondComments.value = false;
             }
         }
+        console.log(commentList.value, '000');
     } catch (error) {
         console.error('Failed to fetch comments:', error);
         message.error('加载评论失败，请重试。');
@@ -102,7 +105,7 @@ const getSecondComments = async () => {
 
 //加载更多二级评论
 const moreSecondComments = async () => {
-    commentInfo.limit = 5;
+    commentInfo.limit = 3;
     commentInfo.offset = commentInfo.offset + 1;
     getSecondComments();
 };
@@ -136,6 +139,8 @@ const jumpMember = (id: number) => {
     router.push(`/member/${id}`);
 };
 
+//判断这个评论是否是自己的评论
+const isSelf = prop.item.user_id === +localStorage.getItem('userId') ? true : false;
 //--------------------------------回复评论-----------------------------
 
 const responseComments = () => {
@@ -192,12 +197,13 @@ const isOverlayVisible = ref(false);
 const handleMaskClick = () => {
     isOverlayVisible.value = false;
     appear.value = false;
+    getSecondComments();
 };
 </script>
 <template>
     <div class="f-comments" ref="boxRef">
         <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
-        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(1)" />
+        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(prop.item.user_id)" />
         <div class="avatar-other">
             <div class="first-comment">
                 <div class="comments-detail">
@@ -222,7 +228,7 @@ const handleMaskClick = () => {
                         </span>
                     </div>
                 </div>
-                <div class="more">
+                <div class="more" v-if="isSelf">
                     <n-popconfirm :positive-text="null" :negative-text="null" :show-icon="false">
                         <template #trigger>
                             <i class="iconfont">&#xe61e;</i>
@@ -234,14 +240,14 @@ const handleMaskClick = () => {
                     </n-popconfirm>
                 </div>
             </div>
-            <div class="second-comment" v-if="isSecondComments">
+            <div class="second-comment">
                 <SecondOrderComments
                     :item="item"
                     v-for="(item, index) in commentList"
                     :key="index"
                     @delete-secComments="deleteSec"
                 ></SecondOrderComments>
-                <p @click="moreSecondComments">
+                <p @click="moreSecondComments" v-if="isSecondComments">
                     查看更多回复
                     <Icon size="18">
                         <DownOutlined />

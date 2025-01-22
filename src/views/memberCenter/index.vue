@@ -76,7 +76,7 @@ const isSelf = ref(true);
 
 //初始化用户数据
 const userInfo = async () => {
-    if (+user.id !== 1) {
+    if (+user.id !== +localStorage.getItem('userId')) {
         isSelf.value = false;
     }
     const { data } = await getMemberInfo({
@@ -120,7 +120,9 @@ const commitSignature = async () => {
 //关注
 const concernFun = async () => {
     user.concern_status = !user.concern_status;
-    const { code } = await concernInter(user.id);
+    const { code } = await concernInter({
+        followed_id: +user.id
+    });
     if (code === 2000) {
         if (user.concern_status) {
             message.success('关注成功');
@@ -320,13 +322,14 @@ const searchFun = () => {
                     <div class="left-left">
                         <n-avatar round :size="48" :src="user.head_shot" />
                         <n-ellipsis style="max-width: 240px; display: block">{{ user.nickname }}</n-ellipsis>
-                        <n-ellipsis style="max-width: 240px; display: block">{{ user.date }} 加入了</n-ellipsis>
+                        <n-ellipsis style="max-width: 240px; display: block">{{ user.date }} 加入了siwu</n-ellipsis>
                         <n-input
                             ref="inputInstRef"
                             v-model:value="user.signature"
                             placeholder=""
                             :disabled="isEdit"
                             @blur="commitSignature"
+                            style="width: 200px"
                         />
                         <i class="iconfont" @click="edit" style="color: #cbcbcb" v-if="isSelf">&#xe602;</i>
                     </div>
@@ -548,8 +551,9 @@ const searchFun = () => {
                 }
                 .left-right {
                     .n-button {
-                        margin-top: 40px;
+                        margin: 20px 20px 0px 0px;
                         width: 80px;
+                        float: right;
                     }
 
                     .concern {

@@ -26,7 +26,6 @@ onMounted(async () => {
 
 //定义个人资料的所有信息
 const userInfo = reactive({
-    id: 0,
     nickname: '',
     career_direction: '',
     user_home_page: '',
@@ -87,8 +86,6 @@ const processedTags = computed(() => {
 
 //添加标签的方法
 const addTags = async (item) => {
-    console.log(userInfo.user_tags, '===========');
-
     if (userInfo.user_tags === null) {
         userInfo.user_tags = [];
     }
@@ -110,6 +107,7 @@ const { image_url, getUrl } = useUpload();
 const handlePreview = async (item) => {
     await getUrl(item);
     userInfo.path = image_url.value;
+    console.log(userInfo.path, '========');
     update('更改头像成功', '更改头像失败');
     // showModalRef.value = true;
 };
