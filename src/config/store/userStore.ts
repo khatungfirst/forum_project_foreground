@@ -39,7 +39,7 @@ export const useUserStore = defineStore('user', {
         },
         login(userInfo: any) {
             this.setToken(userInfo.token);
-            this.setUserInfo(userInfo);
+            this.setUserInfo(userInfo.userinfo);
             this.isLogin = true;
         },
         logout() {

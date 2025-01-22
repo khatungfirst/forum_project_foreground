@@ -50,19 +50,18 @@ const handleLogin = async () => {
         await formRef.value.validate();
         const response = await login({ email: form.value.email, password: form.value.password });
         if (response.code === 2000 && response.data) {
-            userStore.setToken(response.data.token); // 存储令牌
-            userStore.setUserInfo(response.data.userinfo); // 存储用户信息
+            // userStore.setToken(response.data.token); // 存储令牌
+            // userStore.setUserInfo(response.data.userinfo); // 存储用户信息
+            // 等同于下面的login()
+            userStore.login(response.data); // 登录成功，调用 login 方法
             // 验证 token 是否存储成功
             const storedToken = userStore.getToken();
             // userStore().login(response.data);
             console.log('Token is stored:', storedToken);
-
-            console.log('getToken:', userStore.getToken());
-            // 确认 messageStore 是否被正确获取
-            console.log('response.data.userinfo:', response.data.userinfo);
-            console.log('userStore.setUserInfo', userStore.setUserInfo);
-            const UserInfo = userStore.getUserInfo();
-            console.log('获得userInfo', UserInfo.avatar_path);
+            const userInfo = userStore.userInfo;
+            console.log('Current User Info:', userInfo);
+            const isLoggedIn = userStore.isLoggedIn;
+            console.log('Is User Logged In:', isLoggedIn);
             // 登录成功后初始化SSE
             messageStore.initSSE();
             // 重新定向
