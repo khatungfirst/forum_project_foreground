@@ -47,6 +47,9 @@ const prop = defineProps({
 //定义消息提示对象
 const message = useMessage();
 
+//获取当前登录人的头像
+const head_shot = JSON.parse(localStorage.getItem('userInfo')).avatar_path;
+
 //----------------------------------------评论图片---------------------------------
 
 //存放上传图片的url路径
@@ -151,7 +154,7 @@ const publicFirst = async () => {
 </script>
 <template>
     <div class="drawer" v-if="prop.appear" :style="{ width: prop.childWidth + 'px' }">
-        <n-avatar round size="large" :src="prop.headShot" />
+        <n-avatar round size="large" :src="head_shot" />
         <div class="textArea">
             <textarea
                 type="text"

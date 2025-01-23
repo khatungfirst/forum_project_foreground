@@ -189,7 +189,6 @@ const fansLoadInit = async () => {
             fansArr.value.push(...data.concernList);
             isLoading.value = false;
             if (data.total === 0) {
-                console.log(data.total, '数据条数');
                 noMore.value = true;
             }
         }
@@ -321,8 +320,12 @@ const searchFun = () => {
                 <n-card size="huge" class="information">
                     <div class="left-left">
                         <n-avatar round :size="48" :src="user.head_shot" />
-                        <n-ellipsis style="max-width: 240px; display: block">{{ user.nickname }}</n-ellipsis>
-                        <n-ellipsis style="max-width: 240px; display: block">{{ user.date }} 加入了siwu</n-ellipsis>
+                        <n-ellipsis style="max-width: 240px; display: block; font-weight: 800; font-size: 18px">
+                            {{ user.nickname }}
+                        </n-ellipsis>
+                        <n-ellipsis style="max-width: 240px; display: block">
+                            {{ user.date }} 加入了{{ user.tag }}
+                        </n-ellipsis>
                         <n-input
                             ref="inputInstRef"
                             v-model:value="user.signature"
