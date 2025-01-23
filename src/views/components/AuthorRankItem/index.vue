@@ -105,7 +105,7 @@ const refreshAuthors = () => {
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    border: 1px solid #ccc;
+    /* border: 1px solid #ccc; */
     border-radius: 5px;
     width: 290px;
 }

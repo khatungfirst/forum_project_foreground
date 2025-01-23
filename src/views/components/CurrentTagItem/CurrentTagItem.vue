@@ -32,7 +32,7 @@ const handleFollow = () => {
             </div>
             <div class="tag-item_follow">
                 <button class="tag-item_button" @click="handleFollow">
-                    {{ tag.is_followed ? '已关注√' : '关注' }}
+                    {{ tag.status === 1 ? '已关注√' : '关注' }}
                 </button>
             </div>
         </div>
@@ -102,8 +102,9 @@ const handleFollow = () => {
     border-radius: 50px;
     outline: none;
     color: #19a059;
-    padding: 8px 0;
+    padding: 8px 10px;
     width: 100%;
     text-align: center;
+    font-size: 16px;
 }
 </style>

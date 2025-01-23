@@ -64,7 +64,7 @@ const fetchArticles = async () => {
 };
 
 const init = async () => {
-    const { data } = await getSelectArticle(dataObj.value);
+    // const { data } = await getSelectArticle(dataObj.value);
     if (data) {
         selectData.value = data.selectedList;
     }
@@ -74,9 +74,10 @@ const loadMoreData = async () => {
     if (isLoading.value || noMore.value) return;
     isLoading.value = true;
     dataObj.value.page++;
-    const { data } = await getSelectArticle(dataObj.value);
-    if (data) {
-        selectData.value.push(...data.selectedList);
+    const response = await getArticleByTag(dataObj.value);
+    if (response.code === 2000 && response.data.article_list.length > 0) {
+        articles.value.push(...response.data.article_list);
+        totalArticlesLoaded.value += response.data.article_list.length; // 更新已加载的文章总数
     } else {
         noMore.value = true;
         dataObj.value.page--;
@@ -143,7 +144,13 @@ const refreshArticles = () => {
         <!-- 主内容区 -->
         <div class="main-content">
             <div class="middle">
-                <n-tabs type="line" animated @update:value="tabTop" v-model:value="category_id">
+                <n-tabs
+                    type="line"
+                    animated
+                    @update:value="tabTop"
+                    v-model:value="category_id"
+                    style="padding: 10px 20px"
+                >
                     <n-tab-pane name="1" tab="综合">
                         <SearchMiddleBox :category_id="category_id" />
                     </n-tab-pane>
@@ -207,6 +214,7 @@ const refreshArticles = () => {
     display: flex;
     flex-direction: row;
     height: 100vh;
+    padding: 10px 90px;
 }
 
 .middle {

@@ -4,9 +4,9 @@ import { getUserInfo } from '../apis/settings';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        token: '',
-        userInfo: null,
-        isLogin: false
+        token: localStorage.getItem('token') || '',
+        userInfo: JSON.parse(localStorage.getItem('userInfo') || 'null'),
+        isLogin: !!localStorage.getItem('token')
     }),
     getters: {
         isLoggedIn: (state) => state.isLogin
@@ -14,17 +14,13 @@ export const useUserStore = defineStore('user', {
     actions: {
         setToken(token: string) {
             this.token = token;
-            // 将 token 存储到 LocalStorage
             localStorage.setItem('token', token);
         },
         getToken() {
             return this.token || localStorage.getItem('token');
         },
         setUserInfo(userinfo: any) {
-            console.log(userinfo); // 打印 userinfo 对象
             this.userInfo = userinfo;
-            // 同时将用户 ID 存储到 LocalStorage
-            localStorage.setItem('userId', userinfo.id);
             localStorage.setItem('userInfo', JSON.stringify(userinfo));
         },
         getUserInfo() {
@@ -33,9 +29,8 @@ export const useUserStore = defineStore('user', {
         clear() {
             this.token = '';
             this.userInfo = null;
-            // 清除 LocalStorage 中的 token
             localStorage.removeItem('token');
-            localStorage.removeItem('userId');
+            localStorage.removeItem('userInfo');
         },
         login(userInfo: any) {
             this.setToken(userInfo.token);
@@ -45,6 +40,16 @@ export const useUserStore = defineStore('user', {
         logout() {
             this.clear();
             this.isLogin = false;
+        },
+        init() {
+            // 初始化时检查 localStorage 中的 token 和 userInfo
+            const token = localStorage.getItem('token');
+            const userInfo = JSON.parse(localStorage.getItem('userInfo') || 'null');
+            if (token && userInfo) {
+                this.token = token;
+                this.userInfo = userInfo;
+                this.isLogin = true;
+            }
         }
     }
 });
