@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { defineProps, defineEmits } from 'vue';
 import { getImageUrl } from '@/config/apis/publicArticle';
 import { publicComments } from '@/config/apis/comments';
 import type { UploadFileInfo } from 'naive-ui';

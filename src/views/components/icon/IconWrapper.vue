@@ -1,6 +1,5 @@
 <!-- 渲染图标的组件 -->
 <script lang="ts" setup>
-import { defineProps } from 'vue';
 import { Icon } from '@vicons/utils';
 //声明组件的属性类型
 const props = defineProps<{

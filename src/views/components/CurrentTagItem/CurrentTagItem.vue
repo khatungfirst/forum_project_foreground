@@ -1,6 +1,5 @@
 // CurrentTagItem.vue
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 
 const emit = defineEmits(['follow']);
 const props = defineProps({

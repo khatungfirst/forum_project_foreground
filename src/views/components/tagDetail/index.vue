@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, defineEmits } from 'vue';
+import { computed } from 'vue';
 // 定义可以触发的事件
 const emit = defineEmits(['follow']);
 const props = defineProps({

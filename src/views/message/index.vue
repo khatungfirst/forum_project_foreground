@@ -156,7 +156,7 @@ const goToArticleDetail = (articleId) => {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .right {
     /* ... 其他样式 ... */
 
