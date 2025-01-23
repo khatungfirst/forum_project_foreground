@@ -69,9 +69,11 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         getImageUrl(fd)
             .then((response) => {
                 if (response && response.data) {
+                    console.log(response.data[0].url, '99999');
+
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data);
-                    uploadedImages.value.push(...response.data);
+                    uploadedImages.value.push(...response.data[0].url);
                 } else {
                     // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
                     reject(new Error('Failed to retrieve thumbnail URL'));
