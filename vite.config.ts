@@ -40,7 +40,7 @@ export default defineConfig(({ command, mode }) => {
 
     return {
         // 开发或生产环境服务的公共基础路径。
-        // base: env.VITE_APP_PUBLIC_URL,
+        base: env.VITE_APP_PUBLIC_URL,
         plugins: [
             vue(),
             vueJsx(),
