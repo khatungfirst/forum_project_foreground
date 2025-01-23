@@ -1,4 +1,4 @@
-import { $get, $http, $post } from '@/packages/request';
+import { $get, $http } from '@/packages/request';
 //获取文章类型和标签下拉框中的数据
 export const getTypeTag = (): Promise<any> => {
     return $get('/article/edit');
@@ -11,5 +11,5 @@ export const getImageUrl = (params: any): Promise<any> => {
 
 //发布文章
 export const publicArticles = (params: any): Promise<any> => {
-    return $post('/article/publish', params);
+    return $http('/article/publish', params);
 };

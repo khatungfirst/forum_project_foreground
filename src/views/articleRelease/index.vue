@@ -51,7 +51,7 @@ onUnmounted(() => {
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
-    user_id: localStorage.getItem('userId'),
+    user_id: +localStorage.getItem('userId'),
     article_id: 0, //存放当前文章的id
     title: '', //标题输入的数据
     status: '', //定义文章的状态(初始是草稿状态)
@@ -59,8 +59,7 @@ const articleData = reactive({
     summary: '', //定义文章摘要
     content: '', //markdown里的内容
     tags: [], // 定义用户选择的标签
-    image_url: '', //定义封面图的路径
-    published_at: '' //文章发布时间字段
+    image_url: '' //定义封面图的路径
 });
 
 const init = async () => {
@@ -80,7 +79,6 @@ const init = async () => {
             articleData.image_url = data.image_url;
             articleData.summary = data.summary;
             articleData.article_id = data.id;
-            articleData.published_at = data.published_at;
         }
     }
 };
