@@ -29,7 +29,7 @@ const prop = defineProps({
             views_count: 0,
             likes_count: 0,
             image_url: '',
-            tags: [],
+            tags: [{ name: '' }],
             id: '',
             status: false
         })
