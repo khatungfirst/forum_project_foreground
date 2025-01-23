@@ -105,6 +105,7 @@ const handleSelect = (key) => {
 
 const toggleAuthorInfo = () => {
     isAuthorInfo.value = !isAuthorInfo.value;
+    router.push(`/member/${userStore.userInfo.id}`);
 };
 
 onMounted(async () => {
@@ -201,7 +202,7 @@ const authorInit = async () => {
                         @click="toggleAuthorInfo"
                     />
                 </n-button>
-                <div><authorMessage v-if="isAuthorInfo" :authorInfo="authorInfo" class="author-message-card" /></div>
+                <!-- <div><authorMessage v-if="isAuthorInfo" :authorInfo="authorInfo" class="author-message-card" /></div> -->
             </template>
 
             <template v-else>
