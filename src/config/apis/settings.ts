@@ -1,4 +1,4 @@
-import { $get, $post } from '@/packages/request';
+import { $get, $post, $http } from '@/packages/request';
 
 //获取私信设置的初始状态
 export const getLetterStatus = (): Promise<any> => {
@@ -27,5 +27,5 @@ export const getUserInfo = (): Promise<any> => {
 
 //更新个人资料
 export const changeUserInfo = (params: any): Promise<any> => {
-    return $post('/user/form_personal_data', params);
+    return $http('/user/form_personal_data', params);
 };
