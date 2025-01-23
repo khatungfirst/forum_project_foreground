@@ -222,7 +222,7 @@ const articleInit = async () => {
 
 //发表文章按钮
 const pubicArticle = () => {
-    router.push(`/articlerelease/${user.id}`);
+    router.push(`/articlerelease/0`);
 };
 
 //切换标签
