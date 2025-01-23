@@ -9,12 +9,12 @@ const prop = defineProps({
             title: string;
             summary: string;
             nickname: string;
-            published_at: string;
+            daily_time: string;
             views_count: number;
             likes_count: number;
             image_url: string;
             tags: Array<{
-                name: string;
+                ID: number;
             }>;
             id: string;
             status: boolean;
@@ -24,11 +24,11 @@ const prop = defineProps({
             title: '',
             summary: '',
             nickname: '',
-            published_at: '',
+            daily_time: '',
             views_count: 0,
             likes_count: 0,
             image_url: '',
-            tags: [],
+            tags: [{ ID: 0 }],
             id: '',
             status: false
         })
@@ -64,7 +64,7 @@ const checkDetail = () => {
                     <span>
                         {{ prop.item.nickname }}
                     </span>
-                    <span class="time">{{ prop.item.published_at }}</span>
+                    <span class="time">{{ prop.item.daily_time }}</span>
                     <span class="icon">
                         <Icon>
                             <EyeOutlined />
@@ -79,7 +79,7 @@ const checkDetail = () => {
                     </span>
                     <ul>
                         <li v-for="(tag, index) in prop.item.tags" :key="index" class="tag">
-                            {{ tag.name }}
+                            {{ tag.ID }}
                         </li>
                     </ul>
                 </div>

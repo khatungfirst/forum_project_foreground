@@ -1,6 +1,7 @@
 <script setup>
-import {  computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+
 const router = useRouter();
 const props = defineProps({
     articles: {
@@ -11,10 +12,12 @@ const props = defineProps({
 });
 const emit = defineEmits(['refresh']);
 
+const totalArticlesLoaded = ref(0); // 跟踪已加载的文章总数
+
 const processedArticles = computed(() => {
     return props.articles.map((article, index) => ({
         ...article,
-        rank: index + 1 // 给每个文章分配排名
+        rank: totalArticlesLoaded.value + index + 1 // 给每个文章分配排名
     }));
 });
 
@@ -28,7 +31,14 @@ const enterArticleDetail = (id) => {
 };
 
 const refreshArticles = () => {
+    totalArticlesLoaded.value = 0; // 重置已加载的文章总数
     emit('refresh');
+};
+
+const loadMoreData = () => {
+    // 假设每次加载更多数据时，会从父组件传入新的文章数组
+    // 这里需要确保父组件在加载更多数据后，更新 totalArticlesLoaded
+    totalArticlesLoaded.value += props.articles.length;
 };
 </script>
 
@@ -69,7 +79,6 @@ const refreshArticles = () => {
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    border: 1px solid #ccc;
     border-radius: 5px;
     width: 290px;
 }
