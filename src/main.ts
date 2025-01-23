@@ -24,7 +24,7 @@ app.use(plugin);
 app.use(createPinia()); //创建一个 pinia 实例(根 store)并将其传递给应用
 app.use(router);
 const userStore = useUserStore();
-
+userStore.init();
 // 只有当 token 存在时（不为 null），才设置到 userStore
 if (localStorage.getItem('token')) {
     const token = localStorage.getItem('token');

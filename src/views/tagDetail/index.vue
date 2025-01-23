@@ -67,11 +67,14 @@ const follow_tag = async (id) => {
     try {
         const response = await Tag_follow({ id: id });
         if (response.code === 2000) {
-            const index = tags.value.findIndex((tag) => tag.id === id);
-            if (index !== -1) {
-                tags.value[index].is_followed = true;
+            // 重新获取标签列表
+            const tagsResponse = await getTagList();
+            if (tagsResponse.code === 2000 && Array.isArray(tagsResponse.data.tag_list)) {
+                tags.value = tagsResponse.data.tag_list;
+                // 更新当前标签的详细信息
+                fetchCurrentTag(route.params.id);
             } else {
-                console.error('Failed to follow tag:', response.message);
+                console.error('获取标签数据失败');
             }
         } else {
             console.error('关注标签失败:', response.message);
@@ -112,40 +115,54 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 </script>
 
 <template>
-    <div class="container">
-        <div class="tag-list-container">
-            <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
-        </div>
-        <div class="search-mid">
-            <n-tabs type="line" animated v-model:value="currentTab">
-                <n-tab-pane name="0" tab="热门">
-                    <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                        <Article v-for="article in articles" :key="article.id" :item="article" />
-                    </n-infinite-scroll>
-                </n-tab-pane>
-                <n-tab-pane name="1" tab="最新">
-                    <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                        <Article v-for="article in articles" :key="article.id" :item="article" />
-                    </n-infinite-scroll>
-                </n-tab-pane>
-            </n-tabs>
-            <div class="loading" v-if="isLoading && !noMore">
-                <span class="videos">
-                    <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                </span>
-                <span class="text">正在全力加载中...</span>
+    <div class="wrapper">
+        <div class="container">
+            <div class="tag-list-container">
+                <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
             </div>
-            <div v-if="noMore" class="loading">没有更多了 🤪</div>
+            <div class="search-mid">
+                <n-tabs type="line" animated v-model:value="currentTab">
+                    <n-tab-pane name="0" tab="热门">
+                        <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                            <Article v-for="article in articles" :key="article.id" :item="article" />
+                        </n-infinite-scroll>
+                    </n-tab-pane>
+                    <n-tab-pane name="1" tab="最新">
+                        <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                            <Article v-for="article in articles" :key="article.id" :item="article" />
+                        </n-infinite-scroll>
+                    </n-tab-pane>
+                </n-tabs>
+                <div class="loading" v-if="isLoading && !noMore">
+                    <span class="videos">
+                        <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
+                    </span>
+                    <span class="text">正在全力加载中...</span>
+                </div>
+                <div v-if="noMore" class="loading">没有更多了 🤪</div>
+            </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.container {
-    padding: 0;
+.wrapper {
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    min-height: 100vh; /* 使 wrapper 至少占满视口高度 */
+    padding: 20px; /* 可以根据需要调整内边距 */
 }
+
+.container {
+    width: 100%; /* 容器宽度，可以根据需要调整 */
+    max-width: 1200px; /* 最大宽度，防止内容过宽 */
+    padding: 0;
+    box-sizing: border-box; /* 确保 padding 不影响宽度 */
+}
+
 .tag-list-container {
     width: 100%;
 }
