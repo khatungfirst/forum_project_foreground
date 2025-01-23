@@ -189,7 +189,6 @@ const fansLoadInit = async () => {
             fansArr.value.push(...data.concernList);
             isLoading.value = false;
             if (data.total === 0) {
-                console.log(data.total, '数据条数');
                 noMore.value = true;
             }
         }
