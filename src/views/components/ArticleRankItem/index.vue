@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, defineEmits, ref } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();

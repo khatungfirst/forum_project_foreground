@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { concernInter } from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';

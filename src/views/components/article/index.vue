@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined, LikeTwotone } from '@vicons/antd';
