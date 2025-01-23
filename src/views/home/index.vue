@@ -168,23 +168,23 @@ const refreshArticles = () => {
             <div class="search-mid">
                 <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
                     <n-tab-pane name="0" tab="">
-                        <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
+                        <!-- <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" /> -->
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                         </n-infinite-scroll>
                     </n-tab-pane>
                     <n-tab-pane name="1" tab="">
-                        <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
+                        <!-- <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" /> -->
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                         </n-infinite-scroll>
                     </n-tab-pane>
                 </n-tabs>
                 <div class="loading" v-if="isLoading && !noMore">
-                    <span class="videos">
+                    <!-- <span class="videos">
                         <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
                     </span>
-                    <span class="text">正在全力加载中...</span>
+                    <span class="text">正在全力加载中...</span> -->
                 </div>
                 <div v-if="noMore" class="loading">没有更多了 🤪</div>
             </div>
