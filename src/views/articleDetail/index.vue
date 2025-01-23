@@ -296,6 +296,7 @@ const login = () => {
 const handleMaskClick = () => {
     isOverlayVisible.value = false;
     appear.value = false;
+    commentTotal.value++;
     initComments();
 };
 
@@ -315,6 +316,7 @@ const review = () => {
 //删除评论
 const deleteFirst = (id) => {
     commentsList.value = commentsList.value.filter((item) => item.id !== id);
+    initComments;
 };
 
 //评论的下拉事件
