@@ -11,7 +11,7 @@ import {
     getConcernList,
     getConcernDetail
 } from '@/config/apis/member.ts';
-import { concernInter } from '@/config/apis/articleDetail';
+import { concernInter, collectionInter } from '@/config/apis/articleDetail';
 import { getNumberData } from '@/config/apis/settings.ts';
 import { debounce } from '@/utils/debounce.ts';
 import '@/assets/css/icon/iconfont.css';
@@ -222,7 +222,7 @@ const articleInit = async () => {
 
 //发表文章按钮
 const pubicArticle = () => {
-    router.push(`/articlerelease/${user.id}`);
+    router.push(`/articlerelease/0`);
 };
 
 //切换标签
@@ -244,10 +244,10 @@ const loadInit = async () => {
     isLoading.value = true;
 
     setTimeout(async () => {
+        aticleType.page++;
         const { data } = await getArticleInfo(aticleType);
         if (data) {
             if (data.dataList.length > 0) {
-                aticleType.page++;
                 articleArr.value.push(...data.dataList);
             }
             isLoading.value = false;
@@ -258,7 +258,7 @@ const loadInit = async () => {
     }, 1000);
     setTimeout(() => {
         noMore.value = false;
-    }, 2000);
+    }, 7000);
 };
 
 //编辑本篇文章
@@ -281,6 +281,18 @@ const deleteArticles = async (id) => {
     }
 };
 
+//取消收藏
+const cancelCollection = async (id) => {
+    const { code } = await collectionInter({
+        article_id: id,
+        collection_status: false
+    });
+    if (code) {
+        message.success('取消收藏成功！');
+        articleArr.value = articleArr.value.filter((item) => item.id !== id);
+    }
+};
+
 //-------------------- 搜索模块 ---------------------------
 
 //控制搜索框的宽度
@@ -289,14 +301,28 @@ const inputWidth = ref('0px'); // 初始宽度为 0
 //搜索框输入的内容
 const inputValue = ref('');
 
+//控制搜索框什么时候缩回
+const isInputBack = ref(false);
+
 // 鼠标悬停时输入框设置宽度
 const expandInput = () => {
-    inputWidth.value = '200px';
+    console.log('shurushi');
+    if (!isInputBack.value) {
+        isInputBack.value = false;
+        inputWidth.value = '200px';
+    }
 };
 
 // 鼠标移走时输入框缩回
 const shrinkInput = () => {
-    inputWidth.value = '0px';
+    console.log(isInputBack.value, 'input');
+
+    if (isInputBack.value) {
+        inputWidth.value = '0px';
+        isInputBack.value = false;
+    } else {
+        inputWidth.value = '200px';
+    }
 };
 
 //搜索的方法
@@ -311,6 +337,7 @@ const searchFun = () => {
     }
     inputValue.value = '';
     fansType.keyword = '';
+    isInputBack.value = true;
 };
 </script>
 <template>
@@ -380,7 +407,7 @@ const searchFun = () => {
                 <n-card size="huge" class="article-card" ref="scrollContainer">
                     <n-tabs type="line" animated @update:value="tabChange">
                         <template #suffix>
-                            <div class="searchModule" @mouseover="expandInput" @mouseleave="shrinkInput">
+                            <div class="searchModule">
                                 <transition name="slide">
                                     <n-input
                                         round
@@ -404,12 +431,12 @@ const searchFun = () => {
                         </template>
                         <n-tab-pane name="文章" tab="文章">
                             <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
-                                <Article :item="item" v-for="(item, index) in articleArr" :key="index">
+                                <Article :item="item" v-for="(item, index) in articleArr" :key="index" class="article">
                                     <template #type>
                                         <n-tag class="status">{{ item.status }}</n-tag>
                                     </template>
                                     <template #edit>
-                                        <n-tag type="success" class="edit">
+                                        <n-tag type="success" class="edit" v-if="isSelf">
                                             <i
                                                 class="iconfont"
                                                 @click="editTotal(item.id)"
@@ -431,7 +458,21 @@ const searchFun = () => {
                         </n-tab-pane>
                         <n-tab-pane name="收藏" tab="收藏">
                             <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
-                                <Article :item="item" v-for="(item, index) in articleArr" :key="index"></Article>
+                                <Article :item="item" v-for="(item, index) in articleArr" :key="index">
+                                    <template #cancelCollect>
+                                        <div class="cancelCollect">
+                                            <n-button
+                                                strong
+                                                secondary
+                                                round
+                                                type="primary"
+                                                @click.stop="cancelCollection(item.id)"
+                                            >
+                                                取消收藏
+                                            </n-button>
+                                        </div>
+                                    </template>
+                                </Article>
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="关注" tab="关注">
@@ -440,14 +481,15 @@ const searchFun = () => {
                             </n-infinite-scroll>
                         </n-tab-pane>
                     </n-tabs>
-                    <div class="loading" v-if="isLoading && !noMore">
-                        <span class="videos">
+                    <div class="loading">
+                        <!-- <span class="videos">
                             <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                        </span>
-                        <span class="text">正在全力加载中...</span>
+                        </span> -->
+                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                        <span v-if="noMore" class="text">-没有更多了-</span>
                     </div>
-                    <div v-if="noMore" class="loading">没有更多了 🤪</div>
                 </n-card>
+                <!-- <div v-if="noMore" class="loading">-没有更多了-</div> -->
             </div>
             <div class="right">
                 <n-button strong secondary round type="primary" @click="pubicArticle">
@@ -502,7 +544,7 @@ const searchFun = () => {
         margin: 0 auto;
         display: grid;
         grid-template-columns: 3fr 1fr;
-        padding-top: 20px;
+        // padding-top: 20px;
 
         .left {
             .xicon {
@@ -604,6 +646,10 @@ const searchFun = () => {
                     }
                 }
 
+                .n-tabs .n-tab-pane {
+                    padding: 0px;
+                }
+
                 .status {
                     height: 20px;
                     font-size: 12px;
@@ -613,16 +659,27 @@ const searchFun = () => {
                     pointer-events: auto;
                     background-color: #daf0e4;
                     position: absolute;
-                    right: 50px;
+                    right: 20px;
                     top: 0px;
                     z-index: 999;
+                    display: none;
+                }
+
+                .article:hover .edit {
+                    display: block;
                 }
 
                 @include loading;
+
+                .cancelCollect {
+                    display: flex;
+                    align-items: center;
+                    margin: 0px 20px;
+                }
             }
         }
         .n-card :deep(.n-card__content) {
-            padding: 20px 0px 20px 20px;
+            padding: 20px 0px 0px 20px;
         }
 
         .right {

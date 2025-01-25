@@ -187,11 +187,12 @@ const refreshArticles = () => {
                 </n-tabs>
                 <div class="loading" v-if="isLoading && !noMore">
                     <!-- <span class="videos">
+                    <!-- <span class="videos">
                         <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                    </span>
-                    <span class="text">正在全力加载中...</span> -->
+                    </span> -->
+                    <span class="text">正在全力加载中...</span>
                 </div>
-                <div v-if="noMore" class="loading">没有更多了 🤪</div>
+                <div v-if="noMore" class="loading">-没有更多了-</div>
             </div>
         </div>
         <!-- 侧边栏（作家榜单与文章榜单） -->

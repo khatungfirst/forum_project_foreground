@@ -50,6 +50,9 @@ const message = useMessage();
 //获取当前登录人的头像
 const head_shot = JSON.parse(localStorage.getItem('userInfo')).avatar_path;
 
+//定义上传图片是否被禁用
+const disabled = ref(false);
+
 //----------------------------------------评论图片---------------------------------
 
 //存放上传图片的url路径
@@ -65,15 +68,28 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
         const fd = new FormData();
         fd.append('files', file);
-        fd.append('width', '200');
+        fd.append('width', '115');
         getImageUrl(fd)
             .then((response) => {
+                console.log(response.data[0].url, '99999');
                 if (response && response.data) {
                     console.log(response.data[0].url, '99999');
 
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data);
-                    uploadedImages.value.push(...response.data[0].url);
+                    uploadedImages.value.push(response.data[0].url);
+                    if (response.data[0].url) {
+                        fileListRef.value = [
+                            {
+                                id: 'a',
+                                name: '图片上传成功',
+                                status: 'finished',
+                                url: response.data[0].url
+                            }
+                        ];
+                    }
+
+                    disabled.value = true;
                 } else {
                     // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
                     reject(new Error('Failed to retrieve thumbnail URL'));
@@ -189,7 +205,9 @@ const publicFirst = async () => {
                     <n-upload
                         list-type="image"
                         :create-thumbnail-url="createThumbnailUrl"
-                        :default-file-list="fileListRef"
+                        v-model:file-list="fileListRef"
+                        :disabled="disabled"
+                        show-remove-button
                     >
                         <Icon :size="18" color="#8a919f" class="icon">
                             <FileImageOutlined />
