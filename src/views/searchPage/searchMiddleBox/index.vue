@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, reactive, defineProps } from 'vue';
+import { ref, reactive } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
 import { follower_article } from '@/config/apis/articleDetail';
 import Article from '@/views/components/article/index.vue';

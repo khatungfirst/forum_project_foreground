@@ -1,6 +1,6 @@
 //目录预览
 <script lang="ts" setup>
-import { ref, watch, defineProps } from 'vue';
+import { ref, watch } from 'vue';
 
 // 定义 props 的类型
 interface Props {

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined, LikeTwotone } from '@vicons/antd';
@@ -10,12 +9,12 @@ const prop = defineProps({
             title: string;
             summary: string;
             nickname: string;
-            published_at: string;
+            daily_time: string;
             views_count: number;
             likes_count: number;
             image_url: string;
             tags: Array<{
-                name: string;
+                ID: number;
             }>;
             id: string;
             status: boolean;
@@ -25,7 +24,7 @@ const prop = defineProps({
             title: '',
             summary: '',
             nickname: '',
-            published_at: '',
+            daily_time: '',
             views_count: 0,
             likes_count: 0,
             image_url: '',
@@ -70,7 +69,7 @@ const clickTags = () => {
                     <span>
                         {{ prop.item.nickname }}
                     </span>
-                    <span class="time">{{ prop.item.published_at }}</span>
+                    <span class="time">{{ prop.item.daily_time }}</span>
                     <span class="icon">
                         <Icon>
                             <EyeOutlined />
@@ -85,7 +84,7 @@ const clickTags = () => {
                     </span>
                     <ul @click.stop="clickTags">
                         <li v-for="(tag, index) in prop.item.tags" :key="index" class="tag">
-                            {{ tag.name }}
+                            {{ tag.ID }}
                         </li>
                     </ul>
                 </div>

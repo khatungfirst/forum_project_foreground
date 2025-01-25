@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 const prop = defineProps({
     authorInfo: {
         type: Object as () => {
