@@ -96,9 +96,9 @@ const deleteFun = () => {
 };
 
 //举报评论
-const report = () => {
-    message.warning('举报功能暂未开发，敬请期待吧！');
-};
+// const report = () => {
+//     message.warning('举报功能暂未开发，敬请期待吧！');
+// };
 
 //跳转到指定用户会员中心
 const jumpMember = (id: number) => {
@@ -143,11 +143,11 @@ const handleMaskClick = () => {
 <template>
     <div class="comments" ref="boxRef">
         <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
-        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(1)" />
+        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(prop.item.user_id)" />
         <div class="comments-detail">
             <n-ellipsis style="max-width: 240px">
-                <div>
-                    <span class="nickname" @click="jumpMember(1)" style="margin-bottom: 7px; color: #5d6271">
+                <div style="margin-bottom: 7px">
+                    <span class="nickname" @click="jumpMember(1)" style="color: #5d6271">
                         {{ prop.item.nickname }}
                     </span>
                     <span v-if="!isResponseSelf">回复</span>
@@ -160,7 +160,10 @@ const handleMaskClick = () => {
                         {{ prop.item.parent_nickname }} ：
                     </span>
                 </div>
-                <span>{{ prop.item.content }}</span>
+                <p style="font-size: 15px">
+                    {{ prop.item.content }}
+                </p>
+                <p><img :src="prop.item.comment_path" /></p>
             </n-ellipsis>
             <div class="comment-detail">
                 <span class="small-detail1">{{ prop.item.create_at }}</span>
@@ -192,7 +195,7 @@ const handleMaskClick = () => {
                 </template>
                 <div class="button-container">
                     <n-button text :block="true" @click="deleteFun" style="margin-top: 10px">删除</n-button>
-                    <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button>
+                    <!-- <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button> -->
                 </div>
             </n-popconfirm>
         </div>
@@ -211,7 +214,7 @@ const handleMaskClick = () => {
     width: 100%;
     padding: 20px 0px 20px 20px;
     @include flex;
-
+    align-items: start;
     @include overlay;
 
     .n-avatar {

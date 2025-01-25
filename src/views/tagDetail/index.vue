@@ -132,12 +132,12 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
                 </n-tab-pane>
             </n-tabs>
             <div class="loading" v-if="isLoading && !noMore">
-                <span class="videos">
+                <!-- <span class="videos">
                     <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                </span>
+                </span> -->
                 <span class="text">正在全力加载中...</span>
             </div>
-            <div v-if="noMore" class="loading">没有更多了 🤪</div>
+            <div v-if="noMore" class="loading">-没有更多了-</div>
         </div>
     </div>
 </template>

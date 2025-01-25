@@ -75,10 +75,12 @@ const init = async () => {
             articleData.title = data.title;
             articleData.content = data.content;
             articleData.category_id = data.category_id;
-            articleData.tags = data.tags;
             articleData.image_url = data.image_url;
             articleData.summary = data.summary;
             articleData.article_id = data.id;
+            for (const tag of data.tags) {
+                articleData.tags.push(tag.name);
+            }
         }
     }
 };
