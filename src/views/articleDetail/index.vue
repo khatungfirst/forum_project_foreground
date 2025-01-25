@@ -16,7 +16,7 @@ import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
 import MarkdownViewer from '@/views/components/markdownViewer/index.vue';
 import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.vue';
 import { useMessage } from 'naive-ui';
-import { LikeFilled, MessageTwotone, StarFilled, WarningFilled, EyeOutlined } from '@vicons/antd';
+import { LikeFilled, MessageTwotone, StarFilled, EyeOutlined, PlusCircleFilled, CheckCircleFilled } from '@vicons/antd';
 import { Icon } from '@vicons/utils';
 // import MarkdownIt from 'markdown-it';
 
@@ -68,7 +68,7 @@ const currentIcon = ref([false, false]);
 
 //文章对象
 const articleInfo = reactive({
-    id: route.params.id, //定义本篇文章的id
+    id: +route.params.id, //定义本篇文章的id
     likeTotal: 0, //定义本文章的点赞数
     collections: 0, // //定义本文章的收藏数
     title: 0, //文章标题
@@ -153,9 +153,9 @@ const collect = async () => {
 const debouncedCollectionPost = debounce(collect, 500);
 
 //注意的方法
-const attention = () => {
-    console.log('attention');
-};
+// const attention = () => {
+//     console.log('attention');
+// };
 
 // ---------------------------作者、相关推荐模块---------------------------------
 
@@ -227,7 +227,7 @@ const personalLetter = () => {
 
 //页面滚动到一定位置触发的事件：作者信息的位置
 const handleScroll = () => {
-    if (window.scrollY >= 200) {
+    if (window.scrollY >= 260) {
         isAuthorInfo.value = true;
     } else {
         isAuthorInfo.value = false;
@@ -358,8 +358,13 @@ const catalogueControl = () => {
         <div class="left">
             <div class="left-contains">
                 <div class="laconicAuthorInfo" v-if="isAuthorInfo">
-                    <n-avatar round size="large" :src="authorInfo.head" />
-                    <span>{{ authorInfo.nickname }}</span>
+                    <n-avatar round size="large" :src="authorInfo.head" style="width: 55px; height: 55px" />
+                    <div class="iconDiv">
+                        <Icon :color="'#19A059'" :size="22" @click="concern">
+                            <component :is="!authorInfo.concern_status ? PlusCircleFilled : CheckCircleFilled" />
+                        </Icon>
+                    </div>
+                    <!-- <span>{{ authorInfo.nickname }}</span> -->
                 </div>
                 <IconWrapper
                     :icon="LikeFilled"
@@ -385,14 +390,14 @@ const catalogueControl = () => {
                     :badgeValue="articleInfo.collections"
                     :showBadge="true"
                 />
-                <IconWrapper
+                <!-- <IconWrapper
                     :icon="WarningFilled"
                     :size="24"
                     @click="attention"
                     color="#8A919F"
                     :showBadge="false"
                     :badgeValue="0"
-                />
+                /> -->
             </div>
         </div>
         <div class="middle" ref="centerRef">
@@ -451,7 +456,7 @@ const catalogueControl = () => {
             ></commentDrawer>
         </div>
         <div class="right">
-            <div class="author-detail" ref="authorDetail">
+            <div class="author-detail" ref="authorDetail" v-if="!isAuthorInfo">
                 <authorMessage :authorInfo="authorInfo"></authorMessage>
                 <div class="bottom" v-if="!isPerson">
                     <n-button
@@ -470,41 +475,43 @@ const catalogueControl = () => {
                     <n-button tertiary round type="primary" @click="personalLetter">私信</n-button>
                 </div>
             </div>
-            <div class="catalogue">
-                <n-collapse>
-                    <template #header>
-                        <div class="collapse-header" style="border-bottom: 1px solid black"></div>
-                    </template>
-                    <template #header-extra>
-                        <span style="color: #8a9fc7; font-size: 13px">{{ catalogueButton }}</span>
-                    </template>
-                    <n-collapse-item title="目录" @click="catalogueControl">
-                        <div class="catalogue-detail">
-                            <MarkdownViewer :content="articleInfo.content" />
-                        </div>
-                    </n-collapse-item>
-                </n-collapse>
-            </div>
-            <div class="advertisement"></div>
-            <div class="relevant_recommendation">
-                <div class="recommendation-top">
-                    <p>相关推荐</p>
+            <div :class="{ fixed: isAuthorInfo }" class="right-second">
+                <div class="catalogue">
+                    <n-collapse>
+                        <template #header>
+                            <div class="collapse-header" style="border-bottom: 1px solid black"></div>
+                        </template>
+                        <template #header-extra>
+                            <span style="color: #8a9fc7; font-size: 13px">{{ catalogueButton }}</span>
+                        </template>
+                        <n-collapse-item title="目录" @click="catalogueControl">
+                            <div class="catalogue-detail">
+                                <MarkdownViewer :content="articleInfo.content" />
+                            </div>
+                        </n-collapse-item>
+                    </n-collapse>
                 </div>
-                <ul>
-                    <li
-                        class="about-detail"
-                        v-for="(item, index) in about"
-                        :key="index"
-                        @click="recommendedArtical(item.id)"
-                    >
-                        <p>{{ item.title }}</p>
-                        <p class="bottom">
-                            <span>{{ item.views_count }}阅读</span>
-                            ·
-                            <span>{{ item.likes_count }}点赞</span>
-                        </p>
-                    </li>
-                </ul>
+                <div class="advertisement"></div>
+                <div class="relevant_recommendation">
+                    <div class="recommendation-top">
+                        <p>相关推荐</p>
+                    </div>
+                    <ul>
+                        <li
+                            class="about-detail"
+                            v-for="(item, index) in about"
+                            :key="index"
+                            @click="recommendedArtical(item.id)"
+                        >
+                            <p>{{ item.title }}</p>
+                            <p class="bottom">
+                                <span>{{ item.views_count }}阅读</span>
+                                ·
+                                <span>{{ item.likes_count }}点赞</span>
+                            </p>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -527,8 +534,16 @@ const catalogueControl = () => {
             .laconicAuthorInfo {
                 height: 100px;
                 @include flex;
-                .n-avatar {
-                    margin-right: 20px;
+                position: relative;
+                margin-bottom: 30px;
+
+                .iconDiv {
+                    height: 22px;
+                    position: absolute;
+                    bottom: 11px;
+                    cursor: pointer;
+                    background-color: #fff;
+                    border-radius: 22px;
                 }
             }
         }
@@ -638,8 +653,17 @@ const catalogueControl = () => {
             }
         }
 
-        .catalogue {
+        .right-second {
             width: 70%;
+        }
+
+        .fixed {
+            position: fixed;
+            width: 17%;
+        }
+
+        .catalogue {
+            // width: 70%;
             background-color: #fff;
             padding: 10px;
             margin-bottom: 20px;
@@ -668,14 +692,14 @@ const catalogueControl = () => {
         }
 
         .advertisement {
-            width: 70%;
+            // width: 70%;
             height: 130px;
             background-color: #fff;
             margin-bottom: 20px;
         }
 
         .relevant_recommendation {
-            width: 70%;
+            // width: 70%;
             background-color: #fff;
             padding: 10px;
 

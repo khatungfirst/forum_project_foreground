@@ -3,6 +3,7 @@ import '@wangeditor/editor/dist/css/style.css';
 import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue';
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { getArticleDetail } from '../../../config/apis/articleDetail';
+import { getImageUrl } from '../../../config/apis/publicArticle';
 
 //获取父组件传过来的文章id
 const prop = defineProps({
@@ -38,18 +39,29 @@ onMounted(() => {
 
 const toolbarConfig = {};
 const editorConfig = { placeholder: '请输入内容...', MENU_CONF: {} };
+type InsertFnType = (url: string) => void;
 
 //上传图片
 editorConfig.MENU_CONF['uploadImage'] = {
+    // fieldName: 'files',
     // 上传图片的配置
-    server: 'http://127.0.0.1:4523/m1/4891553-0-default/produce_image_url',
+    server: '/proxy_url/produce_image_url',
+    async customUpload(file: File, insertFn: InsertFnType) {
+        const formData = new FormData();
+        formData.append('files', file); // 添加文件到 FormData
+        formData.append('width', '115');
+        // TS 语法
+        const { data } = await getImageUrl(formData);
+        // 最后插入图片
+        insertFn(data[0].url);
+    },
     maxFileSize: 1 * 1024 * 1024
     // base64LimitSize: 1024 * 1024 // 5kb
 };
 
 //上传视频
 editorConfig.MENU_CONF['uploadVideo'] = {
-    server: 'http://127.0.0.1:4523/m1/4891553-0-default/produce_image_url',
+    server: '/proxy_url/produce_image_url',
     maxFileSize: 100 * 1024 * 1024
 };
 

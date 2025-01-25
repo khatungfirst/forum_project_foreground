@@ -17,7 +17,7 @@ export const likeInter = (params: any): Promise<any> => {
 };
 //5、收藏
 export const collectionInter = (params: any): Promise<any> => {
-    return $post('/article/collection', params);
+    return $http('/article/collection', params);
 };
 //6、关注
 export const concernInter = (params: any): Promise<any> => {

@@ -166,9 +166,9 @@ const deleteFun = () => {
 };
 
 //举报评论
-const report = () => {
-    message.warning('举报功能暂未开发，敬请期待吧！');
-};
+// const report = () => {
+//     message.warning('举报功能暂未开发，敬请期待吧！');
+// };
 
 //-----------------------------确定评论盒子宽度-------------------------
 
@@ -207,10 +207,13 @@ const handleMaskClick = () => {
         <div class="avatar-other">
             <div class="first-comment">
                 <div class="comments-detail">
-                    <n-ellipsis style="max-width: 240px; margin-bottom: 7px; color: #5d6271">
+                    <n-ellipsis style="max-width: 240px; margin-bottom: 20px; color: #5d6271">
                         {{ prop.item.nickname }}
                     </n-ellipsis>
-                    <p style="font-size: 15px">{{ prop.item.content }}</p>
+                    <p style="font-size: 15px">
+                        {{ prop.item.content }}
+                    </p>
+                    <p><img :src="prop.item.comment_path" /></p>
                     <div class="comment-detail">
                         <span class="small-detail1">{{ prop.item.create_at }}</span>
                         <span
@@ -235,7 +238,7 @@ const handleMaskClick = () => {
                         </template>
                         <div class="button-container">
                             <n-button text :block="true" @click="deleteFun" style="margin-top: 10px">删除</n-button>
-                            <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button>
+                            <!-- <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button> -->
                         </div>
                     </n-popconfirm>
                 </div>
@@ -249,7 +252,7 @@ const handleMaskClick = () => {
                 ></SecondOrderComments>
                 <p @click="moreSecondComments" v-if="isSecondComments">
                     查看更多回复
-                    <Icon size="18">
+                    <Icon size="14">
                         <DownOutlined />
                     </Icon>
                 </p>

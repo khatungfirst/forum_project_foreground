@@ -42,6 +42,11 @@ const route = useRouter();
 const checkDetail = () => {
     route.push(`/articledetail/${prop.item.id}`);
 };
+
+//点击标签的触发事件
+const clickTags = () => {
+    console.log('标签被点击了');
+};
 </script>
 <template>
     <ul class="content" @click="checkDetail">
@@ -77,7 +82,7 @@ const checkDetail = () => {
                         </Icon>
                         {{ prop.item.likes_count }}
                     </span>
-                    <ul>
+                    <ul @click.stop="clickTags">
                         <li v-for="(tag, index) in prop.item.tags" :key="index" class="tag">
                             {{ tag.ID }}
                         </li>
@@ -88,6 +93,7 @@ const checkDetail = () => {
             <div class="right" v-if="prop.item.image_url !== ''">
                 <img src="https://t7.baidu.com/it/u=1819248061,230866778&fm=193&f=GIF" alt="" />
             </div>
+            <slot class="cancelCollect" name="cancelCollect"></slot>
         </li>
     </ul>
 </template>
@@ -170,7 +176,7 @@ const checkDetail = () => {
 
         img {
             width: 165px;
-            height: 130px;
+            height: 115px;
         }
     }
 }
