@@ -21,6 +21,10 @@ const rules = ref({
         { required: true, message: '请输入邮箱', trigger: 'blur' },
         { pattern: /^[^@\s]+@[^@\s]+\.(com|cn)$/, message: '请输入正确的邮箱', trigger: 'blur' }
     ],
+    verify_code: [
+        { required: true, message: '请输入验证码', trigger: 'blur' },
+        { min: 6, message: '验证码长度不得少于6位', trigger: 'blur' }
+    ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
         { min: 8, message: '密码长度不得少于8位', trigger: 'blur' },
@@ -28,6 +32,18 @@ const rules = ref({
             pattern:
                 /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|\\:;"'<>,.?/])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|\\:;"'<>,.?/]{8,}$/,
             message: '密码必须包含字母、数字和特殊符号',
+            trigger: 'blur'
+        }
+    ],
+    re_password: [
+        { required: true, message: '请再次输入密码', trigger: 'blur' },
+        {
+            validator: (rule, value) => {
+                if (value !== form.value.password) {
+                    return new Error('两次输入的密码不一致');
+                }
+                return true;
+            },
             trigger: 'blur'
         }
     ]
@@ -135,7 +151,12 @@ onMounted(() => {
                 <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
             </n-form-item>
             <n-form-item label="密码" path="password">
-                <n-input v-model:value="form.password" placeholder="请输入密码" class="common-input"></n-input>
+                <n-input
+                    v-model:value="form.password"
+                    type="password"
+                    placeholder="请输入密码"
+                    class="common-input"
+                ></n-input>
             </n-form-item>
             <n-form-item label="重复密码" path="re_password">
                 <n-input
