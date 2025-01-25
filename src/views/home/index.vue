@@ -11,6 +11,7 @@ import { article_rank } from '@/config/apis/articleDetail';
 import { debounce } from '../../utils/debounce';
 import { concernInter } from '@/config/apis/articleDetail';
 import { getSelectArticle } from '@/config/apis/select';
+import { follower_article } from '@/config/apis/articleDetail';
 import { NButton } from 'naive-ui';
 
 const router = useRouter();
@@ -144,26 +145,30 @@ const refreshArticles = () => {
         <!-- 主内容区 -->
         <div class="main-content">
             <div class="middle">
-                <n-tabs
-                    type="line"
-                    animated
-                    @update:value="tabTop"
-                    v-model:value="category_id"
-                    style="padding: 10px 20px"
-                >
-                    <n-tab-pane name="1" tab="综合">
-                        <SearchMiddleBox :category_id="category_id" />
-                    </n-tab-pane>
-                    <n-tab-pane name="2" tab="前端">
-                        <SearchMiddleBox :category_id="category_id" />
-                    </n-tab-pane>
-                    <n-tab-pane name="3" tab="后端">
-                        <SearchMiddleBox :category_id="category_id" />
-                    </n-tab-pane>
-                    <n-tab-pane name="4" tab="关注">
-                        <SearchMiddleBox :category_id="category_id" />
-                    </n-tab-pane>
-                </n-tabs>
+                <div class="left">
+                    <n-tabs
+                        type="card"
+                        animated
+                        @update:value="tabTop"
+                        v-model:value="category_id"
+                        style="padding: 10px 20px"
+                        placement="left"
+                        class="red"
+                    >
+                        <n-tab-pane name="1" tab="综合">
+                            <SearchMiddleBox :category_id="category_id" />
+                        </n-tab-pane>
+                        <n-tab-pane name="2" tab="前端">
+                            <SearchMiddleBox :category_id="category_id" />
+                        </n-tab-pane>
+                        <n-tab-pane name="3" tab="后端">
+                            <SearchMiddleBox :category_id="category_id" />
+                        </n-tab-pane>
+                        <n-tab-pane name="4" tab="关注">
+                            <SearchMiddleBox :category_id="category_id" />
+                        </n-tab-pane>
+                    </n-tabs>
+                </div>
             </div>
             <div class="search-mid">
                 <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
@@ -210,7 +215,12 @@ const refreshArticles = () => {
     </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@import '@/assets/styles/mixin.scss';
+
+.red {
+    color: red;
+}
 .home {
     display: flex;
     flex-direction: row;
@@ -293,5 +303,59 @@ const refreshArticles = () => {
 .iconfont.icon-bianji {
     font-size: 24px;
     color: #19a059;
+}
+.n-tabs :deep(.n-tabs-tab__label) {
+    font-size: 16px;
+}
+
+.middle {
+    width: 85%;
+    height: 90%;
+    margin: 0 auto;
+    display: flex;
+    .left {
+        @include all;
+        .n-tabs {
+            height: 100%;
+        }
+
+        .n-tabs :deep(.n-tabs-nav) {
+            background-color: #fff;
+            margin-right: 15px;
+        }
+
+        .n-tabs :deep(.n-tab-pane) {
+            width: 100%;
+            background-color: #fff;
+            padding: 0px;
+        }
+
+        .n-tabs :deep(.n-tabs-tab-wrapper) {
+            width: 240px;
+            border-radius: 40px;
+            height: 60px;
+            @include flex;
+        }
+
+        .n-tabs :deep(.n-tabs-tab) {
+            background-color: #fff;
+            border: none;
+            border-radius: 40px;
+            font-size: 15px;
+            color: #8d9ec2;
+        }
+
+        .n-tabs :deep(.n-tabs-tab--active) {
+            background-color: #daf0e4;
+            height: 40px;
+            width: 130px;
+            border-radius: 40px;
+            color: #1ea05a;
+        }
+
+        span {
+            margin-left: 5px;
+        }
+    }
 }
 </style>
