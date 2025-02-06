@@ -2,13 +2,16 @@
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { getTypeTag, publicArticles } from '@/config/apis/publicArticle';
-import markdown from '@/views/components/markdown/index.vue';
+// import markdown from '@/views/components/markdown/index.vue';
 import { getArticleDetail } from '@/config/apis/articleDetail';
+import { getImageUrl } from '@/config/apis/publicArticle';
 import useUpload from '@/hooks/useUpload';
 import 'bytemd/dist/index.css';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
 import { CheckCircleTwotone } from '@vicons/antd';
+import { MdEditor } from 'md-editor-v3';
+import 'md-editor-v3/lib/style.css';
 
 //定义消息提示对象
 const message = useMessage();
@@ -65,7 +68,6 @@ const articleData = reactive({
 const init = async () => {
     articleData.article_id = +route.params.id;
     if (articleData.article_id !== 0) {
-        console.log('获取到');
         const id = {
             id: articleData.article_id
         };
@@ -99,14 +101,13 @@ const save = async () => {
     }
     isSave.value = true;
     articleData.status = 'draft';
-    console.log('save2');
 };
 
 // 监听键盘事件以保存内容
 const saveContent = (e) => {
     const key = e.keyCode || e.which;
     if (key === 83 && e.ctrlKey) {
-        if (articleData.title === '' && articleData.content === '<p><br></p>') {
+        if (articleData.title === '' && articleData.content === '') {
             isSave.value = false;
         } else {
             save();
@@ -119,12 +120,6 @@ const saveContent = (e) => {
 
 //计算标题的字数
 const titleNUmber = computed(() => articleData.title.length);
-
-//接受上次markdown中的数据
-const content1 = ref('');
-
-//定义上次的标题
-const title1 = ref('');
 
 //控制卡片显示的变量
 const cardDisplay = ref(false);
@@ -146,10 +141,10 @@ const rules = {
 
 //用watch去监控标题是否发生更改
 watch(
-    () => articleData.title, //articleData.title 本身不是一个响应式引用（ref），而是一个响应式对象（reactive）的属性
+    [() => articleData.title, () => articleData.content], //articleData.title 本身不是一个响应式引用（ref），而是一个响应式对象（reactive）的属性
     (newValue, oldValue) => {
         console.log(newValue, oldValue);
-        title1.value = newValue;
+        // title1.value = newValue[0];
         isSave.value = false;
     }
 );
@@ -158,22 +153,6 @@ watch(
 const handleChange = (e: Event) => {
     checkedValue.value = (e.target as HTMLInputElement).value;
     articleData.status = checkedValue.value;
-};
-
-//获取到markdown中输入的数据
-const getMessage = (msg: string) => {
-    articleData.content = msg;
-    if (
-        content1.value === articleData.content &&
-        content1.value !== '<p><br></p>' &&
-        articleData.status === 'draft' &&
-        title1.value === articleData.title
-    ) {
-        isSave.value = true;
-    } else {
-        isSave.value = false;
-        content1.value = articleData.content;
-    }
 };
 
 //获取上传封面图的链接
@@ -186,6 +165,34 @@ const getImage = async (item) => {
 //页面上发布按钮的点击事件
 const releaseCard = () => {
     cardDisplay.value = !cardDisplay.value;
+};
+
+//编辑文章时的上传图片
+const onUploadImg = async (files, callback) => {
+    const res = await Promise.all(
+        files.map((file) => {
+            return new Promise((rev, rej) => {
+                const form = new FormData();
+                form.append('files', file);
+
+                form.append('width', '115');
+                // TS 语法
+                getImageUrl(form)
+                    .then((result) => {
+                        rev(result.data[0]);
+                    })
+                    .catch((error) => {
+                        rej(error);
+                    });
+            });
+        })
+    );
+    console.log(
+        res.map((item) => item.url),
+        '图片'
+    );
+
+    callback(res.map((item) => item.url));
 };
 
 //真正发布的按钮的点击事件
@@ -309,7 +316,8 @@ const publicArticle = async () => {
                 </span>
             </div>
         </div>
-        <markdown @get-message="getMessage" :article_id="articleData.article_id"></markdown>
+        <!-- <markdown @get-message="getMessage" :article_id="articleData.article_id"></markdown> -->
+        <MdEditor v-model="articleData.content" @onUploadImg="onUploadImg" />
     </div>
 </template>
 <style scoped lang="scss">
@@ -396,6 +404,7 @@ const publicArticle = async () => {
     .top {
         display: flex;
         align-items: center;
+        background-color: #fff;
         span {
             color: #8a919f;
         }
@@ -404,7 +413,8 @@ const publicArticle = async () => {
             height: 40px;
             width: 80%;
             border: none !important;
-            margin: 0px 60px;
+            margin: 0px 60px 0px 0px;
+            text-indent: 2em;
         }
 
         .top-right {
@@ -432,6 +442,10 @@ const publicArticle = async () => {
                 height: 30px;
             }
         }
+    }
+
+    .md-editor {
+        height: 80vh;
     }
 }
 </style>

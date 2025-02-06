@@ -113,7 +113,7 @@ const loseFocus = async (e) => {
                 />
                 <n-button text @click="handleFocus('github_link')">编辑</n-button>
             </li>
-            <li>
+            <!-- <li>
                 <span>密码</span>
                 <n-input
                     ref="passwordInputInstRef"
@@ -124,7 +124,7 @@ const loseFocus = async (e) => {
                     @blur="loseFocus('password')"
                 />
                 <n-button text @click="handleFocus('password')">重置</n-button>
-            </li>
+            </li> -->
         </ul>
     </n-card>
 </template>

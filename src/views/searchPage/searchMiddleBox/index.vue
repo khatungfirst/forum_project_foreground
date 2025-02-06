@@ -22,7 +22,7 @@ const dataObj = ref({
     keyword: route.query.keyword,
     category_id: prop.category_id,
     page: 1,
-    limit: 4,
+    limit: 5,
     kind: '0'
 });
 
@@ -63,10 +63,23 @@ const loadInit = async () => {
         dataObj.value.page++;
         const { data } = await getSelectArticle(dataObj.value);
 
-        if (data) {
+        if (data && selectData) {
+            console.log(selectData.value, 'sele');
+
             selectData.value.push(...data.selectedList);
         } else {
-            dataObj.value.page--;
+            dataObj.page--;
+        }
+        const response = await follower_article({
+            page: dataObj.page,
+            limit: dataObj.limit,
+            kind: dataObj.kind
+        });
+
+        if (response.code === 2000) {
+            selectData.value = response.data.selectedList;
+        } else {
+            dataObj.page--;
         }
         await fetchFollowedArticles();
         isLoading.value = false;
@@ -112,17 +125,21 @@ const tabMiddle = (value: string) => {
     .n-tabs {
         width: 100%;
         height: 800px;
-        padding: 30px;
+        padding: 10px 20px;
         .n-tab-pane {
             width: 100%;
+            position: relative;
 
             .n-infinite-scroll {
                 width: 80%;
             }
         }
         img {
-            width: 80%;
+            width: 70%;
             height: 80vh;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
     }
 
