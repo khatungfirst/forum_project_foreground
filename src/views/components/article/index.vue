@@ -14,7 +14,7 @@ const prop = defineProps({
             likes_count: number;
             image_url: string;
             tags: Array<{
-                ID: number;
+                name: string;
             }>;
             id: string;
             status: boolean;
@@ -84,7 +84,7 @@ const clickTags = () => {
                     </span>
                     <ul @click.stop="clickTags">
                         <li v-for="(tag, index) in prop.item.tags" :key="index" class="tag">
-                            {{ tag.ID }}
+                            {{ tag.name }}
                         </li>
                     </ul>
                 </div>
