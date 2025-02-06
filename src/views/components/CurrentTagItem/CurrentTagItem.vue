@@ -1,6 +1,5 @@
 // CurrentTagItem.vue
 <script setup>
-
 const emit = defineEmits(['follow']);
 const props = defineProps({
     tag: {
@@ -53,8 +52,8 @@ const handleFollow = () => {
     align-items: center;
     width: 100%;
     margin-bottom: 20px;
-    /* margin: 0; */
-    padding: 40px 0 0 80px;
+    margin: 0;
+    padding: 40px 0 40px 60px;
 }
 
 .tag-item-info {

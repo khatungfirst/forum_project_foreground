@@ -48,6 +48,7 @@ const clickTags = () => {
     console.log('标签被点击了');
 };
 </script>
+
 <template>
     <ul class="content" @click="checkDetail">
         <li class="whole">
@@ -91,12 +92,13 @@ const clickTags = () => {
             </div>
             <slot class="edit" name="edit"></slot>
             <div class="right" v-if="prop.item.image_url !== ''">
-                <img src="https://t7.baidu.com/it/u=1819248061,230866778&fm=193&f=GIF" alt="" />
+                <img :src="prop.item.image_url" alt="" />
             </div>
             <slot class="cancelCollect" name="cancelCollect"></slot>
         </li>
     </ul>
 </template>
+
 <style scoped lang="scss">
 .content {
     width: 100%;
