@@ -108,17 +108,18 @@ const startCountdown = () => {
 const handleResister = async () => {
     try {
         await formRef.value.validate();
-        console.log('注册', form.value);
         const response = await register({
             email: form.value.email,
             password: form.value.password,
             verify_code: form.value.verify_code,
             re_password: form.value.re_password
         });
+
         if (response.code === 2000 && response.data) {
+            message.success('注册成功！'); // 注册成功时显示提示
             router.push('/login');
         } else {
-            message.error('注册失败:' + response.data.message);
+            message.error('注册失败：' + response.data.message);
         }
     } catch (errors) {
         console.error('注册失败', errors);
