@@ -109,7 +109,7 @@ const jumpMember = (id: number) => {
 const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
 
 //判断这个评论是否是自己的评论
-const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userinfo')).id ? true : false;
+const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
 
 //------------------------------确定评论盒子的宽度-------------------------
 

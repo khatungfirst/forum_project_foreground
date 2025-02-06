@@ -168,6 +168,10 @@ const about = ref([]);
 //定义简洁作者简介是否出现
 const isAuthorInfo = ref(false);
 
+//当前登录作者id
+const personId = JSON.parse(localStorage.getItem('userInfo'));
+console.log(personId, '0000');
+
 //作者对象
 const authorInfo = reactive({
     author_id: articleInfo.author_id, //当前作者的id
@@ -195,7 +199,7 @@ const authorInit = async () => {
         authorInfo.author_read = data.reads_count;
         authorInfo.concern_status = data.concern_status;
     }
-    if (articleInfo.author_id === +JSON.parse(localStorage.getItem('userinfo')).id) {
+    if (personId && articleInfo.author_id === +personId.id) {
         isPerson.value = true;
     }
 };

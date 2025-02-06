@@ -32,7 +32,7 @@ const router = useRouter();
 
 const concernStatus = ref(prop.item.is_followed);
 
-const loginId = +JSON.parse(localStorage.getItem('userinfo')).id;
+const loginId = +JSON.parse(localStorage.getItem('userInfo')).id;
 
 //声明一个变量接收粉丝数
 const fansCount = ref(prop.item.fans_count);

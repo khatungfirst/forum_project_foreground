@@ -140,7 +140,7 @@ const jumpMember = (id: number) => {
 };
 
 //判断这个评论是否是自己的评论
-const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userinfo')).id ? true : false;
+const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
 //--------------------------------回复评论-----------------------------
 
 const responseComments = () => {
