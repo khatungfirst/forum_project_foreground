@@ -192,6 +192,7 @@ const refreshArticles = () => {
                     </span> -->
                     <span class="text">正在全力加载中...</span>
                 </div>
+                <!-- <div v-if="noMore" class="loading">-没有更多了-</div> -->
                 <div v-if="noMore" class="loading">-没有更多了-</div>
             </div>
         </div>
@@ -235,14 +236,14 @@ const refreshArticles = () => {
 .main-content {
     flex-grow: 1;
     padding: 15px;
-    overflow-y: auto;
+    overflow: hidden;
     margin-right: 20px;
 }
 
 .side-bar {
     width: 300px; /* 侧边栏宽度 */
     background-color: #f2f3f5;
-    overflow-y: auto;
+    // overflow-y: auto;
     margin-left: 15px; /* 与主内容区的间距 */
 }
 
