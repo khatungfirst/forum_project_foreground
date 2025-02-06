@@ -104,7 +104,6 @@ const initArticle = async () => {
 const contents = computed(() => {
     const md = new MarkdownIt();
     const result = md.render(articleInfo.content);
-    console.log(result, 'contents');
     return result;
 });
 
@@ -196,7 +195,7 @@ const authorInit = async () => {
         authorInfo.author_read = data.reads_count;
         authorInfo.concern_status = data.concern_status;
     }
-    if (articleInfo.author_id === +localStorage.getItem('userId')) {
+    if (articleInfo.author_id === +JSON.parse(localStorage.getItem('userinfo')).id) {
         isPerson.value = true;
     }
 };
