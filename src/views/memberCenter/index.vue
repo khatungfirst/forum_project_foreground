@@ -76,7 +76,7 @@ const isSelf = ref(true);
 
 //初始化用户数据
 const userInfo = async () => {
-    if (+user.id !== +localStorage.getItem('userId')) {
+    if (+user.id !== +JSON.parse(localStorage.getItem('userInfo')).id) {
         isSelf.value = false;
     }
     const { data } = await getMemberInfo({
