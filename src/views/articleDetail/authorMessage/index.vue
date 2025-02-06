@@ -24,6 +24,9 @@ const prop = defineProps({
         })
     }
 });
+onMounted(() => {
+    console.log(prop.authorInfo, ']]]]]]]');
+});
 </script>
 <template>
     <div class="top">

@@ -198,6 +198,7 @@ const authorInit = async () => {
         authorInfo.author_article = data.article_count;
         authorInfo.author_read = data.reads_count;
         authorInfo.concern_status = data.concern_status;
+        authorInfo.fans_count = data.fans_count;
     }
     if (personId && articleInfo.author_id === +personId.id) {
         isPerson.value = true;
