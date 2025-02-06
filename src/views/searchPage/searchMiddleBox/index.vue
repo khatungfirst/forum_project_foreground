@@ -25,6 +25,9 @@ onMounted(async () => {
 //用来存放后端传来的相关数据
 const selectData = ref([]);
 
+//表示是否有数据
+const isHaveData = ref(true);
+
 const dataObj = reactive({
     keyword: route.query.keyword,
     category_id: prop.category_id,
@@ -35,8 +38,9 @@ const dataObj = reactive({
 
 const init = async () => {
     const { data } = await getSelectArticle(dataObj);
-    if (data) {
+    if (data && data.selectedList.length > 0) {
         selectData.value = data.selectedList;
+        isHaveData.value = false;
     }
 };
 
@@ -65,26 +69,24 @@ const loadInit = async () => {
     setTimeout(async () => {
         dataObj.page++;
         const { data } = await getSelectArticle(dataObj);
-
-        if (data && selectData) {
-            console.log(selectData.value, 'sele');
-
+        if (data && data.selectedList.length > 0 && selectData) {
             selectData.value.push(...data.selectedList);
         } else {
             dataObj.page--;
+            noMore.value = true;
         }
-        const response = await follower_article({
-            page: dataObj.page,
-            limit: dataObj.limit,
-            kind: dataObj.kind
-        });
-        console.log(response.data, '关注的人的文章');
+        // const response = await follower_article({
+        //     page: dataObj.page,
+        //     limit: dataObj.limit,
+        //     kind: dataObj.kind
+        // });
+        // console.log(response.data, '关注的人的文章');
 
-        if (response.code === 2000) {
-            selectData.value = response.data.selectedList;
-        } else {
-            dataObj.page--;
-        }
+        // if (response.code === 2000) {
+        //     selectData.value = response.data.selectedList;
+        // } else {
+        //     dataObj.page--;
+        // }
         isLoading.value = false;
     }, 200);
 };
@@ -100,25 +102,25 @@ const tabMiddle = (value: string) => {
     <div class="search-mid">
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
             <n-tab-pane name="0" tab="热门" ref="dataContainer">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
                 <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                 </n-infinite-scroll>
             </n-tab-pane>
             <n-tab-pane name="1" tab="最新" ref="dataContainer">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
                 <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                 </n-infinite-scroll>
             </n-tab-pane>
         </n-tabs>
         <div class="loading" v-if="isLoading && !noMore">
-            <span class="videos">
+            <!-- <span class="videos">
                 <video src="../../../assets/images/loading.mp4" autoplay loop muted></video>
-            </span>
+            </span> -->
             <span class="text">正在全力加载中...</span>
         </div>
-        <div v-if="noMore" class="loading">没有更多了 🤪</div>
+        <div v-if="noMore" class="loading">没有更多了</div>
     </div>
 </template>
 <style scoped lang="scss">
@@ -126,7 +128,7 @@ const tabMiddle = (value: string) => {
 .search-mid {
     .n-tabs {
         width: 100%;
-        height: 800px;
+        height: 740px;
         padding: 10px 20px;
         .n-tab-pane {
             width: 100%;
@@ -137,7 +139,7 @@ const tabMiddle = (value: string) => {
             }
         }
         img {
-            width: 70%;
+            width: 50%;
             height: 80vh;
             position: absolute;
             left: 50%;

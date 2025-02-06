@@ -50,7 +50,7 @@ const tabTop = (value: string) => {
 
     .middle {
         width: 70%;
-        height: 800px;
+        height: 740px;
         background-color: #fff;
         margin: 15px auto;
     }
