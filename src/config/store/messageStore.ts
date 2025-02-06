@@ -24,8 +24,6 @@ export const useMessageStore = defineStore('messageStore', {
     // }
     actions: {
         initSSE() {
-            // debugger;
-            this.closeSSE();
             console.log('initSSE called');
             const userStore = useUserStore();
             const token = userStore.getToken(); // 获取Token
