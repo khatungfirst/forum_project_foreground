@@ -467,6 +467,7 @@ const searchFun = () => {
                                                 round
                                                 type="primary"
                                                 @click.stop="cancelCollection(item.id)"
+                                                v-if="isSelf"
                                             >
                                                 取消收藏
                                             </n-button>
