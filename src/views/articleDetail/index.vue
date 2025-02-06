@@ -18,7 +18,7 @@ import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.v
 import { useMessage } from 'naive-ui';
 import { LikeFilled, MessageTwotone, StarFilled, EyeOutlined, PlusCircleFilled, CheckCircleFilled } from '@vicons/antd';
 import { Icon } from '@vicons/utils';
-// import MarkdownIt from 'markdown-it';
+import MarkdownIt from 'markdown-it';
 
 //定义router
 const router = useRouter();
@@ -30,14 +30,6 @@ const message = useMessage();
 
 //区分该文章作者是否是当前登录的用户
 const isPerson = ref(false);
-
-//文章内容（计算属性来转换markdown语言）
-// const contents = computed(() => {
-//     const md = new MarkdownIt();
-//     const result = md.render(content.value);
-//     console.log(result);
-//     return result;
-// });
 
 // ---------------------------生命周期---------------------------------
 
@@ -92,7 +84,7 @@ const initArticle = async () => {
         articleInfo.collections = article.collections_count;
         currentIcon.value[0] = article.like_status;
         currentIcon.value[1] = article.collection_status;
-        articleInfo.time = article.published_at;
+        articleInfo.time = article.daily_time;
         articleInfo.title = article.title;
         articleInfo.content = article.content;
         articleInfo.tags = article.tags;
@@ -103,6 +95,14 @@ const initArticle = async () => {
         authorInit();
     }
 };
+
+//文章内容（计算属性来转换markdown语言）
+const contents = computed(() => {
+    const md = new MarkdownIt();
+    const result = md.render(articleInfo.content);
+    console.log(result);
+    return result;
+});
 
 //点赞的方法
 const like = async () => {
@@ -359,7 +359,7 @@ const catalogueControl = () => {
             <div class="left-contains">
                 <div class="laconicAuthorInfo" v-if="isAuthorInfo">
                     <n-avatar round size="large" :src="authorInfo.head" style="width: 55px; height: 55px" />
-                    <div class="iconDiv">
+                    <div class="iconDiv" v-if="!isPerson">
                         <Icon :color="'#19A059'" :size="22" @click="concern">
                             <component :is="!authorInfo.concern_status ? PlusCircleFilled : CheckCircleFilled" />
                         </Icon>
@@ -416,7 +416,7 @@ const catalogueControl = () => {
                         {{ articleInfo.views_count }}
                     </span>
                 </div>
-                <p v-html="articleInfo.content"></p>
+                <p v-html="contents"></p>
                 <div class="tags">
                     <span>标签：</span>
                     <ul>
@@ -486,7 +486,7 @@ const catalogueControl = () => {
                         </template>
                         <n-collapse-item title="目录" @click="catalogueControl">
                             <div class="catalogue-detail">
-                                <MarkdownViewer :content="articleInfo.content" />
+                                <MarkdownViewer :content="contents" />
                             </div>
                         </n-collapse-item>
                     </n-collapse>

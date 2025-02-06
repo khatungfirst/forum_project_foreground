@@ -29,7 +29,7 @@ const dataObj = reactive({
     keyword: route.query.keyword,
     category_id: prop.category_id,
     page: 1,
-    limit: 4,
+    limit: 5,
     kind: '0'
 });
 
@@ -66,7 +66,9 @@ const loadInit = async () => {
         dataObj.page++;
         const { data } = await getSelectArticle(dataObj);
 
-        if (data) {
+        if (data && selectData) {
+            console.log(selectData.value, 'sele');
+
             selectData.value.push(...data.selectedList);
         } else {
             dataObj.page--;
@@ -125,17 +127,21 @@ const tabMiddle = (value: string) => {
     .n-tabs {
         width: 100%;
         height: 800px;
-        padding: 30px;
+        padding: 10px 20px;
         .n-tab-pane {
             width: 100%;
+            position: relative;
 
             .n-infinite-scroll {
                 width: 80%;
             }
         }
         img {
-            width: 80%;
+            width: 70%;
             height: 80vh;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
     }
 

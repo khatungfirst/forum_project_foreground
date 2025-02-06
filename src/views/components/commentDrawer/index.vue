@@ -161,9 +161,13 @@ const publicFirst = async () => {
     });
 
     try {
-        const { code } = await publicComments(commentDetail);
-        if (code === 2000) {
-            emit('close-comment');
+        if (commentDetail.content === '') {
+            message.warning('评论内容不能为空');
+        } else {
+            const { code } = await publicComments(commentDetail);
+            if (code === 2000) {
+                emit('close-comment');
+            }
         }
     } catch (error) {
         message.error('发布评论失败');
