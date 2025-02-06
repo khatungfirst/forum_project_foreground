@@ -64,12 +64,12 @@ const fetchArticles = async () => {
     }
 };
 
-const init = async () => {
-    const { data } = await getSelectArticle(dataObj.value);
-    if (data) {
-        selectData.value = data.selectedList;
-    }
-};
+// const init = async () => {
+//     const { data } = await getSelectArticle(dataObj.value);
+//     if (data) {
+//         selectData.value = data.selectedList;
+//     }
+// };
 
 const loadMoreData = async () => {
     if (isLoading.value || noMore.value) return;
@@ -153,7 +153,7 @@ const refreshArticles = () => {
                         v-model:value="category_id"
                         style="padding: 10px 20px"
                         placement="left"
-                        class="red"
+                        tab-class="father-tab"
                     >
                         <n-tab-pane name="1" tab="综合">
                             <SearchMiddleBox :category_id="category_id" />
@@ -318,7 +318,6 @@ const refreshArticles = () => {
         .n-tabs {
             height: 100%;
         }
-
         .n-tabs :deep(.n-tabs-nav) {
             background-color: #fff;
             margin-right: 15px;
@@ -345,12 +344,14 @@ const refreshArticles = () => {
             color: #8d9ec2;
         }
 
-        .n-tabs :deep(.n-tabs-tab--active) {
+        :deep(.father-tab.n-tabs-tab--active) {
             background-color: #daf0e4;
             height: 40px;
             width: 130px;
             border-radius: 40px;
             color: #1ea05a;
+            text-align: center;
+            justify-content: center;
         }
 
         span {

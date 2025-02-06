@@ -115,37 +115,43 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 </script>
 
 <template>
-    <div class="container">
-        <div class="tag-list-container">
-            <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
-        </div>
-        <div class="search-mid">
-            <n-tabs type="line" animated v-model:value="currentTab">
-                <n-tab-pane name="0" tab="热门">
-                    <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                        <Article v-for="article in articles" :key="article.id" :item="article" />
-                    </n-infinite-scroll>
-                </n-tab-pane>
-                <n-tab-pane name="1" tab="最新">
-                    <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                        <Article v-for="article in articles" :key="article.id" :item="article" />
-                    </n-infinite-scroll>
-                </n-tab-pane>
-            </n-tabs>
-            <div class="loading" v-if="isLoading && !noMore">
-                <!-- <span class="videos">
+    <div class="content">
+        <div class="container">
+            <div class="tag-list-container">
+                <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
+            </div>
+            <div class="search-mid">
+                <n-tabs type="line" animated v-model:value="currentTab">
+                    <n-tab-pane name="0" tab="热门">
+                        <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                            <Article v-for="article in articles" :key="article.id" :item="article" />
+                        </n-infinite-scroll>
+                    </n-tab-pane>
+                    <n-tab-pane name="1" tab="最新">
+                        <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                            <Article v-for="article in articles" :key="article.id" :item="article" />
+                        </n-infinite-scroll>
+                    </n-tab-pane>
+                </n-tabs>
+                <div class="loading" v-if="isLoading && !noMore">
+                    <!-- <span class="videos">
                     <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
                 </span> -->
-                <span class="text">正在全力加载中...</span>
+                    <span class="text">正在全力加载中...</span>
+                </div>
+                <div v-if="noMore" class="loading">-没有更多了-</div>
             </div>
-            <div v-if="noMore" class="loading">-没有更多了-</div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.content {
+    display: flex;
+    /* justify-content: center; */
+}
 .wrapper {
     display: flex;
     justify-content: center; /* 水平居中 */
@@ -155,10 +161,11 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 }
 
 .container {
-    width: 100%; /* 容器宽度，可以根据需要调整 */
+    width: 100%;
     max-width: 1200px; /* 最大宽度，防止内容过宽 */
     padding: 0;
     box-sizing: border-box; /* 确保 padding 不影响宽度 */
+    margin: 0 auto; /* 让 container 水平居中 */
 }
 
 .tag-list-container {
@@ -172,7 +179,9 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
     padding: 20px;
     background-color: white;
     margin-top: 20px;
-    /* width: 560px; */
+    /* 根据需要调整宽度 */
+    margin: 20px auto; /* 水平居中 */
+    text-align: left; /* 确保内容不居中 */
 }
 
 .loading {

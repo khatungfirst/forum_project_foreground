@@ -5,13 +5,11 @@ import { useRouter } from 'vue-router';
 import { login } from '../../config/apis/login';
 import { useMessage } from 'naive-ui';
 import { useUserStore } from '@/config/store/userStore';
-import { useMessageStore } from '@/config/store/messageStore';
 
 const router = useRouter();
 const formRef = ref(null);
 
 const userStore = useUserStore();
-const messageStore = useMessageStore();
 
 const form = ref({
     email: '',
@@ -63,7 +61,6 @@ const handleLogin = async () => {
             const isLoggedIn = userStore.isLoggedIn;
             console.log('Is User Logged In:', isLoggedIn);
             // 登录成功后初始化SSE
-            messageStore.initSSE();
             // 重新定向
             router.push('/home');
         } else {

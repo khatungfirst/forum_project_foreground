@@ -23,6 +23,7 @@ import '@kangc/v-md-editor/lib/style/preview.css';
 import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
 import '@kangc/v-md-editor/lib/theme/style/github.css';
 
+import { useMessageStore } from '@/config/store/messageStore';
 // 引入阿里妈妈的CSS链接
 // import 'http://at.alicdn.com/t/c/font_4701115_se3u8vd3d2.css';
 
@@ -39,6 +40,8 @@ app.use(router);
 app.use(VMdPreview);
 const userStore = useUserStore();
 userStore.init();
+const messageStore = useMessageStore();
+messageStore.initSSE();
 // 只有当 token 存在时（不为 null），才设置到 userStore
 if (localStorage.getItem('token')) {
     const token = localStorage.getItem('token');
