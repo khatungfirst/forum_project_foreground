@@ -17,12 +17,26 @@ import router from './packages/router';
 // 导入全局自定义插件
 import plugin from '@/resources/plugin';
 import { useUserStore } from './config/store/userStore';
+
+import VMdPreview from '@kangc/v-md-editor/lib/preview';
+import '@kangc/v-md-editor/lib/style/preview.css';
+import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
+import '@kangc/v-md-editor/lib/theme/style/github.css';
+
 // 引入阿里妈妈的CSS链接
 // import 'http://at.alicdn.com/t/c/font_4701115_se3u8vd3d2.css';
+
+import hljs from 'highlight.js';
+
+VMdPreview.use(githubTheme, {
+    Hljs: hljs
+});
+
 const app = createApp(App);
 app.use(plugin);
 app.use(createPinia()); //创建一个 pinia 实例(根 store)并将其传递给应用
 app.use(router);
+app.use(VMdPreview);
 const userStore = useUserStore();
 userStore.init();
 // 只有当 token 存在时（不为 null），才设置到 userStore
