@@ -75,10 +75,6 @@ const routes = [
                 component: () => import('../../views/searchPage/index.vue')
             },
             {
-                path: '/drawer',
-                component: () => import('../../views/components/markdownViewer/index.vue')
-            },
-            {
                 path: '/settings',
                 component: () => import('../../views/settings/index.vue')
             },
