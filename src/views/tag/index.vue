@@ -56,12 +56,18 @@ const getTagListAgain = async () => {
 </script>
 
 <template>
-    <div class="tag-list-container">
-        <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" />
+    <div class="content">
+        <div class="tag-list-container">
+            <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" />
+        </div>
     </div>
 </template>
 
 <style scoped>
+.content {
+    display: flex;
+    justify-content: center;
+}
 .tag-list-container {
     display: flex;
     flex-wrap: wrap;
@@ -73,8 +79,9 @@ const getTagListAgain = async () => {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 20px 110px;
+    padding: 0px 110px;
     gap: 20px; /* 控制标签之间的间距 */
+    width: 87%;
 }
 
 .tag-item-single {

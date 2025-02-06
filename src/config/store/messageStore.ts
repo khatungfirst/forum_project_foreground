@@ -24,21 +24,26 @@ export const useMessageStore = defineStore('messageStore', {
     // }
     actions: {
         initSSE() {
+            // debugger;
             console.log('initSSE called');
             const userStore = useUserStore();
             const token = userStore.getToken(); // 获取Token
             console.log('Token:', token);
 
             this.eventSource = new EventSourcePolyfill(import.meta.env.VITE_APP_PROXY_URL + '/message/sse', {
+                heartbeatTimeout: 3 * 60 * 1000,
                 headers: {
                     Authorization: 'Bearer ' + userStore.getToken(),
                     Accept: 'text/event-stream'
-                }
+                },
+                withCredentials: true
             });
+            this.eventSource.onopen = function (e: any) {
+                console.log(e, '连接刚打开时触发');
+            };
             this.eventSource.onmessage = (event) => {
                 try {
-                    console.log(event);
-
+                    console.log('收到消息内容是:', event.data);
                     const data = JSON.parse(event.data);
                     this.handleMessage(data);
                 } catch (error) {
@@ -46,7 +51,7 @@ export const useMessageStore = defineStore('messageStore', {
                 }
             };
             this.eventSource.onerror = (error) => {
-                console.error('SSE error:', error);
+                console.error('SSE 连接出错：', error);
                 this.handleSSEError(error);
             };
         },

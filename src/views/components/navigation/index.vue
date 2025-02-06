@@ -6,7 +6,7 @@ import Tag from '../../../views/tag/index.vue';
 import { IosSearch } from '@vicons/ionicons4';
 import { useUserStore } from '@/config/store/userStore';
 import { useMessageStore } from '@/config/store/messageStore';
-import { get_latest_message } from '@/config/apis/message';
+// import { get_latest_message } from '@/config/apis/message';
 import authorMessage from '../../../views/articleDetail/authorMessage/index.vue';
 import { getAuthorDetail } from '@/config/apis/articleDetail';
 
@@ -101,6 +101,9 @@ const handleLogin = () => {
 const handleSelect = (key) => {
     messageStore.clearNewMessage(key);
     showDropdownRef.value = false;
+    if (key !== 'system' && key !== 'messages') {
+        router.push(`/message`); // 跳转到消息页面，并携带参数
+    }
 };
 
 const toggleAuthorInfo = () => {
@@ -112,13 +115,13 @@ onMounted(async () => {
     if (userStore.isLoggedIn) {
         await authorInit(); // 调用初始化作者信息的方法
         console.log('userStore.isLoggedIn', userStore.isLoggedIn);
-        const response = await get_latest_message();
+        // const response = await get_latest_message();
 
-        if (response.code === 2000 && response.data) {
-            const type = response.data.type;
-            messageStore.handleMessage(response.data);
-            hasNewMessage.value = true;
-        }
+        // if (response.code === 2000 && response.data) {
+        //     const type = response.data.type;
+        //     messageStore.handleMessage(response.data);
+        //     hasNewMessage.value = true;
+        // }
     }
 });
 
