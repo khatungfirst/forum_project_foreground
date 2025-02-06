@@ -95,7 +95,7 @@ axios.interceptors.request.use(
         // 全局开关开启并且该请求也允许
         if (enableCancelModel && config.enableCancelModel !== false) {
             // 如果当前请求存在pendingMap队列中，就先删除重复请求
-            removePendingRequest(config);
+            // removePendingRequest(config);
             // 将当前请求加入pendingMap队列
             addPendingMap(config);
         }

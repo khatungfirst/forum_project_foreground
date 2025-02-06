@@ -48,7 +48,7 @@ onMounted(async () => {
 
 //定义当前会员中心人员的各种信息
 const user = reactive({
-    id: routes.params.id,
+    id: +routes.params.id,
     head_shot: '',
     nickname: '',
     signature: '',
@@ -82,9 +82,12 @@ const userInfo = async () => {
     const { data } = await getMemberInfo({
         author_id: user.id
     });
+    console.log(user, 'user000000');
+
     if (data) {
         Object.assign(user, data);
     }
+    console.log(user, 'user000000');
 };
 
 //初始化微博、博客链接
@@ -558,6 +561,7 @@ const searchFun = () => {
             }
             .n-card {
                 margin-bottom: 20px;
+                padding-bottom: 20px;
 
                 .left-left {
                     width: 75%;
