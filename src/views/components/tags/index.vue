@@ -1,5 +1,5 @@
 <script setup>
-import {  computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter();
 const emit = defineEmits(['follow']);
@@ -19,7 +19,7 @@ const truncatedDescriptions = computed(() => {
     return props.tags.map((tag) => {
         // 假设限制长度为20个字符
         const truncatedDescription =
-            tag.description.length > 39 ? tag.description.slice(0, 39) + '...' : tag.description;
+            tag.description.length > 16 ? tag.description.slice(0, 16) + '...' : tag.description;
         return { ...tag, description: truncatedDescription };
     });
 });

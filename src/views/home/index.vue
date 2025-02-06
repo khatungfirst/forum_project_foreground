@@ -65,7 +65,7 @@ const fetchArticles = async () => {
 };
 
 const init = async () => {
-    // const { data } = await getSelectArticle(dataObj.value);
+    const { data } = await getSelectArticle(dataObj.value);
     if (data) {
         selectData.value = data.selectedList;
     }
