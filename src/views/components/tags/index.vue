@@ -32,27 +32,25 @@ const handleDetail = (id) => {
 
 <template>
     <div class="tag-item">
-        <div class="tag-item-container">
-            <div class="tag-item-single">
-                <div class="tag-item-info" @click="handleDetail(tag.id)">
-                    <img :src="props.tag.path" alt="tag image" class="tag-item_avatar" />
-                    <div class="tag-item-message">
-                        <span class="tag-item_title">{{ props.tag.name }}</span>
-                        <div class="tag-item_data">
-                            文章：{{ props.tag.article_count }} | 热度：{{ props.tag.heat }} | 人数：{{
-                                props.tag.fans_count
-                            }}
-                        </div>
+        <div class="tag-item-single">
+            <div class="tag-item-info" @click="handleDetail(tag.id)">
+                <img :src="props.tag.path" alt="tag image" class="tag-item_avatar" />
+                <div class="tag-item-message">
+                    <span class="tag-item_title">{{ props.tag.name }}</span>
+                    <div class="tag-item_data">
+                        文章：{{ props.tag.article_count }} | 热度：{{ props.tag.heat }} | 人数：{{
+                            props.tag.fans_count
+                        }}
                     </div>
                 </div>
-                <div class="tag-item-description">
-                    <span>{{ props.tag.description }}</span>
-                </div>
-                <div class="tag-item_follow">
-                    <button class="tag-item_button" @click="handleFollow">
-                        {{ props.tag.status === 1 ? '已关注√' : '关注' }}
-                    </button>
-                </div>
+            </div>
+            <div class="tag-item-description">
+                <span>{{ props.tag.description }}</span>
+            </div>
+            <div class="tag-item_follow">
+                <button class="tag-item_button" @click="handleFollow">
+                    {{ props.tag.status === 1 ? '已关注√' : '关注' }}
+                </button>
             </div>
         </div>
     </div>
@@ -70,16 +68,12 @@ const handleDetail = (id) => {
     background-color: #ffffff;
 }
 
-.tag-item-container {
-    display: flex;
-    /* flex-direction: column; */
-    align-items: center;
-}
-
 .tag-item-single {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     flex-direction: column;
+    justify-content: center;
+    margin: auto;
 }
 
 .tag-item-info {
@@ -118,8 +112,17 @@ const handleDetail = (id) => {
     font-size: 14px;
     color: #7d7b7b;
     width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* 限制显示两行 */
+    -webkit-box-orient: vertical;
 }
-
+.tag-item_follow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .tag-item_button {
     cursor: pointer;
     background-color: #f0f0f0;
