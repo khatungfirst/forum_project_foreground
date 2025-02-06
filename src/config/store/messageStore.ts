@@ -80,9 +80,9 @@ export const useMessageStore = defineStore('messageStore', {
                 this.eventSource = null;
             }
             console.error('SSE连接错误，尝试重新连接...');
-            setTimeout(() => {
-                this.initSSE();
-            }, 5000); // 5秒后重试
+            // setTimeout(() => {
+            //     this.initSSE();
+            // }, 5000); // 5秒后重试
         },
         clearNewMessage(type) {
             this.newMessageTypes[type] = false;
