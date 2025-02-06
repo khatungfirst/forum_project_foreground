@@ -120,7 +120,7 @@ const goToArticleDetail = (articleId) => {
 </script>
 
 <template>
-    <div>
+    <div class="container">
         <n-card title="" style="margin-bottom: 16px">
             <n-tabs type="line" animated v-model="currentTab">
                 <n-tab-pane name="评论" tab="评论">
@@ -157,6 +157,10 @@ const goToArticleDetail = (articleId) => {
 </template>
 
 <style scoped lang="scss">
+.container {
+    width: 80%;
+    margin: 0 auto;
+}
 .right {
     /* ... 其他样式 ... */
 

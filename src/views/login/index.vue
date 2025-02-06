@@ -47,28 +47,23 @@ const handleLogin = async () => {
     try {
         await formRef.value.validate();
         const response = await login({ email: form.value.email, password: form.value.password });
+        console.log('登录响应:', response);
+
         if (response.code === 2000 && response.data) {
-            // userStore.setToken(response.data.token); // 存储令牌
-            // userStore.setUserInfo(response.data.userinfo); // 存储用户信息
-            // 等同于下面的login()
+            message.success('登录成功！'); // 登录成功时显示提示
             userStore.login(response.data); // 登录成功，调用 login 方法
-            // 验证 token 是否存储成功
-            const storedToken = userStore.getToken();
-            // userStore().login(response.data);
-            console.log('Token is stored:', storedToken);
-            const userInfo = userStore.userInfo;
-            console.log('Current User Info:', userInfo);
-            const isLoggedIn = userStore.isLoggedIn;
-            console.log('Is User Logged In:', isLoggedIn);
-            // 登录成功后初始化SSE
-            // 重新定向
             router.push('/home');
         } else {
-            message.error('登录失败: ' + response.data.message);
+            console.error('登录失败:', response);
+            message.error('登录失败: ' + (response.data?.message || '未知错误'));
         }
     } catch (errors) {
-        console.error('验证失败', errors);
-        message.error('请检查表单错误');
+        console.error('登录失败:', errors);
+        if (errors instanceof Error) {
+            message.error('登录失败: ' + errors.message);
+        } else {
+            message.error('登录失败: ' + JSON.stringify(errors));
+        }
     }
 };
 
