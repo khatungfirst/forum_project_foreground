@@ -41,13 +41,7 @@ app.use(VMdPreview);
 const userStore = useUserStore();
 userStore.init();
 const messageStore = useMessageStore();
-onMounted(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        userStore.setToken(token);
-    }
-    messageStore.initSSE(); // 初始化 SSE
-});
+messageStore.initSSE();
 
 // 销毁 SSE
 onUnmounted(() => {
