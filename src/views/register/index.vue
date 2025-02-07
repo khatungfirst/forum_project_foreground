@@ -117,7 +117,7 @@ const handleResister = async () => {
 
         if (response.code === 2000 && response.data) {
             message.success('注册成功！'); // 注册成功时显示提示
-            router.push('/login');
+            router.push('/choosetag');
         } else {
             message.error('注册失败：' + response.data.message);
         }
