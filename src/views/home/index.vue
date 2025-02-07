@@ -40,6 +40,9 @@ onMounted(async () => {
 });
 
 const fetchAuthors = async () => {
+    if (currentPage.value > 4) {
+        currentPage.value = 1;
+    }
     const response = await author_rank({ page: currentPage.value, limit: 5 });
     if (response.code === 2000) {
         const validAuthors = response.data.user_heat_rank.filter((author) => author !== null);
@@ -55,6 +58,9 @@ const fetchAuthors = async () => {
 };
 
 const fetchArticles = async () => {
+    if (currentArticlePage.value > 4) {
+        currentArticlePage.value = 1;
+    }
     const response = await article_rank({ page: currentArticlePage.value, limit: 5 });
     if (response.code === 2000) {
         articles.value = response.data.selectedList;
@@ -173,23 +179,17 @@ const refreshArticles = () => {
             <div class="search-mid">
                 <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
                     <n-tab-pane name="0" tab="">
-                        <!-- <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" /> -->
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                         </n-infinite-scroll>
                     </n-tab-pane>
                     <n-tab-pane name="1" tab="">
-                        <!-- <img src="../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" /> -->
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                         </n-infinite-scroll>
                     </n-tab-pane>
                 </n-tabs>
                 <div class="loading" v-if="isLoading && !noMore">
-                    <!-- <span class="videos">
-                    <!-- <span class="videos">
-                        <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                    </span> -->
                     <span class="text">正在全力加载中...</span>
                 </div>
                 <div v-if="noMore" class="loading">-没有更多了-</div>
@@ -198,12 +198,22 @@ const refreshArticles = () => {
         <!-- 侧边栏（作家榜单与文章榜单） -->
         <div class="side-bar">
             <div class="article-rank-list">
-                <ArticleRankItem :articles="articles" @refresh="refreshArticles" />
+                <ArticleRankItem
+                    :articles="articles"
+                    :page="currentArticlePage"
+                    :limit="5"
+                    @refresh="refreshArticles"
+                />
             </div>
             <div class="author-rank-list">
-                <AuthorRankItem :authors="authors" @follow="followAuthor" @refresh="refreshAuthors" />
+                <AuthorRankItem
+                    :authors="authors"
+                    :page="currentPage"
+                    :limit="5"
+                    @follow="followAuthor"
+                    @refresh="refreshAuthors"
+                />
             </div>
-
             <div class="publish-icon-border" @click="handleReleaseArticle">
                 <i class="iconfont icon-bianji"></i>
             </div>
@@ -235,14 +245,14 @@ const refreshArticles = () => {
 .main-content {
     flex-grow: 1;
     padding: 15px;
-    overflow-y: auto;
+    overflow: hidden;
     margin-right: 20px;
 }
 
 .side-bar {
     width: 300px; /* 侧边栏宽度 */
     background-color: #f2f3f5;
-    overflow-y: auto;
+    // overflow-y: auto;
     margin-left: 15px; /* 与主内容区的间距 */
 }
 

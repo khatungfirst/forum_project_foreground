@@ -42,6 +42,11 @@ const userStore = useUserStore();
 userStore.init();
 const messageStore = useMessageStore();
 messageStore.initSSE();
+
+// 销毁 SSE
+onUnmounted(() => {
+    messageStore.closeSSE(); // 销毁 SSE
+});
 // 只有当 token 存在时（不为 null），才设置到 userStore
 if (localStorage.getItem('token')) {
     const token = localStorage.getItem('token');

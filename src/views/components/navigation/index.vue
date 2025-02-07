@@ -84,11 +84,12 @@ const handleFocus = () => {
 };
 
 const handleSearch = () => {
-    console.log(keyword, 112);
+    console.log(keyword.value, 112);
 
     if (keyword.value) {
         console.log('执行了搜索', keyword.value);
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
+        keyword.value = ''; // 清除搜索框内容
     } else {
         console.log('搜索为空', keyword.value);
     }
