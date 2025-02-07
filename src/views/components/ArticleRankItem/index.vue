@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -8,6 +8,14 @@ const props = defineProps({
         type: Array,
         required: true,
         default: () => []
+    },
+    page: {
+        type: Number,
+        required: true
+    },
+    limit: {
+        type: Number,
+        required: true
     }
 });
 const emit = defineEmits(['refresh']);
@@ -15,10 +23,13 @@ const emit = defineEmits(['refresh']);
 const totalArticlesLoaded = ref(0); // 跟踪已加载的文章总数
 
 const processedArticles = computed(() => {
-    return props.articles.map((article, index) => ({
-        ...article,
-        rank: totalArticlesLoaded.value + index + 1 // 给每个文章分配排名
-    }));
+    return props.articles.map((article, index) => {
+        const rank = (props.page - 1) * props.limit + index + 1; // 计算排名
+        return {
+            ...article,
+            rank: rank // 给每个文章分配排名
+        };
+    });
 });
 
 const getRankColor = (rank) => {
@@ -36,9 +47,7 @@ const refreshArticles = () => {
 };
 
 const loadMoreData = () => {
-    // 假设每次加载更多数据时，会从父组件传入新的文章数组
-    // 这里需要确保父组件在加载更多数据后，更新 totalArticlesLoaded
-    totalArticlesLoaded.value += props.articles.length;
+    totalArticlesLoaded.value += props.articles.length; // 更新已加载的文章总数
 };
 </script>
 
@@ -52,10 +61,8 @@ const loadMoreData = () => {
             </div>
             <hr class="article-rank-divider" />
             <div class="article-rank-item_content">
-                <!-- 使用 v-for 循环渲染每个文章信息 -->
                 <div v-for="article in processedArticles" :key="article.id" class="article-rank-item_single">
                     <div class="rank-icon">
-                        <!-- 使用样式绑定来设置颜色 -->
                         <span class="article-rank-index" :style="{ color: getRankColor(article.rank) }">
                             {{ article.rank }}
                         </span>
