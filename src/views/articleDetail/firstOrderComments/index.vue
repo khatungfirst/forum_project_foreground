@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {  ref } from 'vue';
+import { ref } from 'vue';
 import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import SecondOrderComments from '@/views/articleDetail/secondOrderComments/index.vue';
@@ -86,6 +86,7 @@ const commentInfo = reactive({
 });
 //初始化二级评论
 const getSecondComments = async () => {
+    commentInfo.offset = 1;
     try {
         const { data } = await getSecondOrderComments(commentInfo);
         if (data) {
@@ -112,6 +113,7 @@ const moreSecondComments = async () => {
 //删除二级评论
 const deleteSec = (id) => {
     commentList.value = commentList.value.filter((item) => item.id !== id);
+    getSecondComments();
 };
 
 //------------------------------一级评论---------------------------------
@@ -139,6 +141,8 @@ const jumpMember = (id: number) => {
 };
 
 //判断这个评论是否是自己的评论
+console.log(prop.item.user_id, 'userId');
+
 const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
 //--------------------------------回复评论-----------------------------
 
