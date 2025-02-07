@@ -57,9 +57,12 @@ const concernFun = async (id) => {
 };
 const concern = debounce(concernFun, 500);
 
+const emit = defineEmits(['jump-memberCenter']);
+
 //跳转到关注人的会员中心
 const routeMember = (id) => {
     router.push(`/member/${id}`);
+    emit('jump-memberCenter', id);
 };
 </script>
 <template>

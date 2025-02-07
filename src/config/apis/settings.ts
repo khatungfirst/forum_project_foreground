@@ -11,8 +11,8 @@ export const changeLetterStatus = (params: any): Promise<any> => {
 };
 
 ///获取到账号管理的各项数据
-export const getNumberData = (): Promise<any> => {
-    return $get('/user/account_settings');
+export const getNumberData = (params: any): Promise<any> => {
+    return $get('/user/account_settings', params);
 };
 
 //改变账号管理的数据

@@ -77,6 +77,9 @@ const loadInit = async () => {
         }
         isLoading.value = false;
     }, 200);
+    setTimeout(() => {
+        noMore.value = false;
+    }, 5000);
 };
 const loadInitDebounce = debounce(loadInit, 300);
 
