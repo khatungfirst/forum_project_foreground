@@ -170,7 +170,6 @@ const isAuthorInfo = ref(false);
 
 //当前登录作者id
 const personId = JSON.parse(localStorage.getItem('userInfo'));
-console.log(personId, '0000');
 
 //作者对象
 const authorInfo = reactive({
@@ -334,7 +333,7 @@ const handleLoad = async () => {
         const { data } = await getFirstOrderComments(commentInfo);
         if (data) {
             if (data.first_comments_list.length > 0) {
-                commentsList.value.push(...data.firstCommentsList);
+                commentsList.value.push(...data.first_comments_list);
                 idHavaData.value = true;
             } else {
                 idHavaData.value = false;
@@ -660,6 +659,15 @@ watchEffect(async () => {
             padding: 30px;
             background-color: #fff;
             margin-bottom: 20px;
+
+            .v-md-editor-preview :deep(.github-markdown-body h1),
+            .v-md-editor-preview :deep(.github-markdown-body h2),
+            .v-md-editor-preview :deep(.github-markdown-body h3),
+            .v-md-editor-preview :deep(.github-markdown-body h4),
+            .v-md-editor-preview :deep(.github-markdown-body h5),
+            .v-md-editor-preview :deep(.github-markdown-body h6) {
+                border-bottom: none !important;
+            }
 
             .message {
                 color: #8a919f;

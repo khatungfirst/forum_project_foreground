@@ -96,7 +96,6 @@ const getSecondComments = async () => {
                 isSecondComments.value = false;
             }
         }
-        console.log(commentList.value, '000');
     } catch (error) {
         console.error('Failed to fetch comments:', error);
         message.error('加载评论失败，请重试。');
