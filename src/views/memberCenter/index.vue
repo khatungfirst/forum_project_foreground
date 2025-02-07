@@ -46,9 +46,12 @@ onMounted(async () => {
 
 //------------------------用户模块---------------------
 
+//定义当前会员中心人员的id
+const paramId = ref(+routes.params.id);
+
 //定义当前会员中心人员的各种信息
 const user = reactive({
-    id: +routes.params.id,
+    id: paramId.value,
     head_shot: '',
     nickname: '',
     signature: '',
@@ -82,17 +85,17 @@ const userInfo = async () => {
     const { data } = await getMemberInfo({
         author_id: user.id
     });
-    console.log(user, 'user000000');
 
     if (data) {
         Object.assign(user, data);
     }
-    console.log(user, 'user000000');
 };
 
 //初始化微博、博客链接
 const linkInit = async () => {
-    const { data } = await getNumberData();
+    const { data } = await getNumberData({
+        author_id: user.id
+    });
     user.blog_link = data.blog_link;
     user.weibo_link = data.weibo_link;
     user.github_link = data.github_link;
@@ -204,6 +207,17 @@ const fansLoadInit = async () => {
     setTimeout(() => {
         noMore.value = false;
     }, 6000);
+};
+
+//跳转到关注人的会员中心
+const updateJumpInfo = (id) => {
+    user.id = id;
+    fansType.userId = id;
+    aticleType.id = id;
+    userInfo();
+    articleInit();
+    fansList();
+    linkInit();
 };
 
 //------------------文章列表模块------------------------------
@@ -485,7 +499,12 @@ const searchFun = () => {
                         </n-tab-pane>
                         <n-tab-pane name="关注" tab="关注">
                             <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit">
-                                <FansInfo :item="item" v-for="(item, index) in fansArr" :key="index"></FansInfo>
+                                <FansInfo
+                                    :item="item"
+                                    v-for="(item, index) in fansArr"
+                                    :key="index"
+                                    @jump-memberCenter="updateJumpInfo"
+                                ></FansInfo>
                             </n-infinite-scroll>
                         </n-tab-pane>
                     </n-tabs>

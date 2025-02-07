@@ -108,6 +108,15 @@ const handlePreview = async (item) => {
     await getUrl(item);
     userInfo.path = image_url.value;
     update('更改头像成功', '更改头像失败');
+    //更改本地的头像数据
+    const oldLocalInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const localInfo = {
+        avatar_path: oldLocalInfo.avatar_path,
+        id: oldLocalInfo.id,
+        nickname: oldLocalInfo.nickname
+    };
+    localInfo.avatar_path = image_url.value;
+    localStorage.setItem('userInfo', JSON.stringify(localInfo));
     // showModalRef.value = true;
 };
 </script>

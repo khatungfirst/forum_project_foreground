@@ -62,9 +62,12 @@ const iconColor = '#8A919F';
 //定义一个响应式数组来跟踪每个图标的状态
 const currentIcon = ref([false, false]);
 
+//定义路由变量
+const paramId = ref(+route.params.id);
+
 //文章对象
 const articleInfo = reactive({
-    id: +route.params.id, //定义本篇文章的id
+    id: paramId.value, //定义本篇文章的id
     likeTotal: 0, //定义本文章的点赞数
     collections: 0, // //定义本文章的收藏数
     title: 0, //文章标题
@@ -245,6 +248,10 @@ const handleScroll = () => {
 //跳转到对应推荐文章的文章详情
 const recommendedArtical = (id) => {
     router.push(`/articledetail/${id}`);
+    articleInfo.id = id;
+    commentInfo.article_id = id;
+    initArticle();
+    initComments();
 };
 
 // ---------------------------评论模块---------------------------------
@@ -275,7 +282,7 @@ const idHavaData = ref(false);
 
 //评论相关数据
 const commentInfo = reactive({
-    article_id: +route.params.id,
+    article_id: paramId.value,
     offset: 1,
     limit: 4
 });
