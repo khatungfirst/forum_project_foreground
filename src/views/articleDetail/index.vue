@@ -325,7 +325,8 @@ const review = () => {
 //删除评论
 const deleteFirst = (id) => {
     commentsList.value = commentsList.value.filter((item) => item.id !== id);
-    initComments();
+    // initComments();
+    // location.reload();
 };
 
 //评论的下拉事件

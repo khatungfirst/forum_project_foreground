@@ -107,7 +107,6 @@ const { image_url, getUrl } = useUpload();
 const handlePreview = async (item) => {
     await getUrl(item);
     userInfo.path = image_url.value;
-    console.log(userInfo.path, '========');
     update('更改头像成功', '更改头像失败');
     // showModalRef.value = true;
 };
