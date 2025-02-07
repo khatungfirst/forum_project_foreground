@@ -191,6 +191,7 @@ const authorInit = async () => {
     const authorData = await getAuthorDetail(authorId);
     if (authorData) {
         const data = authorData.data;
+        authorInfo.author_id = articleInfo.author_id;
         authorInfo.head = data.head_shot;
         authorInfo.nickname = data.nickname;
         authorInfo.signature = data.signature;
@@ -281,6 +282,7 @@ const commentInfo = reactive({
 
 //评论相关初始化方法
 const initComments = async () => {
+    commentInfo.offset = 1;
     if (localStorage.getItem('token')) {
         LoginVis.value = false;
     }
@@ -323,7 +325,8 @@ const review = () => {
 //删除评论
 const deleteFirst = (id) => {
     commentsList.value = commentsList.value.filter((item) => item.id !== id);
-    initComments;
+    // initComments();
+    // location.reload();
 };
 
 //评论的下拉事件

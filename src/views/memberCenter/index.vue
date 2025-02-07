@@ -146,7 +146,7 @@ const settinngs = () => {
 
 //--------------------关注列表模块------------------------
 
-//定义文章的筛选条件
+//定义关注的人的筛选条件
 const fansType = reactive({
     userId: user.id,
     page: 1,
@@ -189,16 +189,21 @@ const fansLoadInit = async () => {
         fansType.page++;
         const { data } = await getConcernList(fansType);
         if (data) {
-            fansArr.value.push(...data.concernList);
             isLoading.value = false;
-            if (data.total === 0) {
+            if (data.ids.ids.length === 0) {
                 noMore.value = true;
+            } else {
+                fansId.value.push(...data.ids.ids);
+                const fansData = await getConcernDetail({
+                    ids: fansId.value
+                });
+                fansArr.value = fansData.data.user_info_list;
             }
         }
     }, 1000);
     setTimeout(() => {
         noMore.value = false;
-    }, 2000);
+    }, 6000);
 };
 
 //------------------文章列表模块------------------------------
@@ -261,7 +266,7 @@ const loadInit = async () => {
     }, 1000);
     setTimeout(() => {
         noMore.value = false;
-    }, 7000);
+    }, 5000);
 };
 
 //编辑本篇文章
@@ -309,7 +314,6 @@ const isInputBack = ref(false);
 
 // 鼠标悬停时输入框设置宽度
 const expandInput = () => {
-    console.log('shurushi');
     if (!isInputBack.value) {
         isInputBack.value = false;
         inputWidth.value = '200px';
@@ -323,6 +327,7 @@ const shrinkInput = () => {
     if (isInputBack.value) {
         inputWidth.value = '0px';
         isInputBack.value = false;
+        inputValue.value = '';
     } else {
         inputWidth.value = '200px';
     }
@@ -338,7 +343,6 @@ const searchFun = () => {
         fansType.keyword = inputValue.value;
         fansList();
     }
-    inputValue.value = '';
     fansType.keyword = '';
     isInputBack.value = true;
 };
@@ -460,7 +464,7 @@ const searchFun = () => {
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="收藏" tab="收藏">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
+                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit" ref="scrollPage">
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index">
                                     <template #cancelCollect>
                                         <div class="cancelCollect">

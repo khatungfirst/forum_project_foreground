@@ -75,18 +75,6 @@ const loadInit = async () => {
             dataObj.page--;
             noMore.value = true;
         }
-        // const response = await follower_article({
-        //     page: dataObj.page,
-        //     limit: dataObj.limit,
-        //     kind: dataObj.kind
-        // });
-        // console.log(response.data, '关注的人的文章');
-
-        // if (response.code === 2000) {
-        //     selectData.value = response.data.selectedList;
-        // } else {
-        //     dataObj.page--;
-        // }
         isLoading.value = false;
     }, 200);
 };
@@ -120,7 +108,7 @@ const tabMiddle = (value: string) => {
             </span> -->
             <span class="text">正在全力加载中...</span>
         </div>
-        <div v-if="noMore" class="loading">没有更多了</div>
+        <div v-if="noMore" class="loading">-没有更多了-</div>
     </div>
 </template>
 <style scoped lang="scss">
