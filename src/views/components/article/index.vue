@@ -118,7 +118,7 @@ const highlightedSummary = ref(prop.item.summary);
     border-bottom: 1px solid rgb(223, 217, 217);
     position: relative;
     z-index: 999;
-    width: 100%;
+    width: 98%;
 
     .left {
         flex: 1;

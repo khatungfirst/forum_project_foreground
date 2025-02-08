@@ -715,7 +715,7 @@ const searchFun = () => {
                     pointer-events: auto;
                     background-color: #daf0e4;
                     position: absolute;
-                    right: 20px;
+                    right: 0px;
                     top: 0px;
                     z-index: 999;
                     display: none;
