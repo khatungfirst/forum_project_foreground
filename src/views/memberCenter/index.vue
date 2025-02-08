@@ -451,7 +451,10 @@ const searchFun = () => {
                             </div>
                         </template>
                         <n-tab-pane name="文章" tab="文章">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
+                            <div class="empty-box" v-if="articleArr.length === 0">
+                                <img src="../../assets/images/empty.png" />
+                            </div>
+                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit" v-else>
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index" class="article">
                                     <template #type>
                                         <n-tag class="status">{{ item.status }}</n-tag>
@@ -478,7 +481,16 @@ const searchFun = () => {
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="收藏" tab="收藏">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit" ref="scrollPage">
+                            <div class="empty-box" v-if="articleArr.length === 0">
+                                <img src="../../assets/images/empty.png" />
+                            </div>
+                            <n-infinite-scroll
+                                style="height: 600px"
+                                :distance="10"
+                                @load="loadInit"
+                                ref="scrollPage"
+                                v-else
+                            >
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index">
                                     <template #cancelCollect>
                                         <div class="cancelCollect">
@@ -498,7 +510,10 @@ const searchFun = () => {
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="关注" tab="关注">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit">
+                            <div class="empty-box" v-if="fansArr.length === 0">
+                                <img src="../../assets/images/empty.png" />
+                            </div>
+                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit" v-else>
                                 <FansInfo
                                     :item="item"
                                     v-for="(item, index) in fansArr"
@@ -585,6 +600,7 @@ const searchFun = () => {
             .n-card {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
+                border-radius: 5px;
 
                 .left-left {
                     width: 75%;
@@ -659,6 +675,15 @@ const searchFun = () => {
             .article-card {
                 position: relative;
 
+                .empty-box {
+                    width: 500px;
+                    height: 600px;
+                    margin: 0 auto;
+                    img {
+                        width: 100%;
+                    }
+                }
+
                 .searchModule {
                     display: flex;
                     align-items: center;
@@ -676,6 +701,9 @@ const searchFun = () => {
 
                 .n-tabs .n-tab-pane {
                     padding: 0px;
+                }
+                .n-tabs :deep(.n-tabs-tab__label) {
+                    font-size: 16px;
                 }
 
                 .status {
@@ -724,6 +752,7 @@ const searchFun = () => {
             .n-card {
                 width: 90%;
                 margin-bottom: 20px;
+                border-radius: 5px;
 
                 p {
                     margin-bottom: 10px;
@@ -737,6 +766,7 @@ const searchFun = () => {
             @include headBorder;
             .n-card :deep(.n-card-header) {
                 padding: 10px;
+                font-size: 16px;
             }
 
             .concernCard {

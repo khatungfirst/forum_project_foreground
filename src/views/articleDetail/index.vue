@@ -100,6 +100,7 @@ const initArticle = async () => {
         articleInfo.author_id = article.user_id;
         articleInfo.nickname = article.nickname;
         authorInit();
+        getTitle();
     }
 };
 
@@ -290,6 +291,7 @@ const commentInfo = reactive({
 //评论相关初始化方法
 const initComments = async () => {
     commentInfo.offset = 1;
+    commentsList.value = [];
     if (localStorage.getItem('token')) {
         LoginVis.value = false;
     }
@@ -358,7 +360,7 @@ const handleLoadComment = debounce(handleLoad, 200);
 // ---------------------------目录模块---------------------------------
 
 // 目录框是否收起的按钮
-const catalogueButton = ref('展开');
+const catalogueButton = ref('收起');
 
 //控制目录框是否展开
 const catalogueControl = () => {
@@ -381,6 +383,8 @@ const heightTitle = ref(0);
 
 // markdown-生成标题
 const getTitle = async () => {
+    console.log(editor.value, 'hhhhhhhhhhhhhhhhhhhh');
+
     await nextTick();
     // 使用js选择器，获取对应的h标签，组合成列表
     const anchors = editor.value.querySelectorAll('h1,h2,h3,h4,h5,h6');
@@ -499,7 +503,7 @@ watchEffect(async () => {
         </div>
         <div class="middle" ref="centerRef">
             <div class="article-detail">
-                <h2>{{ articleInfo.title }}</h2>
+                <h1 style="font-size: 35px; margin-bottom: 10px">{{ articleInfo.title }}</h1>
                 <div class="message">
                     <n-ellipsis style="max-width: 240px">
                         {{ articleInfo.nickname }}
@@ -577,22 +581,22 @@ watchEffect(async () => {
             </div>
             <div :class="{ fixed: isAuthorInfo }" class="right-second">
                 <div class="catalogue">
-                    <n-collapse>
+                    <n-collapse :default-expanded-names="['收起']">
                         <template #header>
                             <div class="collapse-header" style="border-bottom: 1px solid black"></div>
                         </template>
                         <template #header-extra>
-                            <span style="color: #8a9fc7; font-size: 13px" @click="catalogueControl">
+                            <span style="color: #8a91b8; font-size: 13px" @click="catalogueControl">
                                 {{ catalogueButton }}
                             </span>
                         </template>
-                        <n-collapse-item title="目录">
+                        <n-collapse-item title="目录" name="收起">
                             <div class="catalogue-detail">
                                 <!-- <MarkdownViewer :content="contents" /> -->
                                 <div
                                     v-for="(item, index) in titleList"
                                     :key="index"
-                                    :style="{ paddingLeft: item.indent * 15 + 'px' }"
+                                    :style="{ paddingLeft: item.indent * 15 + 15 + 'px' }"
                                     @click.stop="rollTo(item, index)"
                                     :class="index === heightTitle ? 'title-active' : ''"
                                 >
@@ -602,7 +606,7 @@ watchEffect(async () => {
                         </n-collapse-item>
                     </n-collapse>
                 </div>
-                <div class="advertisement"></div>
+                <!-- <div class="advertisement"></div> -->
                 <div class="relevant_recommendation">
                     <div class="recommendation-top">
                         <p>相关推荐</p>
@@ -666,9 +670,14 @@ watchEffect(async () => {
         margin: 0px 20px;
         .article-detail {
             width: 100%;
-            padding: 30px;
+            padding: 45px;
             background-color: #fff;
             margin-bottom: 20px;
+            border-radius: 5px;
+
+            .v-md-editor-preview :deep(.github-markdown-body) {
+                padding: 0px;
+            }
 
             .v-md-editor-preview :deep(.github-markdown-body h1),
             .v-md-editor-preview :deep(.github-markdown-body h2),
@@ -713,10 +722,10 @@ watchEffect(async () => {
                 }
 
                 li {
-                    padding: 5px 10px;
+                    padding: 3px 13px;
                     display: inline-block;
-                    margin-left: 20px;
-                    background-color: #ededee;
+                    margin-left: 9px;
+                    background-color: #f7f8fa;
                     border-radius: 5px;
                 }
             }
@@ -725,6 +734,7 @@ watchEffect(async () => {
         .reviewModule {
             padding: 20px;
             background-color: #fff;
+            border-radius: 5px;
 
             h3 {
                 margin-bottom: 20px;
@@ -763,6 +773,7 @@ watchEffect(async () => {
             background-color: #fff;
             margin-bottom: 20px;
             padding: 10px;
+            border-radius: 5px;
 
             .bottom {
                 display: flex;
@@ -785,25 +796,22 @@ watchEffect(async () => {
         .catalogue {
             // width: 70%;
             background-color: #fff;
-            padding: 10px;
+            // padding: 15px;
             margin-bottom: 20px;
+            border-radius: 5px;
 
-            .catalogue-top {
-                border-bottom: #e7ecf4 1px solid;
-                padding-bottom: 3px;
-                .pack_up {
-                    font-size: 14px;
-                    color: #8a919f;
-                    float: right;
-                }
+            .n-collapse :deep(.n-collapse-item__header) {
+                padding: 15px 0px 8px 0px;
+                margin: 0px 15px;
+            }
 
-                .pack_up:hover {
-                    cursor: pointer;
-                }
+            .catalogue-detail div {
+                margin-bottom: 10px;
             }
 
             .title-active {
-                color: #4ad77c;
+                color: #19a059;
+                border-left: 5px solid #19a059;
             }
         }
 
@@ -813,6 +821,7 @@ watchEffect(async () => {
 
         .catalogue :deep(.n-collapse-item__header) {
             border-bottom: 1px solid rgb(218, 211, 211);
+            font-size: 16px;
         }
 
         .advertisement {
@@ -825,12 +834,14 @@ watchEffect(async () => {
         .relevant_recommendation {
             // width: 70%;
             background-color: #fff;
-            padding: 10px;
+            padding: 15px;
+            border-radius: 5px;
 
             li {
                 margin-bottom: 20px;
                 p {
                     @include ellipsis;
+                    font-size: 14px;
 
                     span {
                         color: #999fbb;

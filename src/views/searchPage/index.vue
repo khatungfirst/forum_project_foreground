@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
 
+const route = useRoute();
+
 //顶部标签选中
 const category_id = ref('1');
 
@@ -9,6 +11,12 @@ const category_id = ref('1');
 const tabTop = (value: string) => {
     category_id.value = value;
 };
+watch(
+    () => route.params.keyword,
+    (oldVal, newVal) => {
+        console.log(newVal, 'newwwwww');
+    }
+);
 </script>
 <template>
     <div class="wrap">
@@ -37,6 +45,7 @@ const tabTop = (value: string) => {
         width: 100%;
         height: 50px;
         background-color: #fff;
+        border-radius: 5px;
 
         .n-tabs {
             width: 70%;
@@ -46,6 +55,10 @@ const tabTop = (value: string) => {
         .n-tabs :deep(.n-tabs-nav-scroll-content) {
             height: 50px;
         }
+
+        .n-tabs :deep(.n-tabs-tab__label) {
+            font-size: 16px;
+        }
     }
 
     .middle {
@@ -53,6 +66,7 @@ const tabTop = (value: string) => {
         height: 740px;
         background-color: #fff;
         margin: 15px auto;
+        border-radius: 5px;
     }
 }
 </style>

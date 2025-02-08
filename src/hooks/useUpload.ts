@@ -7,7 +7,7 @@ export default function () {
     const getUrl = async (item: any) => {
         const fd = new FormData();
         fd.append('files', item.file.file);
-        fd.append('width', '115');
+        fd.append('width', '105');
         const { data } = await getImageUrl(fd);
         image_url.value = data[0].url;
     };

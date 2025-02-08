@@ -68,7 +68,7 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
         const fd = new FormData();
         fd.append('files', file);
-        fd.append('width', '115');
+        fd.append('width', '105');
         getImageUrl(fd)
             .then((response) => {
                 console.log(response.data[0].url, '99999');
