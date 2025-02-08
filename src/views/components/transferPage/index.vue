@@ -63,11 +63,14 @@ const continuePublic = () => {
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
 .wrap {
+    width: 80%;
+    margin: 0 auto;
     @include flex;
     flex-direction: column;
     position: relative;
     top: 13%;
     height: 85vh;
+    background-color: #fff;
     p {
         font-size: 23px;
         color: #19a059;
@@ -78,6 +81,9 @@ const continuePublic = () => {
             margin-right: 20px;
             width: 140px;
         }
+    }
+    img {
+        width: 300px;
     }
 }
 </style>

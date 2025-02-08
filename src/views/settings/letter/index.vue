@@ -68,6 +68,7 @@ const change = async () => {
 @import '@/assets/styles/mixin.scss';
 .n-card {
     height: 900px;
+    border: none;
 
     .letter,
     .n-radio-group {

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
-import { follower_article } from '@/config/apis/articleDetail';
 import Article from '@/views/components/article/index.vue';
 import { debounce } from '@/utils/debounce.ts';
 
@@ -45,11 +44,11 @@ const init = async () => {
 };
 
 watch(
-    () => route.query.keyword,
+    () => dataObj.keyword,
     (newVal, oldVal) => {
-        dataObj.keyword = route.query.keyword;
+        dataObj.keyword = newVal;
         init();
-        console.log(newVal, oldVal, '======');
+        console.log(oldVal, '======');
     },
     { immediate: true }
 );

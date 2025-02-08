@@ -207,6 +207,7 @@ const handlePreview = async (item) => {
     height: 900px;
     // @include all;
     margin-bottom: 40px;
+    border: none;
 
     .top {
         display: grid;
