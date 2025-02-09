@@ -236,10 +236,12 @@ const articleArr = ref([]);
 
 //初始化文章的信息
 const articleInit = async () => {
+    articleArr.value = [];
     const { data } = await getArticleInfo(aticleType);
     if (data) {
         articleArr.value = data.dataList;
     }
+    console.log(articleArr.value, 'ooooo');
 };
 
 //发表文章按钮

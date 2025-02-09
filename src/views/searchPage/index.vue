@@ -1,23 +1,13 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
-import { eventBus } from '@/utils/eventBus.ts';
-
-const route = useRoute();
 //顶部标签选中
 const category_id = ref('1');
-
-// 定义搜索关键词
-const keyword = ref(eventBus.keyword);
 
 //顶部标签页改变时的触发事件
 const tabTop = (value: string) => {
     category_id.value = value;
 };
-
-onMounted(() => {
-    console.log('搜索关键词:', keyword.value);
-});
 </script>
 <template>
     <div class="wrap">

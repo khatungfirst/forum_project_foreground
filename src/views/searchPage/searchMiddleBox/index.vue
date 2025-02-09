@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
 import Article from '@/views/components/article/index.vue';
 import { debounce } from '@/utils/debounce.ts';
+import { useUserStore } from '@/config/store/userStore';
 
 const prop = defineProps({
     category_id: {
@@ -13,6 +14,7 @@ const prop = defineProps({
 });
 
 const route = useRoute();
+const userStore = useUserStore();
 
 //--------------------------------------生命周期-------------------------------------
 
@@ -36,6 +38,7 @@ const dataObj = reactive({
 });
 
 const init = async () => {
+    selectData.value = [];
     const { data } = await getSelectArticle(dataObj);
     if (data && data.selectedList.length > 0) {
         selectData.value = data.selectedList;
@@ -44,7 +47,7 @@ const init = async () => {
 };
 
 watch(
-    () => dataObj.keyword,
+    () => userStore.selectInfo,
     (newVal, oldVal) => {
         dataObj.keyword = newVal;
         init();
@@ -52,6 +55,7 @@ watch(
     },
     { immediate: true }
 );
+
 //----------------------------------加载后获取数据-------------------------------------
 //是否正在加载
 const isLoading = ref(false);
