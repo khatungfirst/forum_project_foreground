@@ -243,12 +243,23 @@ const authorInit = async () => {
     margin-right: 15px;
     cursor: pointer;
     text-decoration: none;
-    color: #101010101;
+    // color: #19a059;
+    position: relative; /* 为绿条添加定位 */
 }
 
 .nav-link.active {
     color: #36ad6a;
     font-weight: bold;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px; /* 绿条高度 */
+    background-color: #36ad6a; /* 绿条颜色 */
 }
 
 .title {

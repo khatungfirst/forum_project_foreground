@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
 import { eventBus } from '@/utils/eventBus.ts';
+
+const route = useRoute();
 //顶部标签选中
 const category_id = ref('1');
 
