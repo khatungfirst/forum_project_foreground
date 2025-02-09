@@ -74,7 +74,7 @@ const loadMoreData = () => {
             </div>
             <hr class="article-rank-divider" />
             <div class="article-rank-more">
-                <span>查看更多</span>
+                <!-- <span>查看更多</span> -->
             </div>
         </div>
     </div>

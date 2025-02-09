@@ -9,6 +9,7 @@ import { useMessageStore } from '@/config/store/messageStore';
 // import { get_latest_message } from '@/config/apis/message';
 import authorMessage from '../../../views/articleDetail/authorMessage/index.vue';
 import { getAuthorDetail } from '@/config/apis/articleDetail';
+import { eventBus } from '@/utils/eventBus.ts';
 
 const router = useRouter();
 const activeTab = ref('home');
@@ -88,6 +89,7 @@ const handleSearch = () => {
 
     if (keyword.value) {
         console.log('执行了搜索', keyword.value);
+        eventBus.keyword = keyword.value; // 将搜索框的值更新到 eventBus
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
         keyword.value = ''; // 清除搜索框内容
     } else {
