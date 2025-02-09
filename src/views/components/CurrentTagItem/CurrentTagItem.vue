@@ -100,7 +100,7 @@ const handleFollow = () => {
     border-radius: 50px;
     outline: none;
     color: #19a059;
-    padding: 8px 10px;
+    padding: 8px 30px;
     width: 100%;
     text-align: center;
     font-size: 16px;

@@ -181,18 +181,26 @@ const refreshArticles = () => {
                     <n-tab-pane name="0" tab="">
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                            <!-- <ul>
+                                <li class="load-ing" v-if="isLoading && !noMore">
+                                    <span class="text">正在全力加载中...</span>
+                                </li>
+                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
+                            </ul> -->
                         </n-infinite-scroll>
                     </n-tab-pane>
                     <n-tab-pane name="1" tab="">
                         <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                             <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                            <!-- <ul>
+                                <li class="load-ing" v-if="isLoading && !noMore">
+                                    <span class="text">正在全力加载中...</span>
+                                </li>
+                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
+                            </ul> -->
                         </n-infinite-scroll>
                     </n-tab-pane>
                 </n-tabs>
-                <div class="loading" v-if="isLoading && !noMore">
-                    <span class="text">正在全力加载中...</span>
-                </div>
-                <div v-if="noMore" class="loading">-没有更多了-</div>
             </div>
         </div>
         <!-- 侧边栏（作家榜单与文章榜单） -->
@@ -275,7 +283,7 @@ const refreshArticles = () => {
     height: auto;
 }
 
-.loading {
+.load-ing {
     text-align: center;
     padding: 20px;
 }
@@ -318,8 +326,20 @@ const refreshArticles = () => {
     font-size: 16px;
 }
 
+::v-deep(.n-scrollbar-content) {
+    padding-bottom: 140px;
+}
+
+.load-ing {
+    margin-top: 15px;
+    text-align: center;
+    width: 100%;
+    color: #7d8791;
+    bottom: 25px;
+}
+
 .middle {
-    width: 85%;
+    width: 100%;
     height: 90%;
     margin: 0 auto;
     display: flex;

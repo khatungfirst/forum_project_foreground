@@ -93,7 +93,7 @@ const refreshAuthors = () => {
             </div>
             <hr class="author-rank-divider" />
             <div class="author-rank-more">
-                <span>查看更多></span>
+                <!-- <span>查看更多></span> -->
             </div>
         </div>
     </div>
@@ -167,7 +167,8 @@ const refreshAuthors = () => {
     padding: 5px 10px;
     font-size: 16px;
     cursor: pointer;
-    background-color: #f0f0f0;
+    /* background-color: #f0f0f0; */
+    background: none; /* 去掉背景 */
     border: none;
     border-radius: 5px;
     outline: none;
