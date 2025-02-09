@@ -91,6 +91,7 @@ const handleSearch = () => {
         console.log('执行了搜索', keyword.value);
         eventBus.keyword = keyword.value; // 将搜索框的值更新到 eventBus
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
+        userStore.selectInfo = keyword.value;
         keyword.value = ''; // 清除搜索框内容
     } else {
         console.log('搜索为空', keyword.value);
