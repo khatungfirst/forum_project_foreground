@@ -9,6 +9,7 @@ import { useMessageStore } from '@/config/store/messageStore';
 // import { get_latest_message } from '@/config/apis/message';
 import authorMessage from '../../../views/articleDetail/authorMessage/index.vue';
 import { getAuthorDetail } from '@/config/apis/articleDetail';
+import { eventBus } from '@/utils/eventBus.ts';
 
 const router = useRouter();
 const activeTab = ref('home');
@@ -88,6 +89,7 @@ const handleSearch = () => {
 
     if (keyword.value) {
         console.log('执行了搜索', keyword.value);
+        eventBus.keyword = keyword.value; // 将搜索框的值更新到 eventBus
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
         keyword.value = ''; // 清除搜索框内容
     } else {
@@ -241,12 +243,23 @@ const authorInit = async () => {
     margin-right: 15px;
     cursor: pointer;
     text-decoration: none;
-    color: #101010101;
+    // color: #19a059;
+    position: relative; /* 为绿条添加定位 */
 }
 
 .nav-link.active {
     color: #36ad6a;
     font-weight: bold;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px; /* 绿条高度 */
+    background-color: #36ad6a; /* 绿条颜色 */
 }
 
 .title {

@@ -1,22 +1,23 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
+import { eventBus } from '@/utils/eventBus.ts';
 
 const route = useRoute();
-
 //顶部标签选中
 const category_id = ref('1');
+
+// 定义搜索关键词
+const keyword = ref(eventBus.keyword);
 
 //顶部标签页改变时的触发事件
 const tabTop = (value: string) => {
     category_id.value = value;
 };
-watch(
-    () => route.params.keyword,
-    (oldVal, newVal) => {
-        console.log(newVal, 'newwwwww');
-    }
-);
+
+onMounted(() => {
+    console.log('搜索关键词:', keyword.value);
+});
 </script>
 <template>
     <div class="wrap">
@@ -45,7 +46,6 @@ watch(
         width: 100%;
         height: 50px;
         background-color: #fff;
-        border-radius: 5px;
 
         .n-tabs {
             width: 70%;
@@ -55,10 +55,6 @@ watch(
         .n-tabs :deep(.n-tabs-nav-scroll-content) {
             height: 50px;
         }
-
-        .n-tabs :deep(.n-tabs-tab__label) {
-            font-size: 16px;
-        }
     }
 
     .middle {
@@ -66,7 +62,6 @@ watch(
         height: 740px;
         background-color: #fff;
         margin: 15px auto;
-        border-radius: 5px;
     }
 }
 </style>
