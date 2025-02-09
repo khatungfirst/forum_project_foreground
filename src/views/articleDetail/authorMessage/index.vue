@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRouter } from 'vue-router';
 const prop = defineProps({
     authorInfo: {
         type: Object as () => {
@@ -24,13 +25,16 @@ const prop = defineProps({
         })
     }
 });
-onMounted(() => {
-    console.log(prop.authorInfo, ']]]]]]]');
-});
+
+const router = useRouter();
+
+const jumpCenter = (id) => {
+    router.push(`/member/${id}`);
+};
 </script>
 <template>
     <div class="top">
-        <n-avatar round size="large" :src="prop.authorInfo.head" />
+        <n-avatar round size="large" :src="prop.authorInfo.head" @click="jumpCenter(prop.authorInfo.author_id)" />
         <div class="authorName">
             <p class="name">{{ prop.authorInfo.nickname }}</p>
             <p class="tag">{{ prop.authorInfo.signature }}</p>

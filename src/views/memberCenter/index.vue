@@ -46,9 +46,12 @@ onMounted(async () => {
 
 //------------------------用户模块---------------------
 
+//定义当前会员中心人员的id
+const paramId = ref(+routes.params.id);
+
 //定义当前会员中心人员的各种信息
 const user = reactive({
-    id: +routes.params.id,
+    id: paramId.value,
     head_shot: '',
     nickname: '',
     signature: '',
@@ -82,17 +85,17 @@ const userInfo = async () => {
     const { data } = await getMemberInfo({
         author_id: user.id
     });
-    console.log(user, 'user000000');
 
     if (data) {
         Object.assign(user, data);
     }
-    console.log(user, 'user000000');
 };
 
 //初始化微博、博客链接
 const linkInit = async () => {
-    const { data } = await getNumberData();
+    const { data } = await getNumberData({
+        author_id: user.id
+    });
     user.blog_link = data.blog_link;
     user.weibo_link = data.weibo_link;
     user.github_link = data.github_link;
@@ -146,7 +149,7 @@ const settinngs = () => {
 
 //--------------------关注列表模块------------------------
 
-//定义文章的筛选条件
+//定义关注的人的筛选条件
 const fansType = reactive({
     userId: user.id,
     page: 1,
@@ -189,16 +192,32 @@ const fansLoadInit = async () => {
         fansType.page++;
         const { data } = await getConcernList(fansType);
         if (data) {
-            fansArr.value.push(...data.concernList);
             isLoading.value = false;
-            if (data.total === 0) {
+            if (data.ids.ids.length === 0) {
                 noMore.value = true;
+            } else {
+                fansId.value.push(...data.ids.ids);
+                const fansData = await getConcernDetail({
+                    ids: fansId.value
+                });
+                fansArr.value = fansData.data.user_info_list;
             }
         }
     }, 1000);
     setTimeout(() => {
         noMore.value = false;
-    }, 2000);
+    }, 6000);
+};
+
+//跳转到关注人的会员中心
+const updateJumpInfo = (id) => {
+    user.id = id;
+    fansType.userId = id;
+    aticleType.id = id;
+    userInfo();
+    articleInit();
+    fansList();
+    linkInit();
 };
 
 //------------------文章列表模块------------------------------
@@ -261,7 +280,7 @@ const loadInit = async () => {
     }, 1000);
     setTimeout(() => {
         noMore.value = false;
-    }, 7000);
+    }, 5000);
 };
 
 //编辑本篇文章
@@ -309,7 +328,6 @@ const isInputBack = ref(false);
 
 // 鼠标悬停时输入框设置宽度
 const expandInput = () => {
-    console.log('shurushi');
     if (!isInputBack.value) {
         isInputBack.value = false;
         inputWidth.value = '200px';
@@ -323,6 +341,7 @@ const shrinkInput = () => {
     if (isInputBack.value) {
         inputWidth.value = '0px';
         isInputBack.value = false;
+        inputValue.value = '';
     } else {
         inputWidth.value = '200px';
     }
@@ -338,7 +357,6 @@ const searchFun = () => {
         fansType.keyword = inputValue.value;
         fansList();
     }
-    inputValue.value = '';
     fansType.keyword = '';
     isInputBack.value = true;
 };
@@ -433,7 +451,10 @@ const searchFun = () => {
                             </div>
                         </template>
                         <n-tab-pane name="文章" tab="文章">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
+                            <div class="empty-box" v-if="articleArr.length === 0">
+                                <img src="../../assets/images/empty.png" />
+                            </div>
+                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit" v-else>
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index" class="article">
                                     <template #type>
                                         <n-tag class="status">{{ item.status }}</n-tag>
@@ -460,7 +481,16 @@ const searchFun = () => {
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="收藏" tab="收藏">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
+                            <div class="empty-box" v-if="articleArr.length === 0">
+                                <img src="../../assets/images/empty.png" />
+                            </div>
+                            <n-infinite-scroll
+                                style="height: 600px"
+                                :distance="10"
+                                @load="loadInit"
+                                ref="scrollPage"
+                                v-else
+                            >
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index">
                                     <template #cancelCollect>
                                         <div class="cancelCollect">
@@ -480,8 +510,16 @@ const searchFun = () => {
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="关注" tab="关注">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit">
-                                <FansInfo :item="item" v-for="(item, index) in fansArr" :key="index"></FansInfo>
+                            <div class="empty-box" v-if="fansArr.length === 0">
+                                <img src="../../assets/images/empty.png" />
+                            </div>
+                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit" v-else>
+                                <FansInfo
+                                    :item="item"
+                                    v-for="(item, index) in fansArr"
+                                    :key="index"
+                                    @jump-memberCenter="updateJumpInfo"
+                                ></FansInfo>
                             </n-infinite-scroll>
                         </n-tab-pane>
                     </n-tabs>
@@ -562,6 +600,7 @@ const searchFun = () => {
             .n-card {
                 margin-bottom: 20px;
                 padding-bottom: 20px;
+                border-radius: 5px;
 
                 .left-left {
                     width: 75%;
@@ -636,6 +675,15 @@ const searchFun = () => {
             .article-card {
                 position: relative;
 
+                .empty-box {
+                    width: 500px;
+                    height: 600px;
+                    margin: 0 auto;
+                    img {
+                        width: 100%;
+                    }
+                }
+
                 .searchModule {
                     display: flex;
                     align-items: center;
@@ -654,6 +702,9 @@ const searchFun = () => {
                 .n-tabs .n-tab-pane {
                     padding: 0px;
                 }
+                .n-tabs :deep(.n-tabs-tab__label) {
+                    font-size: 16px;
+                }
 
                 .status {
                     height: 20px;
@@ -664,7 +715,7 @@ const searchFun = () => {
                     pointer-events: auto;
                     background-color: #daf0e4;
                     position: absolute;
-                    right: 20px;
+                    right: 0px;
                     top: 0px;
                     z-index: 999;
                     display: none;
@@ -701,6 +752,7 @@ const searchFun = () => {
             .n-card {
                 width: 90%;
                 margin-bottom: 20px;
+                border-radius: 5px;
 
                 p {
                     margin-bottom: 10px;
@@ -714,6 +766,7 @@ const searchFun = () => {
             @include headBorder;
             .n-card :deep(.n-card-header) {
                 padding: 10px;
+                font-size: 16px;
             }
 
             .concernCard {

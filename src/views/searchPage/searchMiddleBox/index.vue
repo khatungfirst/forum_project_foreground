@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
-import { follower_article } from '@/config/apis/articleDetail';
 import Article from '@/views/components/article/index.vue';
 import { debounce } from '@/utils/debounce.ts';
 
@@ -45,11 +44,11 @@ const init = async () => {
 };
 
 watch(
-    () => route.query.keyword,
+    () => dataObj.keyword,
     (newVal, oldVal) => {
-        dataObj.keyword = route.query.keyword;
+        dataObj.keyword = newVal;
         init();
-        console.log(newVal, oldVal, '======');
+        console.log(oldVal, '======');
     },
     { immediate: true }
 );
@@ -75,20 +74,11 @@ const loadInit = async () => {
             dataObj.page--;
             noMore.value = true;
         }
-        // const response = await follower_article({
-        //     page: dataObj.page,
-        //     limit: dataObj.limit,
-        //     kind: dataObj.kind
-        // });
-        // console.log(response.data, '关注的人的文章');
-
-        // if (response.code === 2000) {
-        //     selectData.value = response.data.selectedList;
-        // } else {
-        //     dataObj.page--;
-        // }
         isLoading.value = false;
     }, 200);
+    setTimeout(() => {
+        noMore.value = false;
+    }, 5000);
 };
 const loadInitDebounce = debounce(loadInit, 300);
 
@@ -120,7 +110,7 @@ const tabMiddle = (value: string) => {
             </span> -->
             <span class="text">正在全力加载中...</span>
         </div>
-        <div v-if="noMore" class="loading">没有更多了</div>
+        <div v-if="noMore" class="loading">-没有更多了-</div>
     </div>
 </template>
 <style scoped lang="scss">

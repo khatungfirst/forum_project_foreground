@@ -47,6 +47,10 @@ const checkDetail = () => {
 const clickTags = () => {
     console.log('标签被点击了');
 };
+
+//文章题目和概述高亮显示关键词
+const highlightedTitle = ref(prop.item.title);
+const highlightedSummary = ref(prop.item.summary);
 </script>
 
 <template>
@@ -54,18 +58,14 @@ const clickTags = () => {
         <li class="whole">
             <div class="left">
                 <div class="left-left">
-                    <h3>{{ prop.item.title }}</h3>
+                    <h3 v-html="highlightedTitle"></h3>
                     <slot name="type"></slot>
                 </div>
-                <n-ellipsis :line-clamp="2" style="color: #868686; font-size: 14px; margin: 8px 0px">
-                    {{ prop.item.summary }}
-
-                    <template #tooltip>
-                        <div style="text-align: center; width: 700px">
-                            {{ prop.item.summary }}
-                        </div>
-                    </template>
-                </n-ellipsis>
+                <n-ellipsis
+                    :line-clamp="2"
+                    style="color: #868686; font-size: 12px; margin: 8px 0px"
+                    v-html="highlightedSummary"
+                ></n-ellipsis>
                 <div class="detail-bottom">
                     <span>
                         {{ prop.item.nickname }}
@@ -114,11 +114,11 @@ const clickTags = () => {
 }
 .whole {
     display: flex;
-    padding: 10px;
+    padding: 10px 0px;
     border-bottom: 1px solid rgb(223, 217, 217);
     position: relative;
     z-index: 999;
-    width: 100%;
+    width: 98%;
 
     .left {
         flex: 1;
@@ -179,7 +179,7 @@ const clickTags = () => {
 
         img {
             width: 165px;
-            height: 115px;
+            height: 105px;
         }
     }
 }

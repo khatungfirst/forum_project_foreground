@@ -175,7 +175,7 @@ const onUploadImg = async (files, callback) => {
                 const form = new FormData();
                 form.append('files', file);
 
-                form.append('width', '115');
+                form.append('width', '105');
                 // TS 语法
                 getImageUrl(form)
                     .then((result) => {
@@ -335,6 +335,7 @@ const publicArticle = async () => {
         @include absolute;
         z-index: 1000;
         box-shadow: 4px 5px 7px 0px rgba(0, 0, 0, 0.4);
+        border-radius: 5px;
 
         .contain {
             .n-select :deep(.n-base-selection--selected),

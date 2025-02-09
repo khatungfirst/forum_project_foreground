@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {  ref } from 'vue';
+import { ref } from 'vue';
 import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import SecondOrderComments from '@/views/articleDetail/secondOrderComments/index.vue';
@@ -86,6 +86,7 @@ const commentInfo = reactive({
 });
 //初始化二级评论
 const getSecondComments = async () => {
+    commentInfo.offset = 1;
     try {
         const { data } = await getSecondOrderComments(commentInfo);
         if (data) {
@@ -112,6 +113,7 @@ const moreSecondComments = async () => {
 //删除二级评论
 const deleteSec = (id) => {
     commentList.value = commentList.value.filter((item) => item.id !== id);
+    getSecondComments();
 };
 
 //------------------------------一级评论---------------------------------
@@ -139,7 +141,10 @@ const jumpMember = (id: number) => {
 };
 
 //判断这个评论是否是自己的评论
-const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
+console.log(prop.item.user_id, 'userId');
+
+const iid = ref(JSON.parse(localStorage.getItem('userInfo')).id);
+
 //--------------------------------回复评论-----------------------------
 
 const responseComments = () => {
@@ -230,15 +235,19 @@ const handleMaskClick = () => {
                         </span>
                     </div>
                 </div>
-                <div class="more" v-if="isSelf">
-                    <n-popconfirm :positive-text="null" :negative-text="null" :show-icon="false">
+                <div class="more" v-if="prop.item.user_id === iid">
+                    <n-popconfirm
+                        :positive-text="null"
+                        :negative-text="null"
+                        @positive-click="deleteFun"
+                        :show-icon="false"
+                    >
                         <template #trigger>
                             <i class="iconfont">&#xe61e;</i>
                         </template>
-                        <div class="button-container">
-                            <n-button text :block="true" @click="deleteFun" style="margin-top: 10px">删除</n-button>
-                            <!-- <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button> -->
-                        </div>
+                        <template #action>
+                            <p @click="deleteFun" class="deleteSty">删除</p>
+                        </template>
                     </n-popconfirm>
                 </div>
             </div>
@@ -309,9 +318,9 @@ const handleMaskClick = () => {
                 .iconfont:hover {
                     cursor: pointer;
                 }
-                .button-container {
-                    display: flex;
-                    flex-direction: column;
+
+                .deleteSty:hover {
+                    cursor: pointer;
                 }
             }
         }

@@ -107,8 +107,16 @@ const { image_url, getUrl } = useUpload();
 const handlePreview = async (item) => {
     await getUrl(item);
     userInfo.path = image_url.value;
-    console.log(userInfo.path, '========');
     update('更改头像成功', '更改头像失败');
+    //更改本地的头像数据
+    const oldLocalInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const localInfo = {
+        avatar_path: oldLocalInfo.avatar_path,
+        id: oldLocalInfo.id,
+        nickname: oldLocalInfo.nickname
+    };
+    localInfo.avatar_path = image_url.value;
+    localStorage.setItem('userInfo', JSON.stringify(localInfo));
     // showModalRef.value = true;
 };
 </script>
@@ -199,6 +207,7 @@ const handlePreview = async (item) => {
     height: 900px;
     // @include all;
     margin-bottom: 40px;
+    border: none;
 
     .top {
         display: grid;

@@ -133,6 +133,7 @@ const loseFocus = async (e) => {
 .n-card {
     height: 900px;
     margin-bottom: 40px;
+    border: none;
 
     li {
         display: grid;
