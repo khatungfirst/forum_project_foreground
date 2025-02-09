@@ -99,10 +99,10 @@ const handleFollow = () => {
     border: none;
     border-radius: 50px;
     outline: none;
-    color: #19a059;
+    color: #36ad6a;
     padding: 8px 30px;
     width: 100%;
     text-align: center;
-    font-size: 16px;
+    font-size: 14px;
 }
 </style>

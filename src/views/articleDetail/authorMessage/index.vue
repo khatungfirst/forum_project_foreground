@@ -54,6 +54,8 @@ const jumpCenter = (id) => {
             <p class="second">粉丝</p>
         </div>
     </div>
+    <!-- 插槽部分 -->
+    <slot name="actions"></slot>
 </template>
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
