@@ -91,6 +91,7 @@ const handleSearch = () => {
         console.log('执行了搜索', keyword.value);
         eventBus.keyword = keyword.value; // 将搜索框的值更新到 eventBus
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
+        userStore.selectInfo = keyword.value;
         keyword.value = ''; // 清除搜索框内容
     } else {
         console.log('搜索为空', keyword.value);
@@ -208,7 +209,17 @@ const authorInit = async () => {
                         @click="toggleAuthorInfo"
                     />
                 </n-button>
-                <!-- <div><authorMessage v-if="isAuthorInfo" :authorInfo="authorInfo" class="author-message-card" /></div> -->
+                <div class="author-message-card">
+                    <authorMessage v-if="isAuthorInfo" :authorInfo="authorInfo">
+                        <!-- 使用具名插槽 -->
+                        <template #actions>
+                            <div class="actions-slot">
+                                <n-button @click="handleSettings">设置</n-button>
+                                <n-button @click="handleLogout">退出</n-button>
+                            </div>
+                        </template>
+                    </authorMessage>
+                </div>
             </template>
 
             <template v-else>
@@ -347,7 +358,6 @@ const authorInit = async () => {
 }
 
 .author-message-card {
-    display: none; /* 默认不显示卡片 */
     position: absolute;
     top: 60px; /* 根据需要调整 */
     left: 50%;
