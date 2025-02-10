@@ -87,11 +87,12 @@ const commentInfo = reactive({
 //初始化二级评论
 const getSecondComments = async () => {
     commentInfo.offset = 1;
+    commentList.value = [];
     try {
         const { data } = await getSecondOrderComments(commentInfo);
         if (data) {
             if (data.second_comments_list.length > 0) {
-                commentList.value.push(...data.second_comments_list);
+                commentList.value = data.second_comments_list;
                 isSecondComments.value = true;
             } else {
                 isSecondComments.value = false;
@@ -107,12 +108,25 @@ const getSecondComments = async () => {
 const moreSecondComments = async () => {
     commentInfo.limit = 3;
     commentInfo.offset = commentInfo.offset + 1;
-    getSecondComments();
+    const { data } = await getSecondOrderComments(commentInfo);
+    if (data) {
+        if (data.second_comments_list.length > 0) {
+            commentList.value.push(...data.second_comments_list);
+            isSecondComments.value = true;
+        } else {
+            isSecondComments.value = false;
+        }
+    }
 };
 
 //删除二级评论
 const deleteSec = (id) => {
     commentList.value = commentList.value.filter((item) => item.id !== id);
+    getSecondComments();
+};
+
+//回复二级评论
+const publicSecond = () => {
     getSecondComments();
 };
 
@@ -159,13 +173,13 @@ const responseComments = () => {
 //--------------------------------删除、举报功能------------------------
 
 //解构删除方法
-const { deleteCom } = useDeleteComments(prop.item.id);
+const { deleteCom } = useDeleteComments();
 
 //通过defineEmits编译器宏生成emit方法来进行组件之间通信
 const emit = defineEmits(['delete-firComments']);
 
-const deleteFun = () => {
-    deleteCom();
+const deleteFun = async () => {
+    await deleteCom(prop.item.id);
     emit('delete-firComments', prop.item.id);
 };
 
@@ -257,6 +271,7 @@ const handleMaskClick = () => {
                     v-for="(item, index) in commentList"
                     :key="index"
                     @delete-secComments="deleteSec"
+                    @public-second="publicSecond"
                 ></SecondOrderComments>
                 <p @click="moreSecondComments" v-if="isSecondComments">
                     查看更多回复

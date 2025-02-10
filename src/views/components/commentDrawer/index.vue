@@ -166,6 +166,7 @@ const publicFirst = async () => {
         } else {
             const { code } = await publicComments(commentDetail);
             if (code === 2000) {
+                inputValue.value = '';
                 emit('close-comment');
             }
         }
