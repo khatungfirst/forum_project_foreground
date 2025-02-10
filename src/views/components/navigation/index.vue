@@ -152,7 +152,7 @@ const authorInit = async () => {
     <div class="nav-container">
         <div class="nav">
             <img src="" alt="" />
-            <span class="title">HelloWorld</span>
+            <span class="title">思悟</span>
             <div class="tabs">
                 <router-link
                     to="/home"
@@ -209,9 +209,8 @@ const authorInit = async () => {
                         @click="toggleAuthorInfo"
                     />
                 </n-button>
-                <div class="author-message-card">
+                <!-- <div class="author-message-card">
                     <authorMessage v-if="isAuthorInfo" :authorInfo="authorInfo">
-                        <!-- 使用具名插槽 -->
                         <template #actions>
                             <div class="actions-slot">
                                 <n-button @click="handleSettings">设置</n-button>
@@ -219,7 +218,7 @@ const authorInit = async () => {
                             </div>
                         </template>
                     </authorMessage>
-                </div>
+                </div> -->
             </template>
 
             <template v-else>
@@ -244,6 +243,7 @@ const authorInit = async () => {
 .nav {
     display: flex;
     align-items: center;
+    margin-right: 145px;
 }
 
 .tabs {
@@ -251,7 +251,7 @@ const authorInit = async () => {
 }
 
 .nav-link {
-    margin-right: 15px;
+    margin-right: 20px;
     cursor: pointer;
     text-decoration: none;
     // color: #19a059;
@@ -260,14 +260,14 @@ const authorInit = async () => {
 
 .nav-link.active {
     color: #36ad6a;
-    font-weight: bold;
+    font-weight: bolder;
 }
 
 .nav-link.active::after {
     content: '';
     position: absolute;
     left: 0;
-    bottom: 0;
+    bottom: -10px;
     width: 100%;
     height: 2px; /* 绿条高度 */
     background-color: #36ad6a; /* 绿条颜色 */
@@ -277,7 +277,8 @@ const authorInit = async () => {
     font-size: 24px;
     color: #101010;
     font-weight: bold;
-    margin-right: 10px;
+    margin-right: 20px;
+    margin-left: 60px;
 }
 
 .actions {
@@ -306,6 +307,7 @@ const authorInit = async () => {
     padding: 0 20px;
     border-radius: 25px;
     cursor: pointer;
+    margin: 0 10px;
 }
 
 .content {
@@ -357,23 +359,24 @@ const authorInit = async () => {
     height: 45px;
 }
 
-.author-message-card {
-    position: absolute;
-    top: 60px; /* 根据需要调整 */
-    left: 50%;
-    transform: translateX(-50%); /* 水平居中 */
-    z-index: 1000;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    width: 200px; /* 根据需要调整宽度 */
-}
+// .author-message-card {
+//     display: none;
+//     position: absolute;
+//     top: 60px;
+//     right: -2%;
+//     transform: translateX(-50%);
+//     z-index: 1000;
+//     background-color: white;
+//     border: 1px solid #ccc;
+//     border-radius: 5px;
+//     padding: 10px;
+//     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+//     width: 200px;
+// }
 
-.author-message-card.active {
-    display: block; /* 显示卡片 */
-}
+// .author-message-card.active {
+//     display: block; /* 显示卡片 */
+// }
 
 .author-detail {
     width: 70%;

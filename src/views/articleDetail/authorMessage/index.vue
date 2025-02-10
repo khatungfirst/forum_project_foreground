@@ -55,7 +55,7 @@ const jumpCenter = (id) => {
         </div>
     </div>
     <!-- 插槽部分 -->
-    <slot name="actions"></slot>
+    <!-- <slot name="actions"></slot> -->
 </template>
 <style scoped lang="scss">
 @import '@/assets/styles/mixin.scss';
