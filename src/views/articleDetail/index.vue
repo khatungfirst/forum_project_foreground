@@ -334,8 +334,7 @@ const review = () => {
 //删除评论
 const deleteFirst = (id) => {
     commentsList.value = commentsList.value.filter((item) => item.id !== id);
-    // initComments();
-    // location.reload();
+    initComments();
 };
 
 //评论的下拉事件
@@ -383,8 +382,6 @@ const heightTitle = ref(0);
 
 // markdown-生成标题
 const getTitle = async () => {
-    console.log(editor.value, 'hhhhhhhhhhhhhhhhhhhh');
-
     await nextTick();
     // 使用js选择器，获取对应的h标签，组合成列表
     const anchors = editor.value.querySelectorAll('h1,h2,h3,h4,h5,h6');

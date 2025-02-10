@@ -50,6 +50,7 @@ const router = useRouter();
 
 //定义消息提示对象
 // const message = useMessage();
+const emit = defineEmits(['delete-secComments', 'public-second']);
 
 //---------------------------------生命周期-----------------------------------
 
@@ -86,11 +87,10 @@ const likeObj = {
 };
 
 //删除评论
-const { deleteCom } = useDeleteComments(prop.item.id);
+const { deleteCom } = useDeleteComments();
 
-const emit = defineEmits(['delete-secComments']);
-const deleteFun = () => {
-    deleteCom();
+const deleteFun = async () => {
+    await deleteCom(prop.item.id);
     emit('delete-secComments', prop.item.id);
 };
 
@@ -109,6 +109,15 @@ const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : f
 
 //判断这个评论是否是自己的评论
 const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
+
+//回复评论
+const responseComments = () => {
+    appear.value = !appear.value;
+    isOverlayVisible.value = !isOverlayVisible.value;
+    commentItems.highest_id = prop.item.highest_id;
+    commentItems.parent_id = prop.item.id;
+    commentItems.parent_user_id = prop.item.user_id;
+};
 
 //------------------------------确定评论盒子的宽度-------------------------
 
@@ -137,6 +146,7 @@ const isOverlayVisible = ref(false);
 const handleMaskClick = () => {
     isOverlayVisible.value = false;
     appear.value = false;
+    emit('public-second');
 };
 </script>
 <template>
@@ -175,13 +185,7 @@ const handleMaskClick = () => {
                     <span v-if="likeCounts === 0">点赞</span>
                     <span v-else>{{ likeCounts }}</span>
                 </span>
-                <span
-                    class="small-detail"
-                    @click="
-                        appear = !appear;
-                        isOverlayVisible = !isOverlayVisible;
-                    "
-                >
+                <span class="small-detail" @click="responseComments">
                     <i class="iconfont">&#xe6b3;</i>
                     回复
                 </span>
