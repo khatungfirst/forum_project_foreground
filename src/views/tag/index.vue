@@ -79,7 +79,7 @@ const getTagListAgain = async () => {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 0px 110px;
+    padding: 0px 90px;
     gap: 20px; /* 控制标签之间的间距 */
     width: 87%;
 }
