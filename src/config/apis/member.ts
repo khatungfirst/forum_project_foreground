@@ -17,6 +17,8 @@ export const getConcernList = (params: any): Promise<any> => {
 
 //3-2、获取具体关注人员信息
 export const getConcernDetail = (params: any): Promise<any> => {
+    console.log(params, '/////////////');
+
     return $http('/user/get_basic_information', params);
 };
 

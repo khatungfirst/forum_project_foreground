@@ -69,9 +69,7 @@ const routeMember = (id) => {
     <div class="fans">
         <n-avatar round :size="48" :src="prop.item.avatar_path" @click="routeMember(prop.item.id)" />
         <div class="fans-middle">
-            <n-ellipsis style="max-width: 240px">
-                {{ prop.item.nickname }}
-            </n-ellipsis>
+            <n-ellipsis style="max-width: 240px" v-html="prop.item.nickname"></n-ellipsis>
             <p>
                 <span>文章数：{{ prop.item.author_articles }}</span>
                 <span>粉丝数：{{ fansCount }}</span>
