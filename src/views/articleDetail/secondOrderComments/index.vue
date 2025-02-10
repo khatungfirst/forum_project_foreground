@@ -4,7 +4,6 @@ import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import '@/assets/css/icon/iconfont.css';
-import { useMessage } from 'naive-ui';
 
 //---------------------------------统一声明的变量-----------------------------
 const prop = defineProps({
@@ -50,7 +49,7 @@ const prop = defineProps({
 const router = useRouter();
 
 //定义消息提示对象
-const message = useMessage();
+// const message = useMessage();
 
 //---------------------------------生命周期-----------------------------------
 
@@ -147,13 +146,13 @@ const handleMaskClick = () => {
         <div class="comments-detail">
             <n-ellipsis style="max-width: 240px">
                 <div style="margin-bottom: 7px">
-                    <span class="nickname" @click="jumpMember(1)" style="color: #5d6271">
+                    <span class="nickname" @click="jumpMember(prop.item.user_id)" style="color: #5d6271">
                         {{ prop.item.nickname }}
                     </span>
                     <span v-if="!isResponseSelf">回复</span>
                     <span
                         class="nickname1"
-                        @click="jumpMember(2)"
+                        @click="jumpMember(prop.item.parent_user_id)"
                         v-if="!isResponseSelf"
                         style="margin-bottom: 7px; color: #5d6271"
                     >

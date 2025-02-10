@@ -80,9 +80,6 @@ const loadInit = async () => {
         }
         isLoading.value = false;
     }, 200);
-    setTimeout(() => {
-        noMore.value = false;
-    }, 5000);
 };
 const loadInitDebounce = debounce(loadInit, 300);
 
@@ -97,24 +94,25 @@ const tabMiddle = (value: string) => {
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
             <n-tab-pane name="0" tab="热门" ref="dataContainer">
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
-                <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                    <div class="load-ing">
+                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                        <span v-if="noMore" class="text">-没有更多了-</span>
+                    </div>
                 </n-infinite-scroll>
             </n-tab-pane>
             <n-tab-pane name="1" tab="最新" ref="dataContainer">
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
-                <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                    <div class="load-ing">
+                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                        <span v-if="noMore" class="text">-没有更多了-</span>
+                    </div>
                 </n-infinite-scroll>
             </n-tab-pane>
         </n-tabs>
-        <div class="loading" v-if="isLoading && !noMore">
-            <!-- <span class="videos">
-                <video src="../../../assets/images/loading.mp4" autoplay loop muted></video>
-            </span> -->
-            <span class="text">正在全力加载中...</span>
-        </div>
-        <div v-if="noMore" class="loading">-没有更多了-</div>
     </div>
 </template>
 <style scoped lang="scss">
@@ -123,7 +121,7 @@ const tabMiddle = (value: string) => {
     .n-tabs {
         width: 100%;
         height: 740px;
-        padding: 10px 20px;
+        padding: 10px 20px 0px 20px;
         .n-tab-pane {
             width: 100%;
             position: relative;
@@ -132,12 +130,25 @@ const tabMiddle = (value: string) => {
                 width: 80%;
             }
         }
+
         img {
             width: 50%;
             height: 80vh;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+        }
+
+        ::v-deep(.n-scrollbar-content) {
+            padding-bottom: 160px;
+        }
+
+        .load-ing {
+            margin-top: 15px;
+            text-align: center;
+            width: 100%;
+            color: #7d8791;
+            bottom: 0px;
         }
     }
 
@@ -148,7 +159,5 @@ const tabMiddle = (value: string) => {
     .n-divider {
         display: block;
     }
-
-    @include loading;
 }
 </style>

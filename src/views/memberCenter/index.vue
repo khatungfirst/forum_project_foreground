@@ -153,7 +153,7 @@ const settinngs = () => {
 const fansType = reactive({
     userId: user.id,
     page: 1,
-    limit: 5,
+    limit: 7,
     keyword: ''
 });
 
@@ -175,7 +175,8 @@ const fansList = async () => {
     if (data) {
         fansId.value = data.ids.ids;
         const fansData = await getConcernDetail({
-            ids: fansId.value
+            ids: fansId.value,
+            keyword: fansType.keyword
         });
         if (fansData) {
             fansArr.value = fansData.data.user_info_list;
@@ -198,15 +199,13 @@ const fansLoadInit = async () => {
             } else {
                 fansId.value.push(...data.ids.ids);
                 const fansData = await getConcernDetail({
-                    ids: fansId.value
+                    ids: fansId.value,
+                    keyword: fansType.keyword
                 });
                 fansArr.value = fansData.data.user_info_list;
             }
         }
     }, 1000);
-    setTimeout(() => {
-        noMore.value = false;
-    }, 6000);
 };
 
 //跳转到关注人的会员中心
@@ -241,7 +240,6 @@ const articleInit = async () => {
     if (data) {
         articleArr.value = data.dataList;
     }
-    console.log(articleArr.value, 'ooooo');
 };
 
 //发表文章按钮
@@ -251,6 +249,9 @@ const pubicArticle = () => {
 
 //切换标签
 const tabChange = (value: string) => {
+    fansType.keyword = '';
+    aticleType.keyword = '';
+    noMore.value = false;
     if (value !== '关注') {
         aticleType.type = value;
         aticleType.page = 1;
@@ -280,9 +281,6 @@ const loadInit = async () => {
             }
         }
     }, 1000);
-    setTimeout(() => {
-        noMore.value = false;
-    }, 5000);
 };
 
 //编辑本篇文章
@@ -338,8 +336,6 @@ const expandInput = () => {
 
 // 鼠标移走时输入框缩回
 const shrinkInput = () => {
-    console.log(isInputBack.value, 'input');
-
     if (isInputBack.value) {
         inputWidth.value = '0px';
         isInputBack.value = false;
@@ -359,7 +355,7 @@ const searchFun = () => {
         fansType.keyword = inputValue.value;
         fansList();
     }
-    fansType.keyword = '';
+    // fansType.keyword = '';
     isInputBack.value = true;
 };
 </script>
@@ -480,6 +476,10 @@ const searchFun = () => {
                                         </n-tag>
                                     </template>
                                 </Article>
+                                <div class="loading">
+                                    <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                                    <span v-if="noMore" class="text">-没有更多了-</span>
+                                </div>
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="收藏" tab="收藏">
@@ -509,6 +509,10 @@ const searchFun = () => {
                                         </div>
                                     </template>
                                 </Article>
+                                <div class="loading">
+                                    <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                                    <span v-if="noMore" class="text">-没有更多了-</span>
+                                </div>
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="关注" tab="关注">
@@ -522,16 +526,13 @@ const searchFun = () => {
                                     :key="index"
                                     @jump-memberCenter="updateJumpInfo"
                                 ></FansInfo>
+                                <div class="loading">
+                                    <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                                    <span v-if="noMore" class="text">-没有更多了-</span>
+                                </div>
                             </n-infinite-scroll>
                         </n-tab-pane>
                     </n-tabs>
-                    <div class="loading">
-                        <!-- <span class="videos">
-                            <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                        </span> -->
-                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                        <span v-if="noMore" class="text">-没有更多了-</span>
-                    </div>
                 </n-card>
                 <!-- <div v-if="noMore" class="loading">-没有更多了-</div> -->
             </div>
