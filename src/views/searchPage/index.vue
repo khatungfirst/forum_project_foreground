@@ -28,7 +28,7 @@ const tabTop = (value: string) => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .wrap {
     @include all;
     background-color: #f2f3f5;

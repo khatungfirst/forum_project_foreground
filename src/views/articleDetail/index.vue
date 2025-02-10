@@ -629,7 +629,7 @@ watchEffect(async () => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .wrap {
     display: flex;
     background-color: #f2f3f5;

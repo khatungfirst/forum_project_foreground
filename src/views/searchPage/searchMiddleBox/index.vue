@@ -116,7 +116,7 @@ const tabMiddle = (value: string) => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .search-mid {
     .n-tabs {
         width: 100%;

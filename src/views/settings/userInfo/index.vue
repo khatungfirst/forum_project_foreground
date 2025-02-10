@@ -202,7 +202,7 @@ const handlePreview = async (item) => {
     </n-card>
 </template>
 <style lang="scss" scoped>
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .n-card {
     height: 900px;
     // @include all;
