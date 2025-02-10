@@ -212,7 +212,7 @@ const handleMaskClick = () => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .comments {
     width: 100%;
     padding: 20px 0px 20px 20px;

@@ -58,7 +58,7 @@ const jumpCenter = (id) => {
     <slot name="actions"></slot>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .top {
     padding-left: 15px;
     .n-avatar {

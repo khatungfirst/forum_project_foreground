@@ -129,7 +129,7 @@ const loseFocus = async (e) => {
     </n-card>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .n-card {
     height: 900px;
     margin-bottom: 40px;

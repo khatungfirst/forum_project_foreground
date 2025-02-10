@@ -61,7 +61,7 @@ const continuePublic = () => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .wrap {
     width: 80%;
     margin: 0 auto;

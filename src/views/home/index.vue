@@ -234,7 +234,30 @@ const refreshArticles = () => {
 </template>
 
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
+@mixin flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin absolute {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@mixin all {
+    width: 100%;
+    height: 100%;
+}
 
 .red {
     color: red;
