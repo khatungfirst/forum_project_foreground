@@ -132,7 +132,7 @@ const handleDetail = (id) => {
     color: #19a059;
     /* padding: 8px 125px; */
     margin: 6px 0;
-    padding: 8px 0;
+    padding: 5px 0;
     width: 270px;
 }
 </style>

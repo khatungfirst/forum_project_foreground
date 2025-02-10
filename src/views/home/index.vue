@@ -147,88 +147,90 @@ const refreshArticles = () => {
 </script>
 
 <template>
-    <div class="home">
-        <!-- 主内容区 -->
-        <div class="main-content">
-            <div class="middle">
-                <div class="left">
-                    <n-tabs
-                        type="card"
-                        animated
-                        @update:value="tabTop"
-                        v-model:value="category_id"
-                        style="padding: 10px 20px"
-                        placement="left"
-                        tab-class="father-tab"
-                    >
-                        <n-tab-pane name="1" tab="综合">
-                            <SearchMiddleBox :category_id="category_id" />
+    <div class="container">
+        <div class="home">
+            <!-- 主内容区 -->
+            <div class="main-content">
+                <div class="middle">
+                    <div class="left">
+                        <n-tabs
+                            type="card"
+                            animated
+                            @update:value="tabTop"
+                            v-model:value="category_id"
+                            style="padding: 10px 20px"
+                            placement="left"
+                            tab-class="father-tab"
+                        >
+                            <n-tab-pane name="1" tab="综合">
+                                <SearchMiddleBox :category_id="category_id" />
+                            </n-tab-pane>
+                            <n-tab-pane name="2" tab="前端">
+                                <SearchMiddleBox :category_id="category_id" />
+                            </n-tab-pane>
+                            <n-tab-pane name="3" tab="后端">
+                                <SearchMiddleBox :category_id="category_id" />
+                            </n-tab-pane>
+                            <n-tab-pane name="4" tab="关注">
+                                <SearchMiddleBox :category_id="category_id" />
+                            </n-tab-pane>
+                        </n-tabs>
+                    </div>
+                </div>
+                <div class="search-mid">
+                    <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
+                        <n-tab-pane name="0" tab="">
+                            <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                                <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                                <!-- <ul>
+                                <li class="load-ing" v-if="isLoading && !noMore">
+                                    <span class="text">正在全力加载中...</span>
+                                </li>
+                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
+                            </ul> -->
+                            </n-infinite-scroll>
                         </n-tab-pane>
-                        <n-tab-pane name="2" tab="前端">
-                            <SearchMiddleBox :category_id="category_id" />
-                        </n-tab-pane>
-                        <n-tab-pane name="3" tab="后端">
-                            <SearchMiddleBox :category_id="category_id" />
-                        </n-tab-pane>
-                        <n-tab-pane name="4" tab="关注">
-                            <SearchMiddleBox :category_id="category_id" />
+                        <n-tab-pane name="1" tab="">
+                            <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                                <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                                <!-- <ul>
+                                <li class="load-ing" v-if="isLoading && !noMore">
+                                    <span class="text">正在全力加载中...</span>
+                                </li>
+                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
+                            </ul> -->
+                            </n-infinite-scroll>
                         </n-tab-pane>
                     </n-tabs>
                 </div>
             </div>
-            <div class="search-mid">
-                <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-                    <n-tab-pane name="0" tab="">
-                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                            <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                            <!-- <ul>
-                                <li class="load-ing" v-if="isLoading && !noMore">
-                                    <span class="text">正在全力加载中...</span>
-                                </li>
-                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
-                            </ul> -->
-                        </n-infinite-scroll>
-                    </n-tab-pane>
-                    <n-tab-pane name="1" tab="">
-                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                            <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                            <!-- <ul>
-                                <li class="load-ing" v-if="isLoading && !noMore">
-                                    <span class="text">正在全力加载中...</span>
-                                </li>
-                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
-                            </ul> -->
-                        </n-infinite-scroll>
-                    </n-tab-pane>
-                </n-tabs>
+            <!-- 侧边栏（作家榜单与文章榜单） -->
+            <div class="side-bar">
+                <div class="article-rank-list">
+                    <ArticleRankItem
+                        :articles="articles"
+                        :page="currentArticlePage"
+                        :limit="5"
+                        @refresh="refreshArticles"
+                    />
+                </div>
+                <div class="author-rank-list">
+                    <AuthorRankItem
+                        :authors="authors"
+                        :page="currentPage"
+                        :limit="5"
+                        @follow="followAuthor"
+                        @refresh="refreshAuthors"
+                    />
+                </div>
+                <div class="publish-icon-border" @click="handleReleaseArticle">
+                    <i class="iconfont icon-bianji"></i>
+                </div>
+                <n-button strong secondary round type="primary" class="button hide-button">
+                    <i class="iconfont icon-bianji"></i>
+                    <span class="publish-text">发文</span>
+                </n-button>
             </div>
-        </div>
-        <!-- 侧边栏（作家榜单与文章榜单） -->
-        <div class="side-bar">
-            <div class="article-rank-list">
-                <ArticleRankItem
-                    :articles="articles"
-                    :page="currentArticlePage"
-                    :limit="5"
-                    @refresh="refreshArticles"
-                />
-            </div>
-            <div class="author-rank-list">
-                <AuthorRankItem
-                    :authors="authors"
-                    :page="currentPage"
-                    :limit="5"
-                    @follow="followAuthor"
-                    @refresh="refreshAuthors"
-                />
-            </div>
-            <div class="publish-icon-border" @click="handleReleaseArticle">
-                <i class="iconfont icon-bianji"></i>
-            </div>
-            <n-button strong secondary round type="primary" class="button hide-button">
-                <i class="iconfont icon-bianji"></i>
-                <span class="publish-text">发文</span>
-            </n-button>
         </div>
     </div>
 </template>
@@ -262,11 +264,20 @@ const refreshArticles = () => {
 .red {
     color: red;
 }
+.container {
+    padding: 0 20px 20px 20px;
+    display: flex;
+    justify-content: center;
+    // text-align: center;
+    margin: 0 auto;
+}
 .home {
     display: flex;
     flex-direction: row;
     height: 100vh;
-    padding: 10px 90px;
+    // padding: 0 90px;
+    width: 97%;
+    // margin: 0 auto;
 }
 
 .middle {
@@ -275,23 +286,23 @@ const refreshArticles = () => {
 
 .main-content {
     flex-grow: 1;
-    padding: 15px;
+    // padding: 15px;
     overflow: hidden;
     margin-right: 20px;
+    border-radius: 5px;
 }
 
 .side-bar {
     width: 300px; /* 侧边栏宽度 */
     background-color: #f2f3f5;
     // overflow-y: auto;
-    margin-left: 15px; /* 与主内容区的间距 */
 }
 
 .author-rank-list,
 .article-rank-list {
     padding: 10px;
     background-color: #fff;
-    border-radius: 8px;
+    border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
@@ -383,7 +394,7 @@ const refreshArticles = () => {
         }
 
         .n-tabs :deep(.n-tabs-tab-wrapper) {
-            width: 240px;
+            width: 134px;
             border-radius: 40px;
             height: 60px;
             @include flex;
