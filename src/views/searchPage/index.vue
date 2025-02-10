@@ -36,6 +36,7 @@ const tabTop = (value: string) => {
         width: 100%;
         height: 50px;
         background-color: #fff;
+        border-radius: 5px;
 
         .n-tabs {
             width: 70%;
@@ -52,6 +53,7 @@ const tabTop = (value: string) => {
         height: 740px;
         background-color: #fff;
         margin: 15px auto;
+        border-radius: 5px;
     }
 }
 </style>
