@@ -9,7 +9,7 @@ const prop = defineProps({
     category_id: {
         type: String,
         required: true,
-        default: '1' // 设置默认值
+        default: '0' // 设置默认值
     }
 });
 
