@@ -52,21 +52,19 @@ const router = useRouter();
 // const message = useMessage();
 const emit = defineEmits(['delete-secComments', 'public-second']);
 
-//---------------------------------生命周期-----------------------------------
-
-// 监听窗口调整
-onMounted(async () => {
-    updateChildWidth();
-    //监听中间窗口的变化
-    window.addEventListener('resize', updateChildWidth);
-});
-
-// 移除监听
-onBeforeUnmount(() => {
-    window.removeEventListener('resize', updateChildWidth);
-});
-
 //--------------------------------评论有关方法--------------------------------
+
+//控制评论框是否显示
+const appear = ref(false);
+
+//判断回复的是自己的评论还是其他人的评论
+const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
+
+//判断这个评论是否是自己的评论
+const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
+
+//控制emoji框是否显示
+const isEmojiDisappear = ref(false);
 
 //发表评论需要的相关属性
 const commentItems = reactive({
@@ -75,7 +73,8 @@ const commentItems = reactive({
     parent_id: prop.item.id,
     parent_user_id: prop.item.user_id,
     content: '',
-    path: ''
+    path: '',
+    placeholderText: `回复：${prop.item.nickname}`
 });
 
 //解构点赞评论方法
@@ -104,54 +103,33 @@ const jumpMember = (id: number) => {
     router.push(`/member/${id}`);
 };
 
-//判断回复的是自己的评论还是其他人的评论
-const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
+//得知emoji框出现
+const openEmoji = () => {
+    isEmojiDisappear.value = true;
+};
 
-//判断这个评论是否是自己的评论
-const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
+//控制emoji表情框消失
+const emojiDisappear = () => {
+    isEmojiDisappear.value = false;
+};
 
-//回复评论
+//回复评论的准备工作
 const responseComments = () => {
     appear.value = !appear.value;
-    isOverlayVisible.value = !isOverlayVisible.value;
     commentItems.highest_id = prop.item.highest_id;
     commentItems.parent_id = prop.item.id;
     commentItems.parent_user_id = prop.item.user_id;
 };
 
-//------------------------------确定评论盒子的宽度-------------------------
-
-///获取中间盒子对象
-const boxRef = ref<HTMLElement | null>(null);
-
-//定义一个变量接收中间盒子宽度
-const childWidth = ref(0);
-
-//获取中间盒子宽度
-const updateChildWidth = () => {
-    if (boxRef.value) {
-        childWidth.value = boxRef.value.clientWidth;
-    }
-};
-
-//------------------------------遮罩层--------------------------------
-
-//控制评论框是否显示
-const appear = ref(false);
-
-//定义是否显示遮罩层的变量
-const isOverlayVisible = ref(false);
-
-//定义遮罩层的点击事件
+//定义发表评论的方法
 const handleMaskClick = () => {
-    isOverlayVisible.value = false;
     appear.value = false;
     emit('public-second');
 };
 </script>
 <template>
     <div class="comments" ref="boxRef">
-        <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
+        <div class="overlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
         <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(prop.item.user_id)" />
         <div class="comments-detail">
             <n-ellipsis style="max-width: 240px">
@@ -169,10 +147,10 @@ const handleMaskClick = () => {
                         {{ prop.item.parent_nickname }} ：
                     </span>
                 </div>
-                <p style="font-size: 15px">
+                <p style="font-size: 15px; margin-bottom: 7px">
                     {{ prop.item.content }}
                 </p>
-                <p><img :src="prop.item.comment_path" /></p>
+                <p><img :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" /></p>
             </n-ellipsis>
             <div class="comment-detail">
                 <span class="small-detail1">{{ prop.item.create_at }}</span>
@@ -187,8 +165,16 @@ const handleMaskClick = () => {
                 </span>
                 <span class="small-detail" @click="responseComments">
                     <i class="iconfont">&#xe6b3;</i>
-                    回复
+                    <span>{{ appear ? '收起' : '回复' }}</span>
                 </span>
+                <commentDrawer
+                    :appear="appear"
+                    :headShot="prop.item.path"
+                    :item="commentItems"
+                    :emojiDisappear="isEmojiDisappear"
+                    @close-comment="handleMaskClick"
+                    @open-emoji="openEmoji"
+                ></commentDrawer>
             </div>
         </div>
         <div class="more" v-if="isSelf">
@@ -202,13 +188,6 @@ const handleMaskClick = () => {
                 </div>
             </n-popconfirm>
         </div>
-        <commentDrawer
-            :appear="appear"
-            :childWidth="childWidth"
-            :headShot="prop.item.path"
-            :item="commentItems"
-            @close-comment="handleMaskClick"
-        ></commentDrawer>
     </div>
 </template>
 <style scoped lang="scss">
@@ -218,10 +197,17 @@ const handleMaskClick = () => {
     padding: 20px 0px 20px 20px;
     @include flex;
     align-items: start;
-    @include overlay;
+    .overlay {
+        position: fixed; /* 固定定位 */
+        top: 0;
+        left: 0;
+        @include all;
+        z-index: 998;
+    }
 
     .n-avatar {
-        width: 40px;
+        width: 35px;
+        height: 35px;
     }
 
     .small-detail:hover,
@@ -235,10 +221,17 @@ const handleMaskClick = () => {
 
         .comment-detail {
             color: #8a919f;
+
+            .drawer :deep(.textArea) {
+                width: 100%;
+            }
         }
 
         .small-detail {
             margin-left: 20px;
+            span {
+                margin-left: 4px;
+            }
         }
 
         .nickname {

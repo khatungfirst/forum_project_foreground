@@ -37,9 +37,6 @@ onMounted(async () => {
     // authorInit();
     initComments();
     await nextTick(); // 确保 DOM 更新完成
-    updateChildWidth();
-    //监听中间窗口的变化
-    window.addEventListener('resize', updateChildWidth);
     //监听页面滚动到位置
     window.addEventListener('scroll', handleScroll);
     // 生成文章标题列表
@@ -49,7 +46,6 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-    window.removeEventListener('resize', updateChildWidth);
     window.removeEventListener('scroll', handleScroll);
     window.removeEventListener('scroll', scroll());
 });
@@ -257,18 +253,6 @@ const recommendedArtical = (id) => {
 
 // ---------------------------评论模块---------------------------------
 
-//定义控制评论页面的出现
-const appear = ref(false);
-
-//定义是否显示遮罩层的变量
-const isOverlayVisible = ref(false);
-
-//定义一个变量接收中间盒子的宽度
-const centerRef = ref<HTMLElement | null>(null);
-
-//定义评论子盒子的宽度
-const childWidth = ref(0);
-
 //一级评论接收数组
 const commentsList = ref([]);
 
@@ -279,7 +263,16 @@ const commentTotal = ref(0);
 const LoginVis = ref(true);
 
 //判断新加载是否获得了数据
-const idHavaData = ref(false);
+const isHavaData = ref(false);
+
+//控制emoji框是否显示
+const isEmojiDisappear = ref(false);
+
+//获取到评论框对象
+const reviewBox = ref(null);
+
+//获取当前登录人的头像
+const head_shot = JSON.parse(localStorage.getItem('userInfo')).avatar_path;
 
 //评论相关数据
 const commentInfo = reactive({
@@ -299,7 +292,7 @@ const initComments = async () => {
     if (data) {
         if (data.first_comments_list.length > 0) {
             commentsList.value = data.first_comments_list;
-            idHavaData.value = true;
+            isHavaData.value = true;
         }
         commentTotal.value = data.comments_total;
     }
@@ -310,25 +303,29 @@ const login = () => {
     router.push('/login');
 };
 
-//定义遮罩层的点击事件
+//点击评论图标的事件
+const review = () => {
+    const targetBox = reviewBox.value;
+    targetBox.scrollIntoView({
+        behavior: 'smooth', // 平滑滚动
+        block: 'center' // 目标盒子垂直居中
+    });
+};
+
+//得知emoji框出现
+const openEmoji = () => {
+    isEmojiDisappear.value = true;
+};
+
+//控制emoji表情框消失
+const emojiDisappear = () => {
+    isEmojiDisappear.value = false;
+};
+
+//发表评论
 const handleMaskClick = () => {
-    isOverlayVisible.value = false;
-    appear.value = false;
     commentTotal.value++;
     initComments();
-};
-
-// 获取中间盒子的宽度
-const updateChildWidth = () => {
-    if (centerRef.value) {
-        childWidth.value = centerRef.value.clientWidth;
-    }
-};
-
-//发表评论的方法
-const review = () => {
-    appear.value = !appear.value;
-    isOverlayVisible.value = !isOverlayVisible.value;
 };
 
 //删除评论
@@ -339,20 +336,19 @@ const deleteFirst = (id) => {
 
 //评论的下拉事件
 const handleLoad = async () => {
-    if (idHavaData.value) {
+    if (isHavaData.value) {
         commentInfo.offset = commentInfo.offset + 1;
         const { data } = await getFirstOrderComments(commentInfo);
         if (data) {
             if (data.first_comments_list.length > 0) {
                 commentsList.value.push(...data.first_comments_list);
-                idHavaData.value = true;
+                isHavaData.value = true;
             } else {
-                idHavaData.value = false;
+                isHavaData.value = false;
                 commentInfo.offset = commentInfo.offset - 1;
             }
         }
     }
-    console.log(commentInfo.offset, 'offset');
 };
 const handleLoadComment = debounce(handleLoad, 200);
 
@@ -452,18 +448,20 @@ watchEffect(async () => {
 </script>
 <template>
     <div class="wrap">
-        <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
+        <div class="overlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
         <div class="left">
             <div class="left-contains">
-                <div class="laconicAuthorInfo" v-if="isAuthorInfo">
-                    <n-avatar round size="large" :src="authorInfo.head" style="width: 55px; height: 55px" />
-                    <div class="iconDiv" v-if="!isPerson">
-                        <Icon :color="'#19A059'" :size="22" @click="concern">
-                            <component :is="!authorInfo.concern_status ? PlusCircleFilled : CheckCircleFilled" />
-                        </Icon>
+                <transition name="scale">
+                    <div class="laconicAuthorInfo" v-if="isAuthorInfo">
+                        <n-avatar round size="large" :src="authorInfo.head" style="width: 55px; height: 55px" />
+                        <div class="iconDiv" v-if="!isPerson">
+                            <Icon :color="'#19A059'" :size="22" @click="concern">
+                                <component :is="!authorInfo.concern_status ? PlusCircleFilled : CheckCircleFilled" />
+                            </Icon>
+                        </div>
+                        <!-- <span>{{ authorInfo.nickname }}</span> -->
                     </div>
-                    <!-- <span>{{ authorInfo.nickname }}</span> -->
-                </div>
+                </transition>
                 <IconWrapper
                     :icon="LikeFilled"
                     :color="currentIcon[0] ? '#19A059' : iconColor"
@@ -526,14 +524,25 @@ watchEffect(async () => {
                 </div>
             </div>
             <div class="reviewModule">
-                <h3>评论 {{ commentTotal }}</h3>
-                <div class="loginRegist" v-if="LoginVis">
+                <h2>评论 {{ commentTotal }}</h2>
+                <div class="loginRegist" v-if="LoginVis" ref="reviewBox">
                     <n-avatar round size="large" :src="authorInfo.head" />
                     <div class="loginBgc">
                         <n-button strong secondary round type="primary" @click="login">登录注册</n-button>
                         <span>登录后可评论</span>
                     </div>
                 </div>
+                <div v-else ref="reviewBox">
+                    <n-avatar round size="large" :src="head_shot" />
+                    <!-- 评论的盒子 -->
+                    <commentDrawer
+                        :appear="true"
+                        :emojiDisappear="isEmojiDisappear"
+                        @close-comment="handleMaskClick"
+                        @open-emoji="openEmoji"
+                    ></commentDrawer>
+                </div>
+
                 <div class="review-detail">
                     <p>最新</p>
                     <div class="alone-comments">
@@ -548,13 +557,6 @@ watchEffect(async () => {
                     </div>
                 </div>
             </div>
-            <!-- 评论的盒子 -->
-            <commentDrawer
-                :appear="appear"
-                :childWidth="childWidth"
-                :headShot="authorInfo.head"
-                @close-comment="handleMaskClick"
-            ></commentDrawer>
         </div>
         <div class="right">
             <div class="author-detail" ref="authorDetail" v-if="!isAuthorInfo">
@@ -634,7 +636,13 @@ watchEffect(async () => {
     display: flex;
     background-color: #f2f3f5;
 
-    @include overlay;
+    .overlay {
+        position: fixed; /* 固定定位 */
+        top: 0;
+        left: 0;
+        @include all;
+        z-index: 998;
+    }
 
     .left {
         width: 10%;
@@ -657,6 +665,33 @@ watchEffect(async () => {
                     background-color: #fff;
                     border-radius: 22px;
                 }
+            }
+            @keyframes scaleIn {
+                0% {
+                    opacity: 0;
+                    transform: scale(0); /* 从 0 缩放到 1 */
+                }
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+            }
+            @keyframes scaleOut {
+                from {
+                    opacity: 1;
+                    transform: scale(1); /* 从 1 缩放到 0 */
+                }
+                to {
+                    opacity: 0;
+                    transform: scale(0);
+                }
+            }
+            .scale-enter-active {
+                animation: scaleIn 0.5s ease;
+            }
+
+            .scale-leave-active {
+                animation: scaleOut 0.3s ease;
             }
         }
     }
@@ -729,30 +764,44 @@ watchEffect(async () => {
         }
 
         .reviewModule {
-            padding: 20px;
+            padding: 30px;
             background-color: #fff;
             border-radius: 5px;
 
-            h3 {
-                margin-bottom: 20px;
+            .n-avatar {
+                float: left;
+                margin-right: 30px;
+                width: 55px;
+                height: 55px;
+            }
+
+            h2 {
+                margin-bottom: 25px;
             }
 
             .loginRegist {
-                height: 140px;
+                height: 160px;
                 display: grid;
                 grid-template-columns: 1fr 14fr;
                 .loginBgc {
                     width: 90%;
-                    height: 120px;
+                    height: 160px;
                     float: right;
                     background-color: #f7f8fa;
                     text-align: center;
-                    line-height: 120px;
+                    line-height: 160px;
                     border-radius: 5px;
 
                     .n-button {
                         margin-right: 5px;
                     }
+                }
+            }
+
+            .review-detail {
+                p {
+                    font-size: 20px;
+                    margin: 20px 0px;
                 }
             }
         }

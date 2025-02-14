@@ -180,6 +180,7 @@ const highlightedSummary = ref(prop.item.summary);
         img {
             width: 165px;
             height: 105px;
+            object-fit: cover;
         }
     }
 }

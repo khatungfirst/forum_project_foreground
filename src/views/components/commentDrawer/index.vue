@@ -4,7 +4,7 @@ import { publicComments } from '@/config/apis/comments';
 import type { UploadFileInfo } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
-import { CaretDownFilled, CloseCircleTwotone } from '@vicons/antd';
+import { CaretUpFilled, CloseCircleTwotone } from '@vicons/antd';
 import { SmileOutlined, FileImageOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import data from 'emoji-mart-vue-fast/data/all.json';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
@@ -17,13 +17,9 @@ const prop = defineProps({
         type: Boolean,
         default: false
     },
-    childWidth: {
-        type: Number,
-        default: 0
-    },
-    headShot: {
-        type: String,
-        default: ''
+    emojiDisappear: {
+        type: Boolean,
+        default: false
     },
     item: {
         type: Object as () => {
@@ -33,22 +29,21 @@ const prop = defineProps({
             highest_id: number;
             parent_id: number;
             parent_user_id: number;
+            placeholderText: string;
         },
         required: true,
         default: () => ({
             article_id: 0,
             highest_id: 0,
             parent_id: 0,
-            parent_user_id: 0
+            parent_user_id: 0,
+            placeholderText: '平等交流 友善表达'
         })
     }
 });
 
 //定义消息提示对象
 const message = useMessage();
-
-//获取当前登录人的头像
-const head_shot = JSON.parse(localStorage.getItem('userInfo')).avatar_path;
 
 //定义上传图片是否被禁用
 const disabled = ref(false);
@@ -68,13 +63,10 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
         const fd = new FormData();
         fd.append('files', file);
-        fd.append('width', '105');
+        fd.append('width', '165');
         getImageUrl(fd)
             .then((response) => {
-                console.log(response.data[0].url, '99999');
                 if (response && response.data) {
-                    console.log(response.data[0].url, '99999');
-
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data);
                     uploadedImages.value.push(response.data[0].url);
@@ -124,12 +116,24 @@ const emojiI18n = {
     }
 };
 
-//控制emoji表情是否出现
-const emoji = ref(false);
+// 控制emoji表情是否出现
+const emoji = ref(prop.emojiDisappear);
+console.log(emoji.value, 'emoji');
 
-//控制emoji组件是否出现的点击事件
+const emit = defineEmits(['open-emoji', 'close-comment']);
+
+// 监听表情框消失
+watch(
+    () => prop.emojiDisappear,
+    (newVal) => {
+        emoji.value = newVal;
+    }
+);
+
+// 控制emoji组件出现的点击事件
 const emojiClick = () => {
     emoji.value = !emoji.value;
+    emit('open-emoji');
 };
 const emojiIndex = new EmojiIndex(data);
 
@@ -141,16 +145,12 @@ const inputValue = ref('');
 //输入框中的字数
 const fontNumber = computed(() => inputValue.value.length);
 
-const emit = defineEmits(['close-comment']);
-
 //将emoji表情加入到评论中
 const handleEmoji = (e) => {
-    console.log(e.native);
     inputValue.value = inputValue.value + e.native;
 };
 
 const publicFirst = async () => {
-    console.log(uploadedImages.value);
     const commentDetail = reactive({
         content: inputValue.value,
         path: uploadedImages.value,
@@ -168,6 +168,8 @@ const publicFirst = async () => {
             if (code === 2000) {
                 inputValue.value = '';
                 emit('close-comment');
+                fileListRef.value = [];
+                disabled.value = false;
             }
         }
     } catch (error) {
@@ -176,13 +178,13 @@ const publicFirst = async () => {
 };
 </script>
 <template>
-    <div class="drawer" v-if="prop.appear" :style="{ width: prop.childWidth + 'px' }">
-        <n-avatar round size="large" :src="head_shot" />
+    <div class="drawer" v-if="prop.appear">
+        <!-- <n-avatar round size="large" :src="head_shot" /> -->
         <div class="textArea">
             <textarea
                 type="text"
                 size="large"
-                placeholder="平等交流 友善表达"
+                :placeholder="prop.item.placeholderText"
                 v-model="inputValue"
                 :maxlength="1000"
             ></textarea>
@@ -195,7 +197,7 @@ const publicFirst = async () => {
                         <CloseCircleTwotone />
                     </Icon>
                     <Icon :size="18" color="#fff" class="icon1" v-if="emoji">
-                        <CaretDownFilled />
+                        <CaretUpFilled />
                     </Icon>
                     <Picker
                         :data="emojiIndex"
@@ -220,7 +222,10 @@ const publicFirst = async () => {
                     </n-upload>
                 </div>
                 <div class="right">
-                    <span>{{ fontNumber }}/1000</span>
+                    <span>
+                        {{ fontNumber }}/
+                        <span style="color: #8a919f; margin-right: 0px">1000</span>
+                    </span>
                     <n-tooltip placement="top" trigger="hover" style="background-color: #f2f3f5; color: #8a919f">
                         <template #trigger>
                             <Icon :size="16" color="#8a919f" class="icon">
@@ -230,46 +235,28 @@ const publicFirst = async () => {
                         字数不能超过1000字
                     </n-tooltip>
 
-                    <n-button strong secondary round type="primary" size="small" @click="publicFirst">发布</n-button>
+                    <n-button strong secondary round type="primary" size="large" @click="publicFirst">发布</n-button>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <style scoped lang="scss">
-@keyframes loading {
-    from {
-        transform: translateY(100%); /* 从下方进入 */
-    }
-    to {
-        transform: translateY(0); /* 从下方进入 */
-    }
-}
 .drawer {
     width: 100%;
-    /* height: 200px; */
     background-color: #fff;
-    padding: 60px 20px 20px 20px;
-    position: fixed;
-    bottom: 0;
-    border-radius: 10px;
-    z-index: 999;
-    animation: loading 1s forwards;
-
-    .n-avatar {
-        float: left;
-        margin-right: 30px;
-    }
+    z-index: 10;
+    // padding: 20px;
 
     .textArea {
         width: 90%;
-        height: 120px;
+        height: 160px;
         display: inline-block;
         background-color: #f7f8fa;
 
         textarea {
             width: 100%;
-            height: 80px;
+            height: 105px;
             border: none;
             background: none;
             outline: none;
@@ -277,6 +264,7 @@ const publicFirst = async () => {
             padding: 10px; /* 内边距，调整文本与边缘的距离 */
             overflow-y: auto;
             resize: none; /* 禁止用户手动调整大小 */
+            font-size: 16px;
         }
 
         /* 设置评论框的侧边滑轮样式 */
@@ -310,12 +298,6 @@ const publicFirst = async () => {
                     width: 300px;
                     display: inline-block;
                 }
-
-                .n-button {
-                    position: absolute;
-                    top: 40px;
-                    right: -50px;
-                }
                 .icon {
                     margin-right: 30px;
                     position: absolute;
@@ -323,7 +305,7 @@ const publicFirst = async () => {
                 }
                 .icon1 {
                     position: absolute;
-                    bottom: 40px;
+                    bottom: 15px;
                     left: 20px;
                     z-index: 9999;
                 }
@@ -333,8 +315,8 @@ const publicFirst = async () => {
                 .emoji-mart {
                     width: 30px;
                     position: absolute;
-                    bottom: 50px;
-                    left: -120px;
+                    bottom: -400px;
+                    left: -89px;
                     z-index: 999;
                 }
             }

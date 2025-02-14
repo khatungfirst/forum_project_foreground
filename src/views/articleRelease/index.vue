@@ -164,7 +164,11 @@ const getImage = async (item) => {
 
 //页面上发布按钮的点击事件
 const releaseCard = () => {
-    cardDisplay.value = !cardDisplay.value;
+    if (articleData.title !== '' && articleData.content !== '') {
+        cardDisplay.value = !cardDisplay.value;
+    } else {
+        message.error('文章标题和内容可不能为空哦~');
+    }
 };
 
 //编辑文章时的上传图片
@@ -175,7 +179,7 @@ const onUploadImg = async (files, callback) => {
                 const form = new FormData();
                 form.append('files', file);
 
-                form.append('width', '105');
+                form.append('width', '165');
                 // TS 语法
                 getImageUrl(form)
                     .then((result) => {
@@ -187,10 +191,6 @@ const onUploadImg = async (files, callback) => {
             });
         })
     );
-    console.log(
-        res.map((item) => item.url),
-        '图片'
-    );
 
     callback(res.map((item) => item.url));
 };
@@ -198,12 +198,7 @@ const onUploadImg = async (files, callback) => {
 //真正发布的按钮的点击事件
 const publicArticle = async () => {
     // articleData.status = 'private';
-    if (
-        articleData.category_id !== null &&
-        articleData.summary !== '' &&
-        articleData.title !== '' &&
-        articleData.content !== ''
-    ) {
+    if (articleData.category_id !== null && articleData.summary !== '' && articleData.status !== '') {
         const { code } = await publicArticles(articleData);
         if (code === 2000) {
             message.success('发布成功');
@@ -211,12 +206,14 @@ const publicArticle = async () => {
             router.push('/transferPage');
         }
     } else {
-        message.error('请把信息补充完整');
+        message.error('千万不要忘记填写文章的类目、摘要和发布类型！');
     }
 };
 </script>
 <template>
     <div class="wrap">
+        <!-- 遮罩层 -->
+        <div class="overlay" v-if="cardDisplay"></div>
         <!-- 发布文章的卡片 -->
         <n-card
             v-if="cardDisplay"
@@ -243,6 +240,7 @@ const publicArticle = async () => {
                         require-mark-placement="left"
                         required
                         path="categories"
+                        style="margin-top: 25px"
                     >
                         <n-select v-model:value="articleData.category_id" placeholder="必填" :options="typeOptions" />
                     </n-form-item>
@@ -323,6 +321,7 @@ const publicArticle = async () => {
 <style scoped lang="scss">
 @use '@/assets/styles/mixin.scss' as *;
 .wrap {
+    @include overlay;
     @include all;
     display: grid;
     grid-template-rows: 1fr 18fr;
@@ -365,14 +364,15 @@ const publicArticle = async () => {
 
             .n-p {
                 text-align: center;
+                font-size: 12px;
             }
 
             .text {
                 margin-top: 25px;
+                padding-left: 20px;
 
                 .n-input {
                     width: 85%;
-                    margin-left: 10px;
                 }
 
                 .n-input :deep(.n-form-item-label--left-mark) {
@@ -396,6 +396,10 @@ const publicArticle = async () => {
                 margin-right: 30px;
             }
         }
+    }
+
+    .n-card :deep(.n-card-header) {
+        font-size: 16px;
     }
 
     .n-card :deep(.n-card__content) {
