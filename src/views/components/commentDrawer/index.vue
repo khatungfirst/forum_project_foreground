@@ -21,6 +21,10 @@ const prop = defineProps({
         type: Boolean,
         default: false
     },
+    type: {
+        type: String,
+        default: ''
+    },
     item: {
         type: Object as () => {
             content: string;
@@ -47,6 +51,41 @@ const message = useMessage();
 
 //定义上传图片是否被禁用
 const disabled = ref(false);
+
+const emit = defineEmits(['open-emoji', 'close-comment', 'cancel-response']);
+
+//----------------------------------------控制评论框------------------------------------
+
+//声明
+const textDom = ref(null);
+// const isAppear = ref(prop.appear);
+
+watch(
+    () => prop.appear,
+    (newVal) => {
+        if (newVal) {
+            // console.log(isAppear.value, '8888');
+            // isAppear.value = !isAppear.value;
+            // 确保 textDom 已经存在于 DOM 中
+            nextTick(() => {
+                const input = textDom.value;
+                if (input) {
+                    input.focus();
+                    // console.log(isAppear.value, '9999');
+                }
+            });
+        }
+    }
+);
+
+//评论框失去焦点时消失
+const blurText = () => {
+    if (prop.type !== 'all') {
+        // isAppear.value = false;
+        console.log('失去了焦点给爹');
+        emit('cancel-response');
+    }
+};
 
 //----------------------------------------评论图片---------------------------------
 
@@ -118,9 +157,6 @@ const emojiI18n = {
 
 // 控制emoji表情是否出现
 const emoji = ref(prop.emojiDisappear);
-console.log(emoji.value, 'emoji');
-
-const emit = defineEmits(['open-emoji', 'close-comment']);
 
 // 监听表情框消失
 watch(
@@ -187,6 +223,8 @@ const publicFirst = async () => {
                 :placeholder="prop.item.placeholderText"
                 v-model="inputValue"
                 :maxlength="1000"
+                ref="textDom"
+                @blur="blurText"
             ></textarea>
             <div class="drawer-bottom">
                 <div class="left">
@@ -208,6 +246,7 @@ const publicFirst = async () => {
                         set="apple"
                         @select="handleEmoji"
                         v-if="emoji"
+                        class="Picker"
                     />
                     <n-upload
                         list-type="image"
@@ -222,18 +261,20 @@ const publicFirst = async () => {
                     </n-upload>
                 </div>
                 <div class="right">
-                    <span>
-                        {{ fontNumber }}/
-                        <span style="color: #8a919f; margin-right: 0px">1000</span>
-                    </span>
-                    <n-tooltip placement="top" trigger="hover" style="background-color: #f2f3f5; color: #8a919f">
-                        <template #trigger>
-                            <Icon :size="16" color="#8a919f" class="icon">
-                                <QuestionCircleOutlined />
-                            </Icon>
-                        </template>
-                        字数不能超过1000字
-                    </n-tooltip>
+                    <div>
+                        <span>
+                            {{ fontNumber }}/
+                            <span style="color: #8a919f; margin-right: 0px">1000</span>
+                        </span>
+                        <n-tooltip placement="top" trigger="hover" style="background-color: #f2f3f5; color: #8a919f">
+                            <template #trigger>
+                                <Icon :size="16" color="#8a919f" class="icon">
+                                    <QuestionCircleOutlined />
+                                </Icon>
+                            </template>
+                            字数不能超过1000字
+                        </n-tooltip>
+                    </div>
 
                     <n-button strong secondary round type="primary" size="large" @click="publicFirst">发布</n-button>
                 </div>
@@ -246,22 +287,22 @@ const publicFirst = async () => {
     width: 100%;
     background-color: #fff;
     z-index: 10;
-    // padding: 20px;
+    margin-top: 5px;
 
     .textArea {
         width: 90%;
         height: 160px;
         display: inline-block;
         background-color: #f7f8fa;
+        padding: 10px;
 
         textarea {
             width: 100%;
-            height: 105px;
+            height: 90px;
             border: none;
             background: none;
             outline: none;
             color: inherit; /* 继承父元素的文本颜色 */
-            padding: 10px; /* 内边距，调整文本与边缘的距离 */
             overflow-y: auto;
             resize: none; /* 禁止用户手动调整大小 */
             font-size: 16px;
@@ -280,18 +321,14 @@ const publicFirst = async () => {
         }
 
         .drawer-bottom {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            line-height: 28px;
-
             .left {
-                padding-left: 20px;
                 position: relative;
+                float: left;
+                padding-top: 25px;
 
                 .n-upload {
                     display: inline-block;
                     width: 48px;
-                    margin-left: 50px;
                 }
 
                 .n-upload :deep(.n-upload-trigger + .n-upload-file-list) {
@@ -300,14 +337,15 @@ const publicFirst = async () => {
                 }
                 .icon {
                     margin-right: 30px;
-                    position: absolute;
-                    top: 10px;
+                    float: left;
+                    // position: absolute;
+                    // top: 10px;
                 }
                 .icon1 {
                     position: absolute;
-                    bottom: 15px;
-                    left: 20px;
-                    z-index: 9999;
+                    bottom: 16px;
+                    left: 1px;
+                    z-index: 999;
                 }
                 .icon:hover {
                     cursor: pointer;
@@ -316,12 +354,18 @@ const publicFirst = async () => {
                     width: 30px;
                     position: absolute;
                     bottom: -400px;
-                    left: -89px;
+                    left: -68px;
                     z-index: 999;
                 }
             }
 
             .right {
+                float: right;
+                display: flex;
+                padding-top: 5px;
+                div {
+                    padding-top: 20px;
+                }
                 span {
                     margin-right: 20px;
                 }
