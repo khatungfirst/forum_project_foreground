@@ -92,7 +92,7 @@ const handleSearch = () => {
         // eventBus.keyword = keyword.value; // 将搜索框的值更新到 eventBus
         router.push({ path: '/select', query: { keyword: keyword.value } }); // 路由跳转搜索页
         userStore.selectInfo = keyword.value;
-        keyword.value = ''; // 清除搜索框内容
+        // keyword.value = ''; // 清除搜索框内容
     } else {
         console.log('搜索为空', keyword.value);
     }
@@ -155,6 +155,16 @@ const handleLogout = async () => {
     userStore.logout();
     router.push('/home');
 };
+
+// 监听路由变化
+watch(
+    () => router.currentRoute.value,
+    (newRoute) => {
+        if (newRoute.path !== '/select') {
+            keyword.value = ''; // 清空搜索框内容
+        }
+    }
+);
 </script>
 
 <template>
