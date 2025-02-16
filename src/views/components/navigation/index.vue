@@ -10,7 +10,7 @@ import { useMessageStore } from '@/config/store/messageStore';
 import authorMessage from '../../../views/articleDetail/authorMessage/index.vue';
 import { getAuthorDetail } from '@/config/apis/articleDetail';
 // import { eventBus } from '@/utils/eventBus.ts';
-
+import { logout } from '@/config/apis/login';
 const router = useRouter();
 const activeTab = ref('home');
 const keyword = ref(''); // 定义搜索框内容变量
@@ -111,8 +111,8 @@ const handleSelect = (key) => {
 };
 
 const toggleAuthorInfo = () => {
+    // router.push(`/member/${userStore.userInfo.id}`);
     isAuthorInfo.value = !isAuthorInfo.value;
-    router.push(`/member/${userStore.userInfo.id}`);
 };
 
 onMounted(async () => {
@@ -145,6 +145,15 @@ const authorInit = async () => {
         authorInfo.value.author_read = data.reads_count;
         authorInfo.value.concern_status = data.concern_status;
     }
+};
+const handleSettings = () => {
+    router.push('/settings');
+};
+
+const handleLogout = async () => {
+    await logout();
+    userStore.logout();
+    router.push('/home');
 };
 </script>
 
@@ -209,16 +218,25 @@ const authorInit = async () => {
                         @click="toggleAuthorInfo"
                     />
                 </n-button>
-                <!-- <div class="author-message-card">
-                    <authorMessage v-if="isAuthorInfo" :authorInfo="authorInfo">
+                <div class="author-message-card" v-if="isAuthorInfo">
+                    <authorMessage :authorInfo="authorInfo">
                         <template #actions>
+                            <hr class="article-rank-divider" />
                             <div class="actions-slot">
-                                <n-button @click="handleSettings">设置</n-button>
-                                <n-button @click="handleLogout">退出</n-button>
+                                <n-button quaternary @click="handleSettings">
+                                    <n-icon>
+                                        <i class="iconfont icon-icon02 button_icon" style="font-size: 24px"></i>
+                                    </n-icon>
+                                    <span class="button_text">设置</span>
+                                </n-button>
+                                <n-button quaternary @click="handleLogout">
+                                    <n-icon><i class="iconfont icon-tuichu button_icon"></i></n-icon>
+                                    <span class="button_text">退出</span>
+                                </n-button>
                             </div>
                         </template>
                     </authorMessage>
-                </div> -->
+                </div>
             </template>
 
             <template v-else>
@@ -359,24 +377,61 @@ const authorInit = async () => {
     height: 45px;
 }
 
-// .author-message-card {
-//     display: none;
-//     position: absolute;
-//     top: 60px;
-//     right: -2%;
-//     transform: translateX(-50%);
-//     z-index: 1000;
-//     background-color: white;
-//     border: 1px solid #ccc;
-//     border-radius: 5px;
-//     padding: 10px;
-//     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-//     width: 200px;
-// }
+.author-message-card {
+    // display: none;
+    position: absolute;
+    top: 60px;
+    right: -2%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    background-color: white;
+    // border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 18px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    width: 280px;
 
-// .author-message-card.active {
-//     display: block; /* 显示卡片 */
-// }
+    // 当 isAuthorInfo 为 true 时显示
+    &[v-if='isAuthorInfo'] {
+        display: block;
+    }
+}
+
+.article-rank-divider {
+    width: 100%;
+    border: 0;
+    height: 1px;
+    background-color: #e7dfdf;
+    margin: 0 0 12px 0;
+}
+
+.actions-slot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 5px;
+    width: 100%;
+
+    .n-button {
+        margin: 0 5px;
+        background-color: #ffffff;
+        color: #8a919f;
+
+        &:hover {
+            background-color: #e0e0e0;
+        }
+    }
+}
+.button_icon {
+    font-size: 20px;
+}
+.button_text {
+    margin: 0 14px;
+    font-size: 14px;
+}
+.author-message-card.active {
+    display: block; /* 显示卡片 */
+}
 
 .author-detail {
     width: 70%;
