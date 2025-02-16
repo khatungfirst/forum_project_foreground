@@ -770,9 +770,9 @@ watchEffect(async () => {
 
             .n-avatar {
                 float: left;
-                margin-right: 30px;
-                width: 55px;
-                height: 55px;
+                margin-right: 15px;
+                width: 44px;
+                height: 44px;
             }
 
             h2 {

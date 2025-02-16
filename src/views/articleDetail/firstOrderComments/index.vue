@@ -167,9 +167,22 @@ const emojiDisappear = () => {
 
 const responseComments = () => {
     appear.value = !appear.value;
+    console.log(appear.value, '打开评论1');
     commentItems.highest_id = prop.item.id;
     commentItems.parent_id = prop.item.id;
     commentItems.parent_user_id = prop.item.user_id;
+};
+let timer = null;
+
+//评论框焦点消失后评论框消失
+const cancelResponse = () => {
+    if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+        appear.value = false;
+        console.log(appear.value, '失去评论1');
+    }, 100);
 };
 
 //--------------------------------删除、举报功能------------------------
@@ -227,7 +240,7 @@ const handleMaskClick = () => {
                         </span>
                         <span class="small-detail" @click="responseComments">
                             <i class="iconfont">&#xe6b3;</i>
-                            <span>{{ appear ? '收起' : '回复' }}</span>
+                            <span>{{ appear ? '取消回复' : '回复' }}</span>
                         </span>
                         <commentDrawer
                             :appear="appear"
@@ -236,6 +249,7 @@ const handleMaskClick = () => {
                             :emojiDisappear="isEmojiDisappear"
                             @close-comment="handleMaskClick"
                             @open-emoji="openEmoji"
+                            @cancel-response="cancelResponse"
                         ></commentDrawer>
                     </div>
                 </div>
@@ -319,9 +333,6 @@ const handleMaskClick = () => {
                     color: #8a919f;
                     font-size: 13px;
 
-                    .drawer {
-                        padding-left: 30px;
-                    }
                     .drawer :deep(.textArea) {
                         width: 100%;
                     }

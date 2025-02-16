@@ -215,7 +215,7 @@ const handlePreview = async (item) => {
     }
 
     .commitButton {
-        width: 75%;
+        width: 55%;
         @include flex;
     }
 
