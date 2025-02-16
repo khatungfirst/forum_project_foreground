@@ -5,6 +5,7 @@ import { NTabs, NTabPane } from 'naive-ui';
 import AuthorRankItem from '../components/AuthorRankItem/index.vue';
 import ArticleRankItem from '../components/ArticleRankItem/index.vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
+import followArticle from '../components/followArticle/followArticle.vue';
 import Article from '../components/article/index.vue';
 import { author_rank } from '@/config/apis/author';
 import { article_rank } from '@/config/apis/articleDetail';
@@ -172,7 +173,7 @@ const refreshArticles = () => {
                                 <SearchMiddleBox :category_id="category_id" />
                             </n-tab-pane>
                             <n-tab-pane name="4" tab="关注">
-                                <SearchMiddleBox :category_id="category_id" />
+                                <followArticle></followArticle>
                             </n-tab-pane>
                         </n-tabs>
                     </div>
