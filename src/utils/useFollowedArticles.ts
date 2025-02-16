@@ -6,6 +6,7 @@
 //     const followedArticles = ref([]);
 
 //     const fetchFollowedArticles = async () => {
+//         console.log('触发获取关注的人文章', 111);
 //         const response = await follower_article({
 //             page: dataObj.page,
 //             limit: dataObj.limit,
