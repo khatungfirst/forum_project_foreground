@@ -62,7 +62,7 @@ const goBack = () => {
     @include all;
     background-color: #f2f3f5;
     overflow: hidden;
-
+    margin-top: 55px;
     .top {
         width: 75%;
         height: 50px;
