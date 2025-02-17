@@ -43,3 +43,10 @@ export const register = (params: any): Promise<any> => {
 export const forgot_password = (params: any): Promise<any> => {
     return $http('/user/forgot_password', params);
 };
+
+/**
+ * 登出接口
+ */
+export const logout = (params: any): Promise<any> => {
+    return $http('/user/logout', params);
+};

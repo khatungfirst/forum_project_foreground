@@ -49,7 +49,7 @@ editorConfig.MENU_CONF['uploadImage'] = {
     async customUpload(file: File, insertFn: InsertFnType) {
         const formData = new FormData();
         formData.append('files', file); // 添加文件到 FormData
-        formData.append('width', '105');
+        formData.append('width', '165');
         // TS 语法
         const { data } = await getImageUrl(formData);
         // 最后插入图片

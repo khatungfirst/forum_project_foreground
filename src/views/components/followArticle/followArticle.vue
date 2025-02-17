@@ -1,37 +1,41 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { getSelectArticle } from '@/config/apis/select';
+import { ref, reactive, onMounted } from 'vue';
 import Article from '@/views/components/article/index.vue';
+import { follower_article } from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';
-import { useUserStore } from '@/config/store/userStore';
 
-const prop = defineProps({
-    category_id: {
-        type: String,
-        required: true,
-        default: '0' // 设置默认值
+// 存储关注的人的文章数据
+const followedArticles = ref([]);
+
+// 获取关注的人的文章
+const fetchFollowedArticles = async () => {
+    console.log('触发获取关注的人文章', 111);
+    const response = await follower_article({
+        page: dataObj.page,
+        limit: dataObj.limit,
+        kind: dataObj.kind
+    });
+    if (response.code === 2000) {
+        followedArticles.value = response.data.article_list;
+    } else {
+        console.error('获取关注的人的文章失败', response.message);
     }
-});
+};
 
-const route = useRoute();
-const userStore = useUserStore();
-
-//--------------------------------------生命周期-------------------------------------
-
-onMounted(async () => {
+// 生命周期钩子：组件挂载时获取数据
+onMounted(() => {
     init();
+    fetchFollowedArticles();
 });
 
 //---------------------------------------初始化-------------------------------------
-//用来存放后端传来的相关数据
+// 用来存放后端传来的相关数据
 const selectData = ref([]);
 
-//表示是否有数据
+// 表示是否有数据
 const isHaveData = ref(true);
 
 const dataObj = reactive({
-    keyword: route.query.keyword,
-    category_id: prop.category_id,
     page: 1,
     limit: 5,
     kind: '0'
@@ -39,31 +43,21 @@ const dataObj = reactive({
 
 const init = async () => {
     selectData.value = [];
-    const { data } = await getSelectArticle(dataObj);
-    if (data && data.selectedList.length > 0) {
-        selectData.value = data.selectedList;
+    const { data } = await follower_article(dataObj);
+    if (data && data.article_list.length > 0) {
+        selectData.value = data.article_list;
         isHaveData.value = false;
     }
 };
 
-watch(
-    () => userStore.selectInfo,
-    (newVal, oldVal) => {
-        dataObj.keyword = newVal;
-        init();
-        console.log(oldVal, '======');
-    },
-    { immediate: true }
-);
-
 //----------------------------------加载后获取数据-------------------------------------
-//是否正在加载
+// 是否正在加载
 const isLoading = ref(false);
 
-//表示是否还有数据
+// 表示是否还有数据
 const noMore = ref(false);
 
-//获取到最外层盒子的对象
+// 获取到最外层盒子的对象
 const dataContainer = ref(null);
 
 const loadInit = async () => {
@@ -71,9 +65,9 @@ const loadInit = async () => {
     isLoading.value = true;
     setTimeout(async () => {
         dataObj.page++;
-        const { data } = await getSelectArticle(dataObj);
-        if (data && data.selectedList.length > 0 && selectData) {
-            selectData.value.push(...data.selectedList);
+        const { data } = await follower_article(dataObj);
+        if (data && data.article_list.length > 0 && selectData) {
+            selectData.value.push(...data.article_list);
         } else {
             dataObj.page--;
             noMore.value = true;
@@ -83,12 +77,13 @@ const loadInit = async () => {
 };
 const loadInitDebounce = debounce(loadInit, 300);
 
-//中间标签页改变时的触发事件
+// 中间标签页改变时的触发事件
 const tabMiddle = (value: string) => {
     dataObj.kind = value;
     init();
 };
 </script>
+
 <template>
     <div class="search-mid">
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
@@ -115,6 +110,7 @@ const tabMiddle = (value: string) => {
         </n-tabs>
     </div>
 </template>
+
 <style scoped lang="scss">
 @use '@/assets/styles/mixin.scss' as *;
 .search-mid {

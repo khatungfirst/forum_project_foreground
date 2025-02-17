@@ -5,6 +5,7 @@ import { NTabs, NTabPane } from 'naive-ui';
 import AuthorRankItem from '../components/AuthorRankItem/index.vue';
 import ArticleRankItem from '../components/ArticleRankItem/index.vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
+import followArticle from '../components/followArticle/followArticle.vue';
 import Article from '../components/article/index.vue';
 import { author_rank } from '@/config/apis/author';
 import { article_rank } from '@/config/apis/articleDetail';
@@ -172,7 +173,7 @@ const refreshArticles = () => {
                                 <SearchMiddleBox :category_id="category_id" />
                             </n-tab-pane>
                             <n-tab-pane name="4" tab="关注">
-                                <SearchMiddleBox :category_id="category_id" />
+                                <followArticle></followArticle>
                             </n-tab-pane>
                         </n-tabs>
                     </div>
@@ -237,30 +238,6 @@ const refreshArticles = () => {
 
 <style scoped lang="scss">
 @use '@/assets/styles/mixin.scss' as *;
-@mixin flex {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-@mixin ellipsis {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-@mixin absolute {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-}
-
-@mixin all {
-    width: 100%;
-    height: 100%;
-}
-
 .red {
     color: red;
 }

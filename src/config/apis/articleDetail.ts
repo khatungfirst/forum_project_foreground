@@ -32,5 +32,5 @@ export const article_rank = (params: any): Promise<any> => {
 
 // 9、获取关注的人的文章
 export const follower_article = (params: any): Promise<any> => {
-    return $get('/message/follow', params);
+    return $get('/article/get_following_article', params);
 };
