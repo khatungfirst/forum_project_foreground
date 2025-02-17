@@ -114,11 +114,26 @@ const emojiDisappear = () => {
 };
 
 //回复评论的准备工作
-const responseComments = () => {
+const responseComments = (id) => {
     appear.value = !appear.value;
+    console.log(appear.value, '打开评论2');
     commentItems.highest_id = prop.item.highest_id;
     commentItems.parent_id = prop.item.id;
     commentItems.parent_user_id = prop.item.user_id;
+    console.log(id);
+};
+
+let timer = null;
+//评论框焦点消失后评论框消失
+const cancelResponse = () => {
+    console.log(appear.value, '失去评论2');
+    if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+        appear.value = false;
+        console.log(appear.value, '失去评论1');
+    }, 100);
 };
 
 //定义发表评论的方法
@@ -163,9 +178,9 @@ const handleMaskClick = () => {
                     <span v-if="likeCounts === 0">点赞</span>
                     <span v-else>{{ likeCounts }}</span>
                 </span>
-                <span class="small-detail" @click="responseComments">
+                <span class="small-detail" @click="responseComments(prop.item.id)">
                     <i class="iconfont">&#xe6b3;</i>
-                    <span>{{ appear ? '收起' : '回复' }}</span>
+                    <span>{{ appear ? '取消回复' : '回复' }}</span>
                 </span>
                 <commentDrawer
                     :appear="appear"
@@ -174,6 +189,7 @@ const handleMaskClick = () => {
                     :emojiDisappear="isEmojiDisappear"
                     @close-comment="handleMaskClick"
                     @open-emoji="openEmoji"
+                    @cancel-response="cancelResponse"
                 ></commentDrawer>
             </div>
         </div>
@@ -197,6 +213,7 @@ const handleMaskClick = () => {
     padding: 20px 0px 20px 20px;
     @include flex;
     align-items: start;
+    margin-top: 5px;
     .overlay {
         position: fixed; /* 固定定位 */
         top: 0;
