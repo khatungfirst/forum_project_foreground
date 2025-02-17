@@ -583,7 +583,7 @@ const searchFun = () => {
 .wrap {
     @include all;
     background-color: #f2f3f5;
-
+    margin-top: 75px;
     .member-content {
         width: 80%;
         margin: 0 auto;

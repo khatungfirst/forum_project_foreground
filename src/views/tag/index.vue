@@ -67,6 +67,7 @@ const getTagListAgain = async () => {
 .content {
     display: flex;
     justify-content: center;
+    margin-top: 65px;
 }
 .tag-list-container {
     display: flex;

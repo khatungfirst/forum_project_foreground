@@ -160,6 +160,7 @@ const goToArticleDetail = (articleId) => {
 .container {
     width: 80%;
     margin: 0 auto;
+    margin-top: 75px;
 }
 .right {
     /* ... 其他样式 ... */

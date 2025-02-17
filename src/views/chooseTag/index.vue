@@ -60,7 +60,7 @@ const confirmSelection = async () => {
 };
 
 const gotoHome = () => {
-    router.push(`/login`);
+    router.push(`/home`);
 };
 </script>
 

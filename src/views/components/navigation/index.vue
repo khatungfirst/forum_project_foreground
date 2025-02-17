@@ -262,10 +262,15 @@ watch(
 <style scoped lang="scss">
 .nav-container {
     display: flex;
+    position: fixed; // 固定在页面顶部
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; // 确保导航栏在最上层
     justify-content: space-between;
     align-items: center;
-    margin: 15px;
-    padding: 0 30px;
+    padding: 15px 30px;
+    background-color: #ffffff;
 }
 
 .nav {
