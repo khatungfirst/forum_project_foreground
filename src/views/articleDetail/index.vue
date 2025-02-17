@@ -635,7 +635,7 @@ watchEffect(async () => {
 .wrap {
     display: flex;
     background-color: #f2f3f5;
-
+    margin-top: 75px;
     .overlay {
         position: fixed; /* 固定定位 */
         top: 0;

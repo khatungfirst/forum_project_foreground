@@ -32,6 +32,7 @@ const tabTop = (value: string) => {
 .wrap {
     @include all;
     background-color: #f2f3f5;
+    margin-top: 75px;
     .top-menu {
         width: 100%;
         height: 50px;

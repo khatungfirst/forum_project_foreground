@@ -247,6 +247,7 @@ const refreshArticles = () => {
     justify-content: center;
     // text-align: center;
     margin: 0 auto;
+    margin-top: 75px;
 }
 .home {
     display: flex;
