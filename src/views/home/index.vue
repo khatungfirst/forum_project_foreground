@@ -14,7 +14,7 @@ import { concernInter } from '@/config/apis/articleDetail';
 import { getSelectArticle } from '@/config/apis/select';
 import { follower_article } from '@/config/apis/articleDetail';
 import { NButton } from 'naive-ui';
-
+import PublishButton from '../components/PublishButton/index.vue';
 const router = useRouter();
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
@@ -224,13 +224,7 @@ const refreshArticles = () => {
                         @refresh="refreshAuthors"
                     />
                 </div>
-                <div class="publish-icon-border" @click="handleReleaseArticle">
-                    <i class="iconfont icon-bianji"></i>
-                </div>
-                <n-button strong secondary round type="primary" class="button hide-button">
-                    <i class="iconfont icon-bianji"></i>
-                    <span class="publish-text">发文</span>
-                </n-button>
+                <PublishButton></PublishButton>
             </div>
         </div>
     </div>
@@ -305,35 +299,6 @@ const refreshArticles = () => {
     color: #19a059;
 }
 
-.publish-icon-border {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50px;
-    height: 50px;
-    background-color: white;
-    border-radius: 50%;
-    margin-top: 20px;
-    margin-left: 220px;
-    cursor: pointer; /* 添加鼠标停显示为手型 */
-    position: relative; /* 相对定位，为子元素做准备 */
-}
-.button {
-    display: none;
-}
-.publish-icon-border:hover ~ .button {
-    display: block; /* 鼠标悬停上时显示按钮 */
-    position: relative;
-    top: -65px; /* 向上移动10px */
-    left: 180px;
-    transform: translateX(-50%); /* 水平居中 */
-    opacity: 1; /* 文字不透明度 */
-}
-
-.iconfont.icon-bianji {
-    font-size: 24px;
-    color: #19a059;
-}
 .n-tabs :deep(.n-tabs-tab__label) {
     font-size: 16px;
 }
