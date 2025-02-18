@@ -808,6 +808,10 @@ watchEffect(async () => {
                 p {
                     font-size: 20px;
                     margin: 20px 0px;
+
+                    img {
+                        width: 200px;
+                    }
                 }
             }
         }

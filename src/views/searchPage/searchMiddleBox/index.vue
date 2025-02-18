@@ -20,8 +20,12 @@ const userStore = useUserStore();
 
 onMounted(async () => {
     init();
+    window.addEventListener('scroll', scrollLoad);
 });
 
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', scrollLoad);
+});
 //---------------------------------------初始化-------------------------------------
 //用来存放后端传来的相关数据
 const selectData = ref([]);
@@ -87,6 +91,22 @@ const loadInitDebounce = debounce(loadInit, 300);
 const tabMiddle = (value: string) => {
     dataObj.kind = value;
     init();
+};
+
+//监听浏览器滚动条滚动到底部触发加载新数据
+const scrollLoad = () => {
+    // 获取当前滚动位置
+    const scrollTop = window.scrollY;
+    // 获取页面的总高度
+    const windowHeight = window.innerHeight;
+    // 获取页面的滚动高度
+    const scrollHeight = document.documentElement.scrollHeight;
+
+    // 判断是否滚动到页面底部
+    if (scrollTop + windowHeight + 1 >= scrollHeight) {
+        console.log('滚动到底部');
+        loadInitDebounce();
+    }
 };
 </script>
 <template>

@@ -208,8 +208,6 @@ const publicFirst = async () => {
     });
 
     try {
-        console.log(commentDetail.path, '0000');
-
         if (commentDetail.content === '' && commentDetail.path === '') {
             message.warning('评论内容不能为空');
         } else {

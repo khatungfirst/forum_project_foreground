@@ -227,10 +227,12 @@ const handleMaskClick = () => {
                     <n-ellipsis style="max-width: 240px; margin-bottom: 10px; color: #5d6271">
                         {{ prop.item.nickname }}
                     </n-ellipsis>
-                    <p style="font-size: 15px; margin-bottom: 10px">
+                    <p style="font-size: 15px; margin-bottom: 10px" v-if="prop.item.content !== ''">
                         {{ prop.item.content }}
                     </p>
-                    <p><img :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" /></p>
+                    <p>
+                        <img style="width: 200px" :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" />
+                    </p>
                     <div class="comment-detail">
                         <span class="small-detail1">{{ prop.item.create_at }}</span>
                         <span
