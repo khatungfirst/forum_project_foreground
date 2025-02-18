@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { getNumberData, changeNumberData } from '@/config/apis/settings.ts';
+import { useUserStore } from '@/config/store/userStore';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 
 //定义消息提示对象
 const message = useMessage();
 
+const userStore = useUserStore();
+
 //------------------------------生命周期--------------------------------
 
 onMounted(async () => {
-    const { data } = await getNumberData();
+    const { data } = await getNumberData({
+        author_id: userStore.userInfo.id
+    });
     //把data中的属性值复制给numberSettings
     Object.assign(numberSettings, data);
     // numberSettings = data;

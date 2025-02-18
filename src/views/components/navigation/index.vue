@@ -345,7 +345,7 @@ watch(
 
 .content {
     background-color: #f2f3f5;
-    padding: 20px;
+    // padding: 20px;
 }
 
 .icon-xiaoxi {

@@ -165,7 +165,7 @@ const handleMaskClick = () => {
                 <p style="font-size: 15px; margin-bottom: 7px">
                     {{ prop.item.content }}
                 </p>
-                <p><img :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" /></p>
+                <p><img style="width: 200px" :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" /></p>
             </n-ellipsis>
             <div class="comment-detail">
                 <span class="small-detail1">{{ prop.item.create_at }}</span>
