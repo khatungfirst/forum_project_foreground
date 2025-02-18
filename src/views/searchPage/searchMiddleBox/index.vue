@@ -94,7 +94,7 @@ const tabMiddle = (value: string) => {
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
             <n-tab-pane name="0" tab="热门" ref="dataContainer">
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
-                <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
+                <n-infinite-scroll style="min-height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
                         <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
@@ -104,7 +104,7 @@ const tabMiddle = (value: string) => {
             </n-tab-pane>
             <n-tab-pane name="1" tab="最新" ref="dataContainer">
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
-                <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
+                <n-infinite-scroll style="min-height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
                         <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
@@ -118,9 +118,11 @@ const tabMiddle = (value: string) => {
 <style scoped lang="scss">
 @use '@/assets/styles/mixin.scss' as *;
 .search-mid {
+    width: 70%;
+    margin: 0 auto;
     .n-tabs {
         width: 100%;
-        height: 740px;
+        background-color: #fff;
         padding: 10px 20px 0px 20px;
         .n-tab-pane {
             width: 100%;
@@ -137,10 +139,6 @@ const tabMiddle = (value: string) => {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-        }
-
-        ::v-deep(.n-scrollbar-content) {
-            padding-bottom: 160px;
         }
 
         .load-ing {

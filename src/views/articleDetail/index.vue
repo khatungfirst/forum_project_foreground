@@ -10,6 +10,7 @@ import {
 } from '@/config/apis/articleDetail';
 import { getFirstOrderComments } from '@/config/apis/comments';
 import { debounce } from '@/utils/debounce.ts';
+import { useUserStore } from '@/config/store/userStore';
 import IconWrapper from '@/views/components/icon/IconWrapper.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
@@ -29,6 +30,8 @@ const message = useMessage();
 
 //区分该文章作者是否是当前登录的用户
 const isPerson = ref(false);
+
+const userInfo = useUserStore();
 
 // ---------------------------生命周期---------------------------------
 
@@ -277,6 +280,7 @@ const head_shot = JSON.parse(localStorage.getItem('userInfo')).avatar_path;
 //评论相关数据
 const commentInfo = reactive({
     article_id: paramId.value,
+    user_id: userInfo.userInfo.id ? userInfo.userInfo.id : 0,
     offset: 1,
     limit: 4
 });

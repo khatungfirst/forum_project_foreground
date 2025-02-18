@@ -5,6 +5,7 @@ import useDeleteComments from '@/hooks/useDeleteComments';
 import SecondOrderComments from '@/views/articleDetail/secondOrderComments/index.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { getSecondOrderComments } from '@/config/apis/comments';
+import { useUserStore } from '@/config/store/userStore';
 import '@/assets/css/icon/iconfont.css';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -55,6 +56,8 @@ const router = useRouter();
 //定义消息提示对象
 const message = useMessage();
 
+const userInfo = useUserStore();
+
 //-----------------------------生命周期---------------------------
 
 // 监听窗口调整
@@ -72,6 +75,7 @@ const isSecondComments = ref(false);
 //获取评论需要的相关属性
 const commentInfo = reactive({
     highest_id: prop.item.id,
+    user_id: userInfo.userInfo.id ? userInfo.userInfo.id : 0,
     offset: 1,
     limit: 2
     // user_id: 0

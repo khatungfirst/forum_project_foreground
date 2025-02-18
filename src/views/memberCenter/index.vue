@@ -452,7 +452,7 @@ const searchFun = () => {
                             <div class="empty-box" v-if="articleArr.length === 0">
                                 <img src="../../assets/images/empty.png" />
                             </div>
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit" v-else>
+                            <n-infinite-scroll style="min-height: 600px" :distance="10" @load="loadInit" v-else>
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index" class="article">
                                     <template #type>
                                         <n-tag class="status">{{ item.status }}</n-tag>
@@ -487,7 +487,7 @@ const searchFun = () => {
                                 <img src="../../assets/images/empty.png" />
                             </div>
                             <n-infinite-scroll
-                                style="height: 600px"
+                                style="min-height: 600px"
                                 :distance="10"
                                 @load="loadInit"
                                 ref="scrollPage"
@@ -519,7 +519,7 @@ const searchFun = () => {
                             <div class="empty-box" v-if="fansArr.length === 0">
                                 <img src="../../assets/images/empty.png" />
                             </div>
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit" v-else>
+                            <n-infinite-scroll style="min-height: 600px" :distance="10" @load="fansLoadInit" v-else>
                                 <FansInfo
                                     :item="item"
                                     v-for="(item, index) in fansArr"

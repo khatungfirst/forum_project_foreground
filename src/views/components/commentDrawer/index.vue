@@ -58,7 +58,8 @@ const emit = defineEmits(['open-emoji', 'close-comment', 'cancel-response']);
 
 //声明
 const textDom = ref(null);
-// const isAppear = ref(prop.appear);
+
+const isBlur = ref(true);
 
 watch(
     () => prop.appear,
@@ -80,19 +81,26 @@ watch(
 
 //评论框失去焦点时消失
 const blurText = () => {
-    if (prop.type !== 'all') {
-        // isAppear.value = false;
-        console.log('失去了焦点给爹');
-        emit('cancel-response');
-    }
+    setTimeout(() => {
+        if (prop.type !== 'all' && isBlur.value && inputValue.value == '') {
+            // isAppear.value = false;
+            console.log('失去了焦点给爹');
+            emit('cancel-response');
+        }
+    }, 100);
 };
 
 //----------------------------------------评论图片---------------------------------
 
 //存放上传图片的url路径
-const uploadedImages = ref<{ id: string; url: string }[]>([]);
+// const uploadedImages = ref<{ id: string; url: string }[]>([]);
 
 const fileListRef = ref<UploadFileInfo[]>([]);
+
+const uploadImage = () => {
+    console.log('点击上传图片');
+    isBlur.value = false;
+};
 
 function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefined> {
     if (!file) return undefined;
@@ -102,13 +110,15 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
         const fd = new FormData();
         fd.append('files', file);
-        fd.append('width', '165');
+        fd.append('type', '评论');
         getImageUrl(fd)
             .then((response) => {
                 if (response && response.data) {
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data);
-                    uploadedImages.value.push(response.data[0].url);
+                    // uploadedImages.value[0] = response.data[0].url;
+                    console.log(response.data[0].url, 'url');
+
                     if (response.data[0].url) {
                         fileListRef.value = [
                             {
@@ -169,6 +179,7 @@ watch(
 // 控制emoji组件出现的点击事件
 const emojiClick = () => {
     emoji.value = !emoji.value;
+    isBlur.value = false;
     emit('open-emoji');
 };
 const emojiIndex = new EmojiIndex(data);
@@ -189,7 +200,7 @@ const handleEmoji = (e) => {
 const publicFirst = async () => {
     const commentDetail = reactive({
         content: inputValue.value,
-        path: uploadedImages.value,
+        path: fileListRef.value[0] ? fileListRef.value[0].url : '',
         article_id: +route.params.id,
         highest_id: prop.item.highest_id,
         parent_id: prop.item.parent_id,
@@ -197,7 +208,9 @@ const publicFirst = async () => {
     });
 
     try {
-        if (commentDetail.content === '') {
+        console.log(commentDetail.path, '0000');
+
+        if (commentDetail.content === '' && commentDetail.path === '') {
             message.warning('评论内容不能为空');
         } else {
             const { code } = await publicComments(commentDetail);
@@ -206,9 +219,12 @@ const publicFirst = async () => {
                 emit('close-comment');
                 fileListRef.value = [];
                 disabled.value = false;
+                isBlur.value = true;
             }
         }
     } catch (error) {
+        console.log(error);
+
         message.error('发布评论失败');
     }
 };
@@ -249,11 +265,12 @@ const publicFirst = async () => {
                         class="Picker"
                     />
                     <n-upload
-                        list-type="image"
                         :create-thumbnail-url="createThumbnailUrl"
                         v-model:file-list="fileListRef"
-                        :disabled="disabled"
+                        :default-file-list="fileListRef"
+                        list-type="image"
                         show-remove-button
+                        @click="uploadImage"
                     >
                         <Icon :size="18" color="#8a919f" class="icon">
                             <FileImageOutlined />
@@ -334,6 +351,11 @@ const publicFirst = async () => {
                 .n-upload :deep(.n-upload-trigger + .n-upload-file-list) {
                     width: 300px;
                     display: inline-block;
+                }
+
+                .n-upload :deep(.n-upload-file-list) {
+                    position: absolute;
+                    bottom: -2px;
                 }
                 .icon {
                     margin-right: 30px;
