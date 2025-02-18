@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+
 const router = useRouter();
 const emit = defineEmits(['follow']);
 const props = defineProps({
