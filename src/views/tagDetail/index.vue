@@ -10,7 +10,7 @@ import { useUserStore } from '@/config/store/userStore';
 import PublishButton from '../components/PublishButton/index.vue';
 
 const userStore = useUserStore();
-const user_id = userStore.userInfo.id;
+const user_id = userStore.userInfo?.id || 0;
 const route = useRoute();
 const tags = ref([]); // 使用数组初始化
 const dataObj = ref({
