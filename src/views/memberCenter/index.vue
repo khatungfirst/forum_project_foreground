@@ -53,6 +53,17 @@ onBeforeUnmount(() => {
     window.removeEventListener('scroll', scrollLoad);
 });
 
+//----------------监听跳转当前登录人的会员中心-------------------
+watch(
+    () => userInfor.jumpToMemberCenter,
+    (newVal) => {
+        updateJumpInfo(newVal);
+        if (newVal === userInfor.userInfo.id) {
+            isSelf.value = true;
+        }
+    }
+);
+
 //------------------------发布文章的按钮---------------
 //控制发布文章按钮是否显示
 const publicAppear = ref(false);
@@ -258,6 +269,7 @@ const updateJumpInfo = (id) => {
     articleInit();
     fansList();
     linkInit();
+    userInfor.jumpToMemberCenter = id;
 };
 
 //------------------文章列表模块------------------------------
