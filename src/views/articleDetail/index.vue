@@ -18,6 +18,7 @@ import { useMessage } from 'naive-ui';
 import { LikeFilled, MessageTwotone, StarFilled, EyeOutlined, PlusCircleFilled, CheckCircleFilled } from '@vicons/antd';
 import { Icon } from '@vicons/utils';
 import MarkdownIt from 'markdown-it';
+import PublishButton from '../components/PublishButton/index.vue';
 
 //定义router
 const router = useRouter();
@@ -628,6 +629,7 @@ watchEffect(async () => {
                 </div>
             </div>
         </div>
+        <PublishButton></PublishButton>
     </div>
 </template>
 <style scoped lang="scss">

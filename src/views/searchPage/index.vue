@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
+import PublishButton from '../components/PublishButton/index.vue';
+
 //顶部标签选中
 const category_id = ref('0');
 
@@ -25,6 +27,7 @@ const tabTop = (value: string) => {
             </n-tabs>
         </div>
         <div class="middle"></div>
+        <PublishButton></PublishButton>
     </div>
 </template>
 <style scoped lang="scss">
