@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/config/store/userStore';
+const userStore = useUserStore();
 const prop = defineProps({
     authorInfo: {
         type: Object as () => {
@@ -28,8 +30,34 @@ const prop = defineProps({
 
 const router = useRouter();
 
+// 定义一个响应式变量, 控制卡片的显示和隐藏
+const isCardVisible = ref(true);
+
+// 定义一个方法, 用于关闭卡片
+const closeCard = () => {
+    isCardVisible.value = false;
+};
+
+// 监听全局点击事件
+const handleClickOutside = (event: MouseEvent) => {
+    const cardElement = document.querySelector('.author-card'); // 获取卡片元素
+    if (!cardElement || cardElement.contains(event.target as Node)) {
+        closeCard();
+    }
+};
+
+// 组件挂载前移除全局点击事件监听
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+// 在组件卸载前移除全局点击事件监听
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
 const jumpCenter = (id) => {
     router.push(`/member/${id}`);
+    userStore.jumpToMemberCenter = id;
 };
 </script>
 <template>
