@@ -5,6 +5,7 @@ import useDeleteComments from '@/hooks/useDeleteComments';
 import SecondOrderComments from '@/views/articleDetail/secondOrderComments/index.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { getSecondOrderComments } from '@/config/apis/comments';
+import { useUserStore } from '@/config/store/userStore';
 import '@/assets/css/icon/iconfont.css';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -55,6 +56,8 @@ const router = useRouter();
 //定义消息提示对象
 const message = useMessage();
 
+const userInfo = useUserStore();
+
 //-----------------------------生命周期---------------------------
 
 // 监听窗口调整
@@ -72,6 +75,7 @@ const isSecondComments = ref(false);
 //获取评论需要的相关属性
 const commentInfo = reactive({
     highest_id: prop.item.id,
+    user_id: userInfo.userInfo.id ? userInfo.userInfo.id : 0,
     offset: 1,
     limit: 2
     // user_id: 0
@@ -223,10 +227,12 @@ const handleMaskClick = () => {
                     <n-ellipsis style="max-width: 240px; margin-bottom: 10px; color: #5d6271">
                         {{ prop.item.nickname }}
                     </n-ellipsis>
-                    <p style="font-size: 15px; margin-bottom: 10px">
+                    <p style="font-size: 15px; margin-bottom: 10px" v-if="prop.item.content !== ''">
                         {{ prop.item.content }}
                     </p>
-                    <p><img :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" /></p>
+                    <p>
+                        <img style="width: 200px" :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" />
+                    </p>
                     <div class="comment-detail">
                         <span class="small-detail1">{{ prop.item.create_at }}</span>
                         <span

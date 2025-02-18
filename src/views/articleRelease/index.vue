@@ -156,7 +156,7 @@ const handleChange = (e: Event) => {
 };
 
 //获取上传封面图的链接
-const { image_url, getUrl } = useUpload();
+const { image_url, getUrl } = useUpload('文章封面');
 const getImage = async (item) => {
     await getUrl(item);
     articleData.image_url = image_url.value;
@@ -179,7 +179,7 @@ const onUploadImg = async (files, callback) => {
                 const form = new FormData();
                 form.append('files', file);
 
-                form.append('width', '165');
+                form.append('type', '文章');
                 // TS 语法
                 getImageUrl(form)
                     .then((result) => {
@@ -327,7 +327,7 @@ const publicArticle = async () => {
     grid-template-rows: 1fr 18fr;
     overflow: hidden;
     position: relative;
-    margin-top: 65px;
+    margin-top: 95px;
     .n-card {
         width: 30%;
         /* height: 60vh; */
