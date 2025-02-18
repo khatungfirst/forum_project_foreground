@@ -34,7 +34,13 @@ const jumpCenter = (id) => {
 </script>
 <template>
     <div class="top">
-        <n-avatar round size="large" :src="prop.authorInfo.head" @click="jumpCenter(prop.authorInfo.author_id)" />
+        <n-avatar
+            round
+            size="large"
+            :src="prop.authorInfo.head"
+            @click="jumpCenter(prop.authorInfo.author_id)"
+            style="cursor: pointer"
+        />
         <div class="authorName">
             <p class="name">{{ prop.authorInfo.nickname }}</p>
             <p class="tag">{{ prop.authorInfo.signature }}</p>
@@ -55,7 +61,7 @@ const jumpCenter = (id) => {
         </div>
     </div>
     <!-- 插槽部分 -->
-    <!-- <slot name="actions"></slot> -->
+    <slot name="actions"></slot>
 </template>
 <style scoped lang="scss">
 @use '@/assets/styles/mixin.scss' as *;

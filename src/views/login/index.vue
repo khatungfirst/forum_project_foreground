@@ -95,7 +95,7 @@ onMounted(() => {
             </n-form-item>
             <n-form-item>
                 <div class="button-wrapper">
-                    <n-button @click="handleLogin" class="common-button">登陆</n-button>
+                    <n-button @click="handleLogin" class="common-button">登录</n-button>
                 </div>
             </n-form-item>
         </n-form>

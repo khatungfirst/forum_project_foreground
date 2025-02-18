@@ -14,6 +14,7 @@ import {
 } from '@/config/apis/message';
 
 import { concernInter } from '@/config/apis/articleDetail';
+import PublishButton from '../components/PublishButton/index.vue';
 
 const router = useRouter();
 
@@ -153,6 +154,7 @@ const goToArticleDetail = (articleId) => {
                 </n-tab-pane>
             </n-tabs>
         </n-card>
+        <PublishButton></PublishButton>
     </div>
 </template>
 
@@ -160,6 +162,7 @@ const goToArticleDetail = (articleId) => {
 .container {
     width: 80%;
     margin: 0 auto;
+    margin-top: 75px;
 }
 .right {
     /* ... 其他样式 ... */

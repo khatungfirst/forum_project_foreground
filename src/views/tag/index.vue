@@ -3,11 +3,15 @@ import { ref, onMounted } from 'vue';
 import { getTagList, Tag_follow } from '../../config/apis/tag';
 import TagItem from '../components/tags/index.vue';
 import { useRouter } from 'vue-router';
+import PublishButton from '../components/PublishButton/index.vue';
+import { useUserStore } from '@/config/store/userStore';
 const tags = ref([]); // 使用数组初始化
 const router = useRouter();
+const userStore = useUserStore();
+const user_id = userStore.userInfo.id;
 onMounted(async () => {
     try {
-        const response = await getTagList();
+        const response = await getTagList({ user_id: user_id });
         if (response.code === 2000) {
             tags.value = response.data.tag_list;
             console.log(tags);
@@ -43,7 +47,7 @@ const follow_tag = async (id) => {
 
 const getTagListAgain = async () => {
     try {
-        const response = await getTagList();
+        const response = await getTagList({ user_id: user_id });
         if (response.code === 2000) {
             tags.value = response.data.tag_list;
         } else {
@@ -60,6 +64,7 @@ const getTagListAgain = async () => {
         <div class="tag-list-container">
             <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" />
         </div>
+        <div><PublishButton></PublishButton></div>
     </div>
 </template>
 
@@ -67,12 +72,13 @@ const getTagListAgain = async () => {
 .content {
     display: flex;
     justify-content: center;
+    margin-top: 65px;
 }
 .tag-list-container {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    /* padding: 100px; */
+    padding: 100px;
 }
 
 .tag-list-container {

@@ -6,7 +6,11 @@ import { getTagList, Tag_follow, getArticleByTag } from '../../config/apis/tag';
 import { useRoute } from 'vue-router';
 import { NTabs, NTabPane, NInfiniteScroll } from 'naive-ui';
 import _ from 'lodash'; // 导入 Lodash
+import { useUserStore } from '@/config/store/userStore';
+import PublishButton from '../components/PublishButton/index.vue';
 
+const userStore = useUserStore();
+const user_id = userStore.userInfo.id;
 const route = useRoute();
 const tags = ref([]); // 使用数组初始化
 const dataObj = ref({
@@ -24,7 +28,7 @@ const currentTab = ref('0'); // 当前选中的标签
 
 onMounted(async () => {
     try {
-        const response = await getTagList();
+        const response = await getTagList({ user_id: user_id });
         if (response.code === 2000 && Array.isArray(response.data.tag_list)) {
             tags.value = response.data.tag_list;
             fetchCurrentTag(route.params.id); // 初始加载时获取当前标签信息
@@ -68,7 +72,7 @@ const follow_tag = async (id) => {
         const response = await Tag_follow({ id: id });
         if (response.code === 2000) {
             // 重新获取标签列表
-            const tagsResponse = await getTagList();
+            const tagsResponse = await getTagList({ user_id: user_id });
             if (tagsResponse.code === 2000 && Array.isArray(tagsResponse.data.tag_list)) {
                 tags.value = tagsResponse.data.tag_list;
                 // 更新当前标签的详细信息
@@ -144,6 +148,7 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
                 <div v-if="noMore" class="loading">-没有更多了-</div>
             </div>
         </div>
+        <PublishButton></PublishButton>
     </div>
 </template>
 
@@ -151,6 +156,7 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 .content {
     display: flex;
     /* justify-content: center; */
+    margin-top: 65px;
 }
 .wrapper {
     display: flex;

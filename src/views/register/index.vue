@@ -4,7 +4,7 @@ import { NForm, NFormItem, NInput, NButton } from 'naive-ui';
 import { useRouter } from 'vue-router';
 import { useMessage } from 'naive-ui';
 import { verify_code, register } from '../../config/apis/login';
-
+import { useUserStore } from '@/config/store/userStore';
 const router = useRouter();
 const formRef = ref(null);
 const form = ref({
@@ -15,7 +15,7 @@ const form = ref({
 });
 
 const message = useMessage(); // 获取消息提示 API
-
+const userStore = useUserStore();
 const rules = ref({
     email: [
         { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -67,13 +67,12 @@ const sendVerify_code = async () => {
         message.error('请先输入邮箱地址');
         return;
     }
+    startCountdown(); // 立即启动倒计
     try {
         const email = form.value.email;
         const response = await verify_code({ email });
-
         if (response.code === 2000) {
             message.success('验证码已发送，请检查您的邮箱');
-            startCountdown(); // 启动倒计时
         } else {
             message.error(`发送验证码失败: ${response.data.message}`);
         }
@@ -117,6 +116,7 @@ const handleResister = async () => {
 
         if (response.code === 2000 && response.data) {
             message.success('注册成功！'); // 注册成功时显示提示
+            userStore.login(response.data); // 登录成功，调用 login 方法
             router.push('/choosetag');
         } else {
             message.error('注册失败：' + response.data.message);
