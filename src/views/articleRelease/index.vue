@@ -327,7 +327,7 @@ const publicArticle = async () => {
     grid-template-rows: 1fr 18fr;
     overflow: hidden;
     position: relative;
-
+    margin-top: 65px;
     .n-card {
         width: 30%;
         /* height: 60vh; */

@@ -11,19 +11,27 @@ const handleReleaseArticle = () => {
 </script>
 
 <template>
-    <div class="publish-icon-border" @click="handleReleaseArticle">
-        <i class="iconfont icon-bianji"></i>
+    <div class="publish">
+        <div class="publish-icon-border" @click="handleReleaseArticle">
+            <i class="iconfont icon-bianji"></i>
+        </div>
+        <n-button strong secondary round type="primary" class="button hide-button">
+            <i class="iconfont icon-bianji"></i>
+            <span class="publish-text">发文</span>
+        </n-button>
     </div>
-    <n-button strong secondary round type="primary" class="button hide-button">
-        <i class="iconfont icon-bianji"></i>
-        <span class="publish-text">发文</span>
-    </n-button>
 </template>
 
 <style scoped>
+.publish {
+    position: fixed;
+    right: 25px;
+    bottom: 6px;
+}
+
 .publish-icon-border {
     display: flex;
-    position: absolute;
+    position: relative;
     justify-content: center;
     align-items: center;
     width: 50px;
@@ -34,7 +42,7 @@ const handleReleaseArticle = () => {
     margin-left: 220px;
     cursor: pointer; /* 添加鼠标停显示为手型 */
     bottom: 71px;
-    right: 189px;
+    right: 78px;
 }
 
 .button {
@@ -42,9 +50,9 @@ const handleReleaseArticle = () => {
 }
 .publish-icon-border:hover ~ .button {
     display: block; /* 鼠标悬停上时显示按钮 */
-    position: relative;
-    top: -24px; /* 向上移动10px */
-    left: 268px;
+    position: absolute;
+    top: -82px; /* 向上移动88px */
+    left: 112px;
     transform: translateX(-50%); /* 水平居中 */
     opacity: 1; /* 文字不透明度 */
 }
@@ -53,14 +61,14 @@ const handleReleaseArticle = () => {
     font-size: 24px;
     color: #19a059;
 }
-.button {
+/* .button {
     display: none;
     position: absolute;
     top: -65px;
     left: 180px;
     transform: translateX(-50%);
     opacity: 1;
-}
+} */
 
 .publish-icon-border:hover .button {
     display: block;
