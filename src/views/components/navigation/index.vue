@@ -1,18 +1,18 @@
-<script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+<script setup>
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Home from '../../../views/home/index.vue';
 import Tag from '../../../views/tag/index.vue';
 import { IosSearch } from '@vicons/ionicons4';
 import { useUserStore } from '@/config/store/userStore';
 import { useMessageStore } from '@/config/store/messageStore';
+// import { get_latest_message } from '@/config/apis/message';
 import authorMessage from '../../../views/articleDetail/authorMessage/index.vue';
 import { getAuthorDetail } from '@/config/apis/articleDetail';
+// import { eventBus } from '@/utils/eventBus.ts';
 import { logout } from '@/config/apis/login';
-
 const router = useRouter();
 const activeTab = ref('home');
-const check = ref(false);
 const keyword = ref(''); // 定义搜索框内容变量
 const userStore = useUserStore();
 const messageStore = useMessageStore();
@@ -111,14 +111,8 @@ const handleSelect = (key) => {
 };
 
 const toggleAuthorInfo = () => {
-    // 如果此时打开就设置为关闭状态
+    // router.push(`/member/${userStore.userInfo.id}`);
     isAuthorInfo.value = !isAuthorInfo.value;
-    check.value = !check.value;
-};
-
-const closeAuthorInfo = () => {
-    isAuthorInfo.value = false;
-    check.value = false;
 };
 
 onMounted(async () => {
@@ -138,7 +132,7 @@ onMounted(async () => {
 // 作者相关内容的初始化方法
 const authorInit = async () => {
     const authorId = {
-        author_id: userStore.userInfo?.id || 0
+        author_id: userStore.userInfo.id || 0
     };
     const authorData = await getAuthorDetail(authorId);
     console.log('authorData', authorData);
@@ -171,29 +165,6 @@ watch(
         }
     }
 );
-
-// 定义一个方法，用于关闭卡片
-// const closeCard = () => {
-//     isAuthorInfo.value = !isAuthorInfo.value;
-// };
-
-// 监听全局点击事件
-// const handleClickOutside = (event: MouseEvent) => {
-//     const cardElement = document.querySelector('.author-message-card'); // 获取卡片元素
-//     if (!cardElement || !cardElement.contains(event.target as Node)) {
-//         closeCard(); // 如果点击的不是卡片本身或其子元素，关闭卡片
-//     }
-// };
-
-// // 在组件挂载时添加全局点击事件监听
-// onMounted(() => {
-//     document.addEventListener('click', handleClickOutside);
-// });
-
-// // 在组件卸载前移除全局点击事件监听
-// onBeforeUnmount(() => {
-//     document.removeEventListener('click', handleClickOutside);
-// });
 </script>
 
 <template>
@@ -258,12 +229,7 @@ watch(
                     />
                 </n-button>
                 <div class="author-message-card" v-if="isAuthorInfo">
-                    <authorMessage
-                        :authorInfo="authorInfo"
-                        :isAuthorInfo="isAuthorInfo"
-                        :check="check"
-                        @close="closeAuthorInfo"
-                    >
+                    <authorMessage :authorInfo="authorInfo">
                         <template #actions>
                             <hr class="article-rank-divider" />
                             <div class="actions-slot">
@@ -379,7 +345,7 @@ watch(
 
 .content {
     background-color: #f2f3f5;
-    // padding: 20px;
+    padding: 20px;
 }
 
 .icon-xiaoxi {
