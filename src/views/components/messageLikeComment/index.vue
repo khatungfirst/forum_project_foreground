@@ -1,6 +1,6 @@
 <script setup>
 const props = defineProps({
-    comment_message: {
+    likeCommentList: {
         type: Array,
         required: true,
         default: () => []
@@ -12,10 +12,11 @@ const props = defineProps({
 // const enterMemberCenter = (id) => {
 //     router.push({ path: `/member/${id}` });
 // };
+const emit = defineEmits(['goToMember', 'goToArticleDetail']);
 </script>
 
 <template>
-    <div class="comment-item" v-for="comment in comment_message" :key="comment.id">
+    <div class="comment-item" v-for="comment in likeCommentList" :key="comment.id">
         <div class="comment-avatar" @click="() => emit('goToMember', comment.user_id)">
             <img :src="comment.path" alt="User avatar" />
         </div>
