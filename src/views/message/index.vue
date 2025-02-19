@@ -10,11 +10,13 @@ import {
     like_message,
     collect_message,
     like_comment_message,
-    follow_message
+    follow_message,
+    comment_like_message
 } from '@/config/apis/message';
 
 import { concernInter } from '@/config/apis/articleDetail';
 import PublishButton from '../components/PublishButton/index.vue';
+import messageLikeComment from '../components/messageLikeComment/index.vue';
 
 const router = useRouter();
 
@@ -22,6 +24,7 @@ const commentList = ref([]); // 存储评论消息
 const likeList = ref([]); // 存储点赞消息
 const collectList = ref([]); // 存储收藏消息
 const followList = ref([]); // 存储关注消息
+const likeCommentList = ref([]); // 存储点赞评论消息
 
 const likedComments = ref(new Set()); // 存储已点赞的评论ID
 
@@ -93,6 +96,13 @@ onMounted(async () => {
     } else {
         console.error('获取关注消息失败');
     }
+
+    const likeCommentResponse = await comment_like_message({ page: 1, limit: 5 });
+    if (likeCommentResponse.code === 2000) {
+        likeCommentList.value = likeCommentResponse.data.like_list;
+    } else {
+        console.error('获取点赞评论消息失败');
+    }
 });
 
 const likeComment = async (comment) => {
@@ -140,6 +150,11 @@ const goToArticleDetail = (articleId) => {
                         @goToArticleDetail="goToArticleDetail"
                         @goToMember="goToMember"
                     ></LikeItem>
+                    <messageLikeComment
+                        :likeCommentList="likeCommentList"
+                        @goToArticleDetail="goToArticleDetail"
+                        @goToMember="goToMember"
+                    ></messageLikeComment>
                 </n-tab-pane>
                 <n-tab-pane name="收藏" tab="收藏" class="custom-tab">
                     <LikeItem
