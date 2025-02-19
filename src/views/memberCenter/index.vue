@@ -3,6 +3,8 @@ import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Article from '@/views/components/article/index.vue';
 import FansInfo from '@/views/components/fansInfo/index.vue';
+import PublishButton from '../components/PublishButton/index.vue';
+import { useUserStore } from '@/config/store/userStore';
 import {
     getMemberInfo,
     editSignature,
@@ -36,13 +38,63 @@ const routes = useRoute();
 //定义消息提示对象
 const message = useMessage();
 
+const userInfor = useUserStore();
+
 //------------------------生命周期---------------------
 
 onMounted(async () => {
     userInfo();
     articleInit();
     linkInit();
+    window.addEventListener('scroll', scrollLoad);
 });
+
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', scrollLoad);
+});
+
+//----------------监听跳转当前登录人的会员中心-------------------
+watch(
+    () => userInfor.jumpToMemberCenter,
+    (newVal) => {
+        updateJumpInfo(newVal);
+        if (newVal === userInfor.userInfo.id) {
+            isSelf.value = true;
+        }
+    }
+);
+
+//------------------------发布文章的按钮---------------
+//控制发布文章按钮是否显示
+const publicAppear = ref(false);
+
+const scrollLoad = () => {
+    //监听控制发布文章按钮
+    // 获取当前滚动位置
+    const scrollTop = window.scrollY;
+    if (scrollTop >= 30) {
+        publicAppear.value = true;
+    } else {
+        publicAppear.value = false;
+    }
+    //-----------监听控制下拉加载数据-----------
+    // 获取页面的总高度
+    const windowHeight = window.innerHeight;
+    // 获取页面的滚动高度
+    const scrollHeight = document.documentElement.scrollHeight;
+
+    console.log(scrollTop, windowHeight, scrollHeight);
+
+    // 判断是否滚动到页面底部
+    if (scrollTop + windowHeight + 1 >= scrollHeight) {
+        console.log('触发');
+        if (tabValue.value === '关注') {
+            fansLoadInit();
+        } else {
+            loadInit();
+        }
+    }
+};
 
 //------------------------用户模块---------------------
 
@@ -217,6 +269,7 @@ const updateJumpInfo = (id) => {
     articleInit();
     fansList();
     linkInit();
+    userInfor.jumpToMemberCenter = id;
 };
 
 //------------------文章列表模块------------------------------
@@ -232,6 +285,9 @@ const aticleType = reactive({
 
 //文章数组
 const articleArr = ref([]);
+
+//定义变量接收标签的目前值
+const tabValue = ref('文章');
 
 //初始化文章的信息
 const articleInit = async () => {
@@ -249,6 +305,7 @@ const pubicArticle = () => {
 
 //切换标签
 const tabChange = (value: string) => {
+    tabValue.value = value;
     fansType.keyword = '';
     aticleType.keyword = '';
     noMore.value = false;
@@ -352,6 +409,7 @@ const searchFun = () => {
         aticleType.page = 1;
         articleInit();
     } else {
+        fansType.page = 1;
         fansType.keyword = inputValue.value;
         fansList();
     }
@@ -452,7 +510,7 @@ const searchFun = () => {
                             <div class="empty-box" v-if="articleArr.length === 0">
                                 <img src="../../assets/images/empty.png" />
                             </div>
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit" v-else>
+                            <n-infinite-scroll style="min-height: 600px" :distance="10" @load="loadInit" v-else>
                                 <Article :item="item" v-for="(item, index) in articleArr" :key="index" class="article">
                                     <template #type>
                                         <n-tag class="status">{{ item.status }}</n-tag>
@@ -487,7 +545,7 @@ const searchFun = () => {
                                 <img src="../../assets/images/empty.png" />
                             </div>
                             <n-infinite-scroll
-                                style="height: 600px"
+                                style="min-height: 600px"
                                 :distance="10"
                                 @load="loadInit"
                                 ref="scrollPage"
@@ -519,7 +577,7 @@ const searchFun = () => {
                             <div class="empty-box" v-if="fansArr.length === 0">
                                 <img src="../../assets/images/empty.png" />
                             </div>
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit" v-else>
+                            <n-infinite-scroll style="min-height: 600px" :distance="10" @load="fansLoadInit" v-else>
                                 <FansInfo
                                     :item="item"
                                     v-for="(item, index) in fansArr"
@@ -576,6 +634,9 @@ const searchFun = () => {
                 </n-card>
             </div>
         </div>
+        <transition name="scale">
+            <PublishButton v-if="publicAppear"></PublishButton>
+        </transition>
     </div>
 </template>
 <style scoped lang="scss">
@@ -601,7 +662,7 @@ const searchFun = () => {
                 cursor: pointer;
             }
             .n-card {
-                margin-bottom: 20px;
+                margin: 20px 0px;
                 padding-bottom: 20px;
                 border-radius: 5px;
 
@@ -749,7 +810,7 @@ const searchFun = () => {
             .n-button {
                 width: 90%;
                 height: 40px;
-                margin: 10px 0px 30px 0px;
+                margin: 20px 0px 30px 0px;
             }
 
             .n-card {
@@ -796,6 +857,33 @@ const searchFun = () => {
                 padding-right: 20px;
             }
         }
+    }
+    @keyframes scaleIn {
+        0% {
+            opacity: 0;
+            transform: scale(0); /* 从 0 缩放到 1 */
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    @keyframes scaleOut {
+        from {
+            opacity: 1;
+            transform: scale(1); /* 从 1 缩放到 0 */
+        }
+        to {
+            opacity: 0;
+            transform: scale(0);
+        }
+    }
+    .scale-enter-active {
+        animation: scaleIn 0.5s ease;
+    }
+
+    .scale-leave-active {
+        animation: scaleOut 0.3s ease;
     }
 }
 </style>

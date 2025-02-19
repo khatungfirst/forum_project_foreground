@@ -101,7 +101,7 @@ const handleClose = async (e) => {
 
 //---------------------------------上传头像-----------------------------------
 
-const { image_url, getUrl } = useUpload();
+const { image_url, getUrl } = useUpload('用户');
 
 //上传图片预览图
 const handlePreview = async (item) => {
