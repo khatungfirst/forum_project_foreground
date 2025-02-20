@@ -21,13 +21,13 @@ const user_id = userStore.userInfo?.id || 0;
 const router = useRouter();
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
-const category_id = ref('1');
+const category_id = ref('0');
 const selectData = ref([]); // 存储文章列表数据
 const isLoading = ref(false);
 const noMore = ref(false);
 const dataObj = ref({
     keyword: '',
-    category_id: '1',
+    category_id: '0',
     page: 1,
     limit: 4,
     kind: '0'
