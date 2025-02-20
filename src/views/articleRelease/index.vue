@@ -166,7 +166,11 @@ const handleChange = (e: Event) => {
 
 //封面图上传前阻止默认上传行为
 const handleBeforeUpload = (rawFile) => {
-    getImage(rawFile);
+    console.log('999');
+    if (fileList.value.length === 0) {
+        console.log(fileList.value.length, '======');
+        getImage(rawFile);
+    }
     return false;
 };
 
@@ -174,23 +178,24 @@ const handleBeforeUpload = (rawFile) => {
 const { image_url, getUrl, isFit } = useUpload('文章封面');
 const getImage = async (item) => {
     await getUrl(item);
-
     if (isFit.value) {
-        articleData.image_url = image_url.value;
         fileList.value.push({
-            url: image_url,
+            url: image_url.value,
             status: 'finished'
         });
-        const coverImage = await getCompressImage({
-            path: fileList.value[0].url,
-            width: 150,
-            height: 100,
-            level: 5
-        });
-        console.log(coverImage, 'image');
+        if (image_url.value !== '') {
+            articleData.image_url = fileList.value[0].url;
+        }
     } else {
         message.warning('上传的图片比例不符合3：2，请重新选择图片');
     }
+};
+
+//删除封面图
+const removeImage = () => {
+    console.log('777');
+    fileList.value.pop();
+    return false;
 };
 
 //页面上发布按钮的点击事件
@@ -286,6 +291,7 @@ const publicArticle = async () => {
                             max="1"
                             :file-list="fileList"
                             @before-upload="handleBeforeUpload"
+                            @remove="removeImage"
                         />
                         <n-modal preset="card" style="width: 600px" title="封面图">
                             <img :src="articleData.image_url" style="width: 100%" />
