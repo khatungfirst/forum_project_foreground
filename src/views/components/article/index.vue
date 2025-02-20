@@ -35,6 +35,10 @@ const prop = defineProps({
     }
 });
 
+onMounted(() => {
+    compressImage();
+});
+
 //路由对象
 const route = useRouter();
 
@@ -46,6 +50,29 @@ const checkDetail = () => {
 //点击标签的触发事件
 const clickTags = () => {
     console.log('标签被点击了');
+};
+
+//声明压缩后的封面图
+const imageUrl = ref('');
+//压缩封面图
+const compressImage = async () => {
+    console.log('压缩图片');
+
+    //压缩封面图
+    const params = new URLSearchParams({
+        path: prop.item.image_url,
+        width: '150',
+        height: '100',
+        level: '5'
+    });
+    await fetch(`/instantly_compress_image?${params}`, {
+        method: 'GET'
+    }).then(async (res) => {
+        const blob = await res.blob();
+        // const imageU RL = URL.createObjectURL(blob);
+        // imageUrl.value = imageURL.replace('blob:', '');
+        console.log(blob, 'image');
+    });
 };
 
 //文章题目和概述高亮显示关键词
@@ -92,7 +119,7 @@ const highlightedSummary = ref(prop.item.summary);
             </div>
             <slot class="edit" name="edit"></slot>
             <div class="right" v-if="prop.item.image_url !== ''">
-                <img :src="prop.item.image_url" alt="" />
+                <img :src="imageUrl" alt="" />
             </div>
             <slot class="cancelCollect" name="cancelCollect"></slot>
         </li>
@@ -178,8 +205,8 @@ const highlightedSummary = ref(prop.item.summary);
         margin-left: 8px;
 
         img {
-            width: 165px;
-            height: 105px;
+            width: 150px;
+            height: 100px;
             object-fit: cover;
         }
     }
