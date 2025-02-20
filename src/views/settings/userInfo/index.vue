@@ -2,11 +2,14 @@
 import { reactive } from 'vue';
 import { getUserInfo, changeUserInfo } from '@/config/apis/settings.ts';
 import useUpload from '@/hooks/useUpload';
+import { useUserStore } from '@/config/store/userStore';
 import { useMessage } from 'naive-ui';
 import '@/assets/css/icon/iconfont.css';
 
 //定义消息提示对象
 const message = useMessage();
+
+const userInfor = useUserStore();
 
 //-----------------------------------个人资料-------------------------------------
 
@@ -108,15 +111,16 @@ const handlePreview = async (item) => {
     await getUrl(item);
     userInfo.path = image_url.value;
     update('更改头像成功', '更改头像失败');
+    // userInfor.userInfo.
     //更改本地的头像数据
-    const oldLocalInfo = JSON.parse(localStorage.getItem('userInfo'));
-    const localInfo = {
-        avatar_path: oldLocalInfo.avatar_path,
-        id: oldLocalInfo.id,
-        nickname: oldLocalInfo.nickname
-    };
-    localInfo.avatar_path = image_url.value;
-    localStorage.setItem('userInfo', JSON.stringify(localInfo));
+    // const oldLocalInfo = JSON.parse(localStorage.getItem('userInfo'));
+    // const localInfo = {
+    //     avatar_path: oldLocalInfo.avatar_path,
+    //     id: oldLocalInfo.id,
+    //     nickname: oldLocalInfo.nickname
+    // };
+    // localInfo.avatar_path = image_url.value;
+    // localStorage.setItem('userInfo', JSON.stringify(localInfo));
     // showModalRef.value = true;
 };
 </script>

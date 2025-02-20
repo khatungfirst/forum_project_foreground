@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/config/store/userStore';
 import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
@@ -48,6 +49,8 @@ const prop = defineProps({
 
 const router = useRouter();
 
+const userInfo = useUserStore();
+
 //定义消息提示对象
 // const message = useMessage();
 const emit = defineEmits(['delete-secComments', 'public-second']);
@@ -61,7 +64,7 @@ const appear = ref(false);
 const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
 
 //判断这个评论是否是自己的评论
-const isSelf = prop.item.user_id === +JSON.parse(localStorage.getItem('userInfo')).id ? true : false;
+const isSelf = prop.item.user_id === userInfo.userInfo?.id ? true : false;
 
 //控制emoji框是否显示
 const isEmojiDisappear = ref(false);

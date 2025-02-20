@@ -152,7 +152,7 @@ const jumpMember = (id: number) => {
 };
 
 //判断这个评论是否是自己的评论
-const iid = ref(JSON.parse(localStorage.getItem('userInfo')).id);
+const iid = ref(userInfo.userInfo?.id || 0);
 
 //--------------------------------回复评论-----------------------------
 

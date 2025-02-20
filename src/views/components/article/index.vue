@@ -178,8 +178,8 @@ const highlightedSummary = ref(prop.item.summary);
         margin-left: 8px;
 
         img {
-            width: 165px;
-            height: 105px;
+            width: 150px;
+            height: 100px;
             object-fit: cover;
         }
     }

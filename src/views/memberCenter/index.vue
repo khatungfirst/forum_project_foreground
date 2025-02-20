@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+//引入自定义组件
 import Article from '@/views/components/article/index.vue';
+import skeleton from '@/views/components/skeleton/index.vue';
 import FansInfo from '@/views/components/fansInfo/index.vue';
 import PublishButton from '../components/PublishButton/index.vue';
-import { useUserStore } from '@/config/store/userStore';
+//引入api
 import {
     getMemberInfo,
     editSignature,
@@ -15,7 +17,11 @@ import {
 } from '@/config/apis/member.ts';
 import { concernInter, collectionInter } from '@/config/apis/articleDetail';
 import { getNumberData } from '@/config/apis/settings.ts';
+//引入全局状态管理
+import { useUserStore } from '@/config/store/userStore';
+//引入公共方法
 import { debounce } from '@/utils/debounce.ts';
+//引入第三方组件
 import '@/assets/css/icon/iconfont.css';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
@@ -87,7 +93,6 @@ const scrollLoad = () => {
 
     // 判断是否滚动到页面底部
     if (scrollTop + windowHeight + 1 >= scrollHeight) {
-        console.log('触发');
         if (tabValue.value === '关注') {
             fansLoadInit();
         } else {
@@ -100,6 +105,18 @@ const scrollLoad = () => {
 
 //定义当前会员中心人员的id
 const paramId = ref(+routes.params.id);
+
+//控制个签是否可编辑
+const isEdit = ref(true);
+
+//获取到输入框
+const inputInstRef = ref<InputInst | null>(null);
+
+//控制当前页面的用户是否是当前登录的用户
+const isSelf = ref(true);
+
+//控制显示骨架屏
+const skeletonUser = ref(true);
 
 //定义当前会员中心人员的各种信息
 const user = reactive({
@@ -120,25 +137,17 @@ const user = reactive({
     github_link: ''
 });
 
-//控制个签是否可编辑
-const isEdit = ref(true);
-
-//获取到输入框
-const inputInstRef = ref<InputInst | null>(null);
-
-//控制当前页面的用户是否是当前登录的用户
-const isSelf = ref(true);
-
 //初始化用户数据
 const userInfo = async () => {
-    if (+user.id !== +JSON.parse(localStorage.getItem('userInfo')).id) {
+    if (+user.id !== userInfor.userInfo?.id) {
         isSelf.value = false;
     }
+    skeletonUser.value = true;
     const { data } = await getMemberInfo({
         author_id: user.id
     });
-
     if (data) {
+        skeletonUser.value = false;
         Object.assign(user, data);
     }
 };
@@ -200,6 +209,8 @@ const settinngs = () => {
 };
 
 //--------------------关注列表模块------------------------
+//控制文章、收藏、关注模块的骨架屏
+const skeletonOther = ref(true);
 
 //定义关注的人的筛选条件
 const fansType = reactive({
@@ -223,8 +234,10 @@ const fansArr = ref([]);
 
 //初始化关注列表
 const fansList = async () => {
+    skeletonOther.value = true;
     const { data } = await getConcernList(fansType);
     if (data) {
+        skeletonOther.value = false;
         fansId.value = data.ids.ids;
         const fansData = await getConcernDetail({
             ids: fansId.value,
@@ -292,8 +305,10 @@ const tabValue = ref('文章');
 //初始化文章的信息
 const articleInit = async () => {
     articleArr.value = [];
+    skeletonOther.value = true;
     const { data } = await getArticleInfo(aticleType);
     if (data) {
+        skeletonOther.value = false;
         articleArr.value = data.dataList;
     }
 };
@@ -421,64 +436,67 @@ const searchFun = () => {
     <div class="wrap">
         <div class="member-content">
             <div class="left">
-                <n-card size="huge" class="information">
-                    <div class="left-left">
-                        <n-avatar round :size="48" :src="user.head_shot" />
-                        <n-ellipsis style="max-width: 240px; display: block; font-weight: 800; font-size: 18px">
-                            {{ user.nickname }}
-                        </n-ellipsis>
-                        <n-ellipsis style="max-width: 240px; display: block">
-                            {{ user.date }} 加入了{{ user.tag }}
-                        </n-ellipsis>
-                        <n-input
-                            ref="inputInstRef"
-                            v-model:value="user.signature"
-                            placeholder=""
-                            :disabled="isEdit"
-                            @blur="commitSignature"
-                            style="width: 200px"
-                        />
-                        <i class="iconfont" @click="edit" style="color: #cbcbcb" v-if="isSelf">&#xe602;</i>
-                    </div>
-                    <div class="left-right">
-                        <div class="icons">
-                            <a :href="user.blog_link">
-                                <i class="iconfont">&#xe668;</i>
-                            </a>
-                            <a :href="user.weibo_link">
-                                <Icon size="18">
-                                    <WeiboOutlined />
-                                </Icon>
-                            </a>
-                            <a :href="user.github_link">
-                                <Icon size="18">
-                                    <GithubFilled />
-                                </Icon>
-                            </a>
+                <n-card size="huge">
+                    <skeleton v-if="skeletonUser"></skeleton>
+                    <div v-else class="information">
+                        <div class="left-left">
+                            <n-avatar round :size="48" :src="user.head_shot" />
+                            <n-ellipsis style="max-width: 240px; display: block; font-weight: 800; font-size: 18px">
+                                {{ user.nickname }}
+                            </n-ellipsis>
+                            <n-ellipsis style="max-width: 240px; display: block">
+                                {{ user.date }} 加入了{{ user.tag }}
+                            </n-ellipsis>
+                            <n-input
+                                ref="inputInstRef"
+                                v-model:value="user.signature"
+                                placeholder=""
+                                :disabled="isEdit"
+                                @blur="commitSignature"
+                                style="width: 200px"
+                            />
+                            <i class="iconfont" @click="edit" style="color: #cbcbcb" v-if="isSelf">&#xe602;</i>
                         </div>
-                        <n-button tertiary round type="primary" @click="settinngs" class="settings" v-if="isSelf">
-                            设置
-                        </n-button>
-                        <n-button
-                            tertiary
-                            round
-                            type="primary"
-                            @click="concern"
-                            v-if="!user.concern_status && !isSelf"
-                            class="concern"
-                        >
-                            关注
-                        </n-button>
-                        <n-button
-                            tertiary
-                            round
-                            type="primary"
-                            @click="concern"
-                            v-if="user.concern_status && !isSelf"
-                            class="concern"
-                        >
-                            已关注
-                        </n-button>
+                        <div class="left-right">
+                            <div class="icons">
+                                <a :href="user.blog_link">
+                                    <i class="iconfont">&#xe668;</i>
+                                </a>
+                                <a :href="user.weibo_link">
+                                    <Icon size="18">
+                                        <WeiboOutlined />
+                                    </Icon>
+                                </a>
+                                <a :href="user.github_link">
+                                    <Icon size="18">
+                                        <GithubFilled />
+                                    </Icon>
+                                </a>
+                            </div>
+                            <n-button tertiary round type="primary" @click="settinngs" class="settings" v-if="isSelf">
+                                设置
+                            </n-button>
+                            <n-button
+                                tertiary
+                                round
+                                type="primary"
+                                @click="concern"
+                                v-if="!user.concern_status && !isSelf"
+                                class="concern"
+                            >
+                                关注
+                            </n-button>
+                            <n-button
+                                tertiary
+                                round
+                                type="primary"
+                                @click="concern"
+                                v-if="user.concern_status && !isSelf"
+                                class="concern"
+                            >
+                                已关注
+                            </n-button>
+                        </div>
                     </div>
                 </n-card>
                 <n-card size="huge" class="article-card" ref="scrollContainer">
@@ -507,88 +525,102 @@ const searchFun = () => {
                             </div>
                         </template>
                         <n-tab-pane name="文章" tab="文章">
-                            <div class="empty-box" v-if="articleArr.length === 0">
-                                <img src="../../assets/images/empty.png" />
-                            </div>
-                            <n-infinite-scroll style="min-height: 600px" :distance="10" @load="loadInit" v-else>
-                                <Article :item="item" v-for="(item, index) in articleArr" :key="index" class="article">
-                                    <template #type>
-                                        <n-tag class="status">{{ item.status }}</n-tag>
-                                    </template>
-                                    <template #edit>
-                                        <n-tag type="success" class="edit" v-if="isSelf">
-                                            <i
-                                                class="iconfont"
-                                                @click="editTotal(item.id)"
-                                                style="color: #19a059; font-size: 21px"
-                                            >
-                                                &#xe602;
-                                            </i>
-                                            <i
-                                                class="iconfont"
-                                                @click="deleteArticles(item.id)"
-                                                style="color: #19a059; font-size: 21px"
-                                            >
-                                                &#xe624;
-                                            </i>
-                                        </n-tag>
-                                    </template>
-                                </Article>
-                                <div class="loading">
-                                    <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                                    <span v-if="noMore" class="text">-没有更多了-</span>
+                            <skeleton v-if="skeletonOther"></skeleton>
+                            <div v-else>
+                                <div class="empty-box" v-if="articleArr.length === 0">
+                                    <img src="../../assets/images/empty.png" />
                                 </div>
-                            </n-infinite-scroll>
+                                <n-infinite-scroll style="min-height: 600px" :distance="10" @load="loadInit" v-else>
+                                    <Article
+                                        :item="item"
+                                        v-for="(item, index) in articleArr"
+                                        :key="index"
+                                        class="article"
+                                    >
+                                        <template #type>
+                                            <n-tag class="status">{{ item.status }}</n-tag>
+                                        </template>
+                                        <template #edit>
+                                            <n-tag type="success" class="edit" v-if="isSelf">
+                                                <i
+                                                    class="iconfont"
+                                                    @click="editTotal(item.id)"
+                                                    style="color: #19a059; font-size: 21px"
+                                                >
+                                                    &#xe602;
+                                                </i>
+                                                <i
+                                                    class="iconfont"
+                                                    @click="deleteArticles(item.id)"
+                                                    style="color: #19a059; font-size: 21px"
+                                                >
+                                                    &#xe624;
+                                                </i>
+                                            </n-tag>
+                                        </template>
+                                    </Article>
+                                    <div class="loading">
+                                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                                        <span v-if="noMore" class="text">-没有更多了-</span>
+                                    </div>
+                                </n-infinite-scroll>
+                            </div>
                         </n-tab-pane>
                         <n-tab-pane name="收藏" tab="收藏">
-                            <div class="empty-box" v-if="articleArr.length === 0">
-                                <img src="../../assets/images/empty.png" />
-                            </div>
-                            <n-infinite-scroll
-                                style="min-height: 600px"
-                                :distance="10"
-                                @load="loadInit"
-                                ref="scrollPage"
-                                v-else
-                            >
-                                <Article :item="item" v-for="(item, index) in articleArr" :key="index">
-                                    <template #cancelCollect>
-                                        <div class="cancelCollect">
-                                            <n-button
-                                                strong
-                                                secondary
-                                                round
-                                                type="primary"
-                                                @click.stop="cancelCollection(item.id)"
-                                                v-if="isSelf"
-                                            >
-                                                取消收藏
-                                            </n-button>
-                                        </div>
-                                    </template>
-                                </Article>
-                                <div class="loading">
-                                    <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                                    <span v-if="noMore" class="text">-没有更多了-</span>
+                            <skeleton v-if="skeletonOther"></skeleton>
+                            <div v-else>
+                                <div class="empty-box" v-if="articleArr.length === 0">
+                                    <img src="../../assets/images/empty.png" />
                                 </div>
-                            </n-infinite-scroll>
+                                <n-infinite-scroll
+                                    style="min-height: 600px"
+                                    :distance="10"
+                                    @load="loadInit"
+                                    ref="scrollPage"
+                                    v-else
+                                >
+                                    <Article :item="item" v-for="(item, index) in articleArr" :key="index">
+                                        <template #cancelCollect>
+                                            <div class="cancelCollect">
+                                                <n-button
+                                                    strong
+                                                    secondary
+                                                    round
+                                                    type="primary"
+                                                    @click.stop="cancelCollection(item.id)"
+                                                    v-if="isSelf"
+                                                >
+                                                    取消收藏
+                                                </n-button>
+                                            </div>
+                                        </template>
+                                    </Article>
+                                    <div class="loading">
+                                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                                        <span v-if="noMore" class="text">-没有更多了-</span>
+                                    </div>
+                                </n-infinite-scroll>
+                            </div>
                         </n-tab-pane>
                         <n-tab-pane name="关注" tab="关注">
-                            <div class="empty-box" v-if="fansArr.length === 0">
-                                <img src="../../assets/images/empty.png" />
-                            </div>
-                            <n-infinite-scroll style="min-height: 600px" :distance="10" @load="fansLoadInit" v-else>
-                                <FansInfo
-                                    :item="item"
-                                    v-for="(item, index) in fansArr"
-                                    :key="index"
-                                    @jump-memberCenter="updateJumpInfo"
-                                ></FansInfo>
-                                <div class="loading">
-                                    <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                                    <span v-if="noMore" class="text">-没有更多了-</span>
+                            <skeleton v-if="skeletonOther"></skeleton>
+                            <div v-else>
+                                <div class="empty-box" v-if="fansArr.length === 0">
+                                    <img src="../../assets/images/empty.png" />
                                 </div>
-                            </n-infinite-scroll>
+                                <n-infinite-scroll style="min-height: 600px" :distance="10" @load="fansLoadInit" v-else>
+                                    <FansInfo
+                                        :item="item"
+                                        v-for="(item, index) in fansArr"
+                                        :key="index"
+                                        @jump-memberCenter="updateJumpInfo"
+                                    ></FansInfo>
+                                    <div class="loading">
+                                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
+                                        <span v-if="noMore" class="text">-没有更多了-</span>
+                                    </div>
+                                </n-infinite-scroll>
+                            </div>
                         </n-tab-pane>
                     </n-tabs>
                 </n-card>
@@ -603,24 +635,27 @@ const searchFun = () => {
                 </n-button>
                 <n-card title="个人成就" size="huge" class="achievements">
                     <template #header-extra></template>
-                    <p>
-                        <Icon size="16" color="#19a059">
-                            <LikeTwotone />
-                        </Icon>
-                        <span>文章点赞 {{ user.likes_count }}</span>
-                    </p>
-                    <p>
-                        <Icon size="16" color="#19a059">
-                            <EyeOutlined />
-                        </Icon>
-                        <span>文章阅读 {{ user.reads_count }}</span>
-                    </p>
-                    <p>
-                        <Icon size="16" color="#19a059">
-                            <HeartFilled />
-                        </Icon>
-                        <span>文章收藏 {{ user.attentions_count }}</span>
-                    </p>
+                    <skeleton v-if="skeletonUser"></skeleton>
+                    <div v-else>
+                        <p>
+                            <Icon size="16" color="#19a059">
+                                <LikeTwotone />
+                            </Icon>
+                            <span>文章点赞 {{ user.likes_count }}</span>
+                        </p>
+                        <p>
+                            <Icon size="16" color="#19a059">
+                                <EyeOutlined />
+                            </Icon>
+                            <span>文章阅读 {{ user.reads_count }}</span>
+                        </p>
+                        <p>
+                            <Icon size="16" color="#19a059">
+                                <HeartFilled />
+                            </Icon>
+                            <span>文章收藏 {{ user.attentions_count }}</span>
+                        </p>
+                    </div>
                 </n-card>
                 <n-card size="huge" class="concernCard">
                     <div class="concern">
@@ -731,13 +766,17 @@ const searchFun = () => {
                 }
             }
 
-            .information :deep(.n-card__content) {
+            .information {
                 display: grid;
                 grid-template-columns: 4fr 1fr;
             }
 
             .article-card {
                 position: relative;
+
+                // .ske {
+                //     height: 600px;
+                // }
 
                 .empty-box {
                     width: 500px;
