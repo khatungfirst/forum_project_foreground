@@ -1,24 +1,44 @@
 <script setup>
-import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-
+import { Tag_follow } from '../../../config/apis/tag';
 const router = useRouter();
 const emit = defineEmits(['follow']);
 const props = defineProps({
-    tag: {
-        type: Object,
-        required: true
-    }
+    tag: { type: Object, required: true },
+    isFollowing: { type: Boolean, default: false } // 接收父组件的加载状态
 });
 
-const handleFollow = () => {
-    emit('follow', props.tag.id);
+const isFollowed = ref(props.isFollowing);
+const loadingState = ref(false); // 存储每个标签的加载状态
+// const handleFollow = () => {
+//     emit('follow', props.tag.id);
+// };
+
+const handleFollow = async () => {
+    try {
+        // 设置加载状态
+        loadingState.value = true;
+        const response = await Tag_follow({ id: props.tag.id });
+        if (response.code === 2000) {
+            // 更新本地关注状态
+            isFollowed.value = !isFollowed.value;
+
+            // 触发父组件的 follow 事件
+            emit('follow', props.tag.id);
+        } else {
+            console.error('关注标签失败:', response.message);
+        }
+    } catch (error) {
+        console.error('Error following tag:', error);
+    } finally {
+        // 请求完成后，解除加载状态
+        loadingState.value = false;
+    }
 };
 
 // 截取标签描述的长度
 const truncatedDescriptions = computed(() => {
     return props.tags.map((tag) => {
-        // 假设限制长度为20个字符
         const truncatedDescription =
             tag.description.length > 16 ? tag.description.slice(0, 16) + '...' : tag.description;
         return { ...tag, description: truncatedDescription };
@@ -49,8 +69,9 @@ const handleDetail = (id) => {
                 <span>{{ props.tag.description }}</span>
             </div>
             <div class="tag-item_follow">
-                <button class="tag-item_button" @click="handleFollow">
-                    {{ props.tag.status === 1 ? '已关注√' : '关注' }}
+                <button class="tag-item_button" :disabled="loadingState" @click="handleFollow">
+                    {{ isFollowed ? '已关注' : '关注' }}
+                    <n-spin :size="12" v-if="loadingState" />
                 </button>
             </div>
         </div>
