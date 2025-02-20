@@ -40,7 +40,7 @@ const routes = [
     },
     {
         path: '/login',
-        component: () => import('../../views/login/index.vue')
+        component: () => import('../../views/components/Author/index.vue')
     },
     {
         path: '/register',
