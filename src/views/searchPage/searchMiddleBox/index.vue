@@ -2,6 +2,7 @@
 import { ref, reactive } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
 import Article from '@/views/components/article/index.vue';
+import skeleton from '@/views/components/skeleton/index.vue';
 import { debounce } from '@/utils/debounce.ts';
 import { useUserStore } from '@/config/store/userStore';
 
@@ -15,6 +16,9 @@ const prop = defineProps({
 
 const route = useRoute();
 const userStore = useUserStore();
+
+//控制显示骨架屏
+const isSkeleton = ref(true);
 
 //--------------------------------------生命周期-------------------------------------
 
@@ -43,7 +47,9 @@ const dataObj = reactive({
 
 const init = async () => {
     selectData.value = [];
+    isSkeleton.value = true;
     const { data } = await getSelectArticle(dataObj);
+    isSkeleton.value = false;
     if (data && data.selectedList.length > 0) {
         selectData.value = data.selectedList;
         isHaveData.value = false;
@@ -113,8 +119,14 @@ const scrollLoad = () => {
     <div class="search-mid">
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
             <n-tab-pane name="0" tab="热门" ref="dataContainer">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
-                <n-infinite-scroll style="min-height: 800px" :distance="20" @load="loadInitDebounce">
+                <skeleton v-if="isSkeleton"></skeleton>
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
+                <n-infinite-scroll
+                    style="min-height: 800px"
+                    :distance="20"
+                    @load="loadInitDebounce"
+                    v-if="!isHaveData && !isSkeleton"
+                >
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
                         <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
@@ -123,8 +135,14 @@ const scrollLoad = () => {
                 </n-infinite-scroll>
             </n-tab-pane>
             <n-tab-pane name="1" tab="最新" ref="dataContainer">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
-                <n-infinite-scroll style="min-height: 800px" :distance="20" @load="loadInitDebounce">
+                <skeleton v-if="isSkeleton"></skeleton>
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
+                <n-infinite-scroll
+                    style="min-height: 800px"
+                    :distance="20"
+                    @load="loadInitDebounce"
+                    v-if="!isHaveData && !isSkeleton"
+                >
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
                         <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>

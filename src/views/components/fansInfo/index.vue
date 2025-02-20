@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { concernInter } from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';
+import { useUserStore } from '@/config/store/userStore';
 import { useMessage } from 'naive-ui';
 
 const prop = defineProps({
@@ -30,9 +31,11 @@ const message = useMessage();
 
 const router = useRouter();
 
+const userInfo = useUserStore();
+
 const concernStatus = ref(prop.item.is_followed);
 
-const loginId = +JSON.parse(localStorage.getItem('userInfo')).id;
+const loginId = userInfo.userInfo?.id || 0;
 
 //声明一个变量接收粉丝数
 const fansCount = ref(prop.item.fans_count);

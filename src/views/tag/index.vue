@@ -1,20 +1,22 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { getTagList, Tag_follow } from '../../config/apis/tag';
 import TagItem from '../components/tags/index.vue';
 import { useRouter } from 'vue-router';
 import PublishButton from '../components/PublishButton/index.vue';
 import { useUserStore } from '@/config/store/userStore';
-const tags = ref([]); // 使用数组初始化
+
+const tags = ref([]);
+
 const router = useRouter();
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
+
 onMounted(async () => {
     try {
         const response = await getTagList({ user_id: user_id });
         if (response.code === 2000) {
             tags.value = response.data.tag_list;
-            console.log(tags);
         } else {
             console.error('获取标签数据失败');
         }
@@ -25,6 +27,9 @@ onMounted(async () => {
 
 const follow_tag = async (id) => {
     try {
+        // 设置加载状态
+        loadingState.value[id] = true;
+
         const response = await Tag_follow({ id: id });
         if (response.code === 2000) {
             // 更新本地标签数据
@@ -32,7 +37,6 @@ const follow_tag = async (id) => {
             if (index !== -1) {
                 tags.value[index].is_followed = true;
             } else {
-                // 如果找不到标签，可能需要添加新的标签到列表
                 tags.value.push({ id, is_followed: true });
             }
             // 重新获取整个标签列表
@@ -42,6 +46,9 @@ const follow_tag = async (id) => {
         }
     } catch (error) {
         console.error('Error following tag:', error);
+    } finally {
+        // 请求完成后，解除加载状态
+        loadingState.value[id] = false;
     }
 };
 
@@ -50,6 +57,8 @@ const getTagListAgain = async () => {
         const response = await getTagList({ user_id: user_id });
         if (response.code === 2000) {
             tags.value = response.data.tag_list;
+            // 重置加载状态
+            loadingState.value = {};
         } else {
             console.error('重新获取标签数据失败');
         }
@@ -62,9 +71,17 @@ const getTagListAgain = async () => {
 <template>
     <div class="content">
         <div class="tag-list-container">
-            <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" @follow="follow_tag" />
+            <TagItem
+                v-for="tag in tags"
+                :key="tag.id"
+                :tag="tag"
+                :is-following="tag.status === 1"
+                @follow="follow_tag(tag.id)"
+            />
         </div>
-        <div><PublishButton></PublishButton></div>
+        <div>
+            <PublishButton></PublishButton>
+        </div>
     </div>
 </template>
 

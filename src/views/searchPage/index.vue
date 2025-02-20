@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import SearchMiddleBox from '@/views/searchPage/searchMiddleBox/index.vue';
-import PublishButton from '../components/PublishButton/index.vue';
+import PublishButton from '@/views/components/PublishButton/index.vue';
 
 //顶部标签选中
 const category_id = ref('0');

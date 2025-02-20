@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+//引入api
 import {
     getArticleDetail,
     getAuthorDetail,
@@ -9,17 +10,22 @@ import {
     concernInter
 } from '@/config/apis/articleDetail';
 import { getFirstOrderComments } from '@/config/apis/comments';
+//引入公共方法
 import { debounce } from '@/utils/debounce.ts';
+//引入全局状态管理
 import { useUserStore } from '@/config/store/userStore';
+//引入自定义组件
 import IconWrapper from '@/views/components/icon/IconWrapper.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
 import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.vue';
+import skeleton from '@/views/components/skeleton/index.vue';
+import PublishButton from '@/views/components/PublishButton/index.vue';
+//引入外部组件
 import { useMessage } from 'naive-ui';
 import { LikeFilled, MessageTwotone, StarFilled, EyeOutlined, PlusCircleFilled, CheckCircleFilled } from '@vicons/antd';
 import { Icon } from '@vicons/utils';
 import MarkdownIt from 'markdown-it';
-import PublishButton from '../components/PublishButton/index.vue';
 
 //定义router
 const router = useRouter();
@@ -65,6 +71,9 @@ const currentIcon = ref([false, false]);
 //定义路由变量
 const paramId = ref(+route.params.id);
 
+//控制显示骨架屏
+const isSkeleton = ref(true);
+
 //文章对象
 const articleInfo = reactive({
     id: paramId.value, //定义本篇文章的id
@@ -84,8 +93,10 @@ const initArticle = async () => {
     const articleId = {
         id: articleInfo.id
     };
+    isSkeleton.value = true;
     const articleData = await getArticleDetail(articleId);
     if (articleData) {
+        isSkeleton.value = false;
         const article = articleData.data.article;
         articleInfo.likeTotal = article.likes_count;
         articleInfo.collections = article.collections_count;
@@ -173,7 +184,7 @@ const about = ref([]);
 const isAuthorInfo = ref(false);
 
 //当前登录作者id
-const personId = JSON.parse(localStorage.getItem('userInfo'));
+const personId = userInfo.userInfo?.id || 0;
 
 //作者对象
 const authorInfo = reactive({
@@ -204,7 +215,7 @@ const authorInit = async () => {
         authorInfo.concern_status = data.concern_status;
         authorInfo.fans_count = data.fans_count;
     }
-    if (personId && articleInfo.author_id === +personId.id) {
+    if (personId && articleInfo.author_id === personId) {
         isPerson.value = true;
     }
 };
@@ -276,7 +287,7 @@ const isEmojiDisappear = ref(false);
 const reviewBox = ref(null);
 
 //获取当前登录人的头像
-const head_shot = JSON.parse(localStorage.getItem('userInfo')).avatar_path;
+const head_shot = userInfo.userInfo?.avatar_path || '';
 
 //评论相关数据
 const commentInfo = reactive({
@@ -290,7 +301,7 @@ const commentInfo = reactive({
 const initComments = async () => {
     commentInfo.offset = 1;
     commentsList.value = [];
-    if (localStorage.getItem('token')) {
+    if (userInfo.token) {
         LoginVis.value = false;
     }
     const { data } = await getFirstOrderComments(commentInfo);
@@ -522,7 +533,7 @@ watchEffect(async () => {
                     <v-md-preview :text="contents" />
                 </div>
                 <div class="tags">
-                    <span>标签：</span>
+                    <span v-if="articleInfo.tags.length !== 0">标签：</span>
                     <ul>
                         <li v-for="(item, index) in articleInfo.tags" :key="index">{{ item.name }}</li>
                     </ul>
@@ -616,11 +627,13 @@ watchEffect(async () => {
                         <p>相关推荐</p>
                     </div>
                     <ul>
+                        <skeleton v-if="isSkeleton"></skeleton>
                         <li
                             class="about-detail"
                             v-for="(item, index) in about"
                             :key="index"
                             @click="recommendedArtical(item.id)"
+                            v-else
                         >
                             <p>{{ item.title }}</p>
                             <p class="bottom">

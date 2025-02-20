@@ -1,11 +1,15 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { getTypeTag, publicArticles } from '@/config/apis/publicArticle';
-// import markdown from '@/views/components/markdown/index.vue';
+//导入api
+import { getTypeTag, publicArticles, getCompressImage } from '@/config/apis/publicArticle';
 import { getArticleDetail } from '@/config/apis/articleDetail';
 import { getImageUrl } from '@/config/apis/publicArticle';
+//导入公共hook函数
 import useUpload from '@/hooks/useUpload';
+//导入全局状态管理
+import { useUserStore } from '@/config/store/userStore';
+//导入第三方组件
 import 'bytemd/dist/index.css';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -20,6 +24,8 @@ const message = useMessage();
 const router = useRouter();
 
 const route = useRoute();
+
+const userInfo = useUserStore();
 
 // 定义事件处理函数
 const beforeUnloadHandler = (e) => {
@@ -54,7 +60,7 @@ onUnmounted(() => {
 
 //将文章的各个属性放到一个对象中
 const articleData = reactive({
-    user_id: +JSON.parse(localStorage.getItem('userInfo')).id,
+    user_id: userInfo.userInfo?.id || 0,
     article_id: 0, //存放当前文章的id
     title: '', //标题输入的数据
     status: '', //定义文章的状态(初始是草稿状态)
@@ -133,6 +139,9 @@ const tagOptions = ref([]);
 //选择发布文章的状态
 const checkedValue = ref<string | null>(null);
 
+//存放封面图的数组
+const fileList = ref([]);
+
 //制定表单的的校验规则
 const rules = {
     categories: { required: true, trigger: ['blur', 'input'], message: '请输入要选择的分类' },
@@ -155,11 +164,38 @@ const handleChange = (e: Event) => {
     articleData.status = checkedValue.value;
 };
 
+//封面图上传前阻止默认上传行为
+const handleBeforeUpload = (rawFile) => {
+    console.log('999');
+    if (fileList.value.length === 0) {
+        console.log(fileList.value.length, '======');
+        getImage(rawFile);
+    }
+    return false;
+};
+
 //获取上传封面图的链接
-const { image_url, getUrl } = useUpload('文章封面');
+const { image_url, getUrl, isFit } = useUpload('文章封面');
 const getImage = async (item) => {
     await getUrl(item);
-    articleData.image_url = image_url.value;
+    if (isFit.value) {
+        fileList.value.push({
+            url: image_url.value,
+            status: 'finished'
+        });
+        if (image_url.value !== '') {
+            articleData.image_url = fileList.value[0].url;
+        }
+    } else {
+        message.warning('上传的图片比例不符合3：2，请重新选择图片');
+    }
+};
+
+//删除封面图
+const removeImage = () => {
+    console.log('777');
+    fileList.value.pop();
+    return false;
 };
 
 //页面上发布按钮的点击事件
@@ -249,12 +285,21 @@ const publicArticle = async () => {
                     </n-form-item>
                     <div class="upload">
                         <span>封面图</span>
-                        <n-upload @change="getImage" list-type="image-card" max="1" />
+                        <n-upload
+                            @change="getImage"
+                            list-type="image-card"
+                            max="1"
+                            :file-list="fileList"
+                            @before-upload="handleBeforeUpload"
+                            @remove="removeImage"
+                        />
                         <n-modal preset="card" style="width: 600px" title="封面图">
                             <img :src="articleData.image_url" style="width: 100%" />
                         </n-modal>
                     </div>
-                    <n-p depth="3" style="margin: 8px 0 0 0">格式：png,jpg,gif 大小不大于：2M尺寸：192*128px</n-p>
+                    <n-p depth="3" style="margin: 8px 0 0 0">
+                        格式：png、jpg、gif，大小不大于：2M，尺寸比例必须为：3：2
+                    </n-p>
                     <n-form-item
                         label="文章摘要"
                         show-require-mark
@@ -365,6 +410,7 @@ const publicArticle = async () => {
             .n-p {
                 text-align: center;
                 font-size: 12px;
+                padding-left: 30px;
             }
 
             .text {

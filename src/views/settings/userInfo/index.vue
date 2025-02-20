@@ -117,7 +117,6 @@ const handlePreview = async (item) => {
     };
     localInfo.avatar_path = image_url.value;
     localStorage.setItem('userInfo', JSON.stringify(localInfo));
-    // showModalRef.value = true;
 };
 </script>
 <template>
