@@ -5,10 +5,11 @@ import { useRouter } from 'vue-router';
 import { login } from '../../config/apis/login';
 import { useMessage } from 'naive-ui';
 import { useUserStore } from '@/config/store/userStore';
-
+// import findPassword from '../findPassword/index.vue';
 const router = useRouter();
 const formRef = ref(null);
-
+// 当前激活的组件
+// const activeComponent = ref('');
 const userStore = useUserStore();
 
 const form = ref({
@@ -16,6 +17,10 @@ const form = ref({
     password: ''
 });
 const message = useMessage(); // 获取消息提示 API
+
+// 定义自定义事件
+const emit = defineEmits(['switch-component']);
+
 const rules = ref({
     email: [
         { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -74,35 +79,42 @@ const handleLogin = async () => {
 onMounted(() => {
     // 可以在此处执行一些初始化逻辑
 });
+
+// 切换到找回密码
+const switchToFindPassword = () => {
+    emit('switch-component', 'findPassword');
+};
 </script>
 
 <template>
-    <div class="login-container">
-        <div class="header">
+    <!-- <div class="login-container"> -->
+    <!-- <div class="header">
             <span :class="{ active: currentRoute === '/login' }" @click="router.push('/login')">登录</span>
             <span :class="{ active: currentRoute === '/register' }" @click="router.push('/register')">注册</span>
-        </div>
-        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
-            <n-form-item label="邮箱" path="email">
-                <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="密码" path="password">
-                <n-input v-model:value="form.password" type="password" placeholder="请输入密码" class="common-input">
-                    <template #suffix>
-                        <span class="forgot-password-btn" @click="router.push('/findPassword')">忘记密码</span>
-                    </template>
-                </n-input>
-            </n-form-item>
-            <n-form-item>
-                <div class="button-wrapper">
-                    <n-button @click="handleLogin" class="common-button">登录</n-button>
-                </div>
-            </n-form-item>
-        </n-form>
-        <!-- <div class="register" @click="goToRegister">
+        </div> -->
+    <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
+        <n-form-item label="邮箱" path="email">
+            <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input"></n-input>
+        </n-form-item>
+        <n-form-item label="密码" path="password">
+            <n-input v-model:value="form.password" type="password" placeholder="请输入密码" class="common-input">
+                <template #suffix>
+                    <!-- <span class="forgot-password-btn" @click="router.push('/findPassword')">忘记密码</span> -->
+
+                    <span class="forgot-password-btn" @click="switchToFindPassword">忘记密码</span>
+                </template>
+            </n-input>
+        </n-form-item>
+        <n-form-item>
+            <div class="button-wrapper">
+                <n-button @click="handleLogin" class="common-button">登录</n-button>
+            </div>
+        </n-form-item>
+    </n-form>
+    <!-- <div class="register" @click="goToRegister">
             <n-button class="common-button">注册</n-button>
         </div> -->
-    </div>
+    <!-- </div> -->
 </template>
 
 <style scoped>
