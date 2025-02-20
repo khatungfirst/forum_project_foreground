@@ -15,16 +15,19 @@ import { getSelectArticle } from '@/config/apis/select';
 import { follower_article } from '@/config/apis/articleDetail';
 import { NButton } from 'naive-ui';
 import PublishButton from '../components/PublishButton/index.vue';
+import { useUserStore } from '@/config/store/userStore';
+const userStore = useUserStore();
+const user_id = userStore.userInfo?.id || 0;
 const router = useRouter();
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
-const category_id = ref('1');
+const category_id = ref('0');
 const selectData = ref([]); // 存储文章列表数据
 const isLoading = ref(false);
 const noMore = ref(false);
 const dataObj = ref({
     keyword: '',
-    category_id: '1',
+    category_id: '0',
     page: 1,
     limit: 4,
     kind: '0'
@@ -44,7 +47,7 @@ const fetchAuthors = async () => {
     if (currentPage.value > 4) {
         currentPage.value = 1;
     }
-    const response = await author_rank({ page: currentPage.value, limit: 5 });
+    const response = await author_rank({ page: currentPage.value, limit: 5, id: user_id });
     if (response.code === 2000) {
         const validAuthors = response.data.user_heat_rank.filter((author) => author !== null);
         const cleanedAuthors = validAuthors.map((author) => ({

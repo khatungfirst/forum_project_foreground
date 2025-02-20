@@ -39,7 +39,7 @@ const isHaveData = ref(true);
 
 const dataObj = reactive({
     keyword: route.query.keyword,
-    category_id: prop.category_id,
+    category_id: prop.category_id - 1,
     page: 1,
     limit: 5,
     kind: '0'

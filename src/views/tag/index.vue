@@ -8,7 +8,7 @@ import { useUserStore } from '@/config/store/userStore';
 const tags = ref([]); // 使用数组初始化
 const router = useRouter();
 const userStore = useUserStore();
-const user_id = userStore.userInfo.id || 0;
+const user_id = userStore.userInfo?.id || 0;
 onMounted(async () => {
     try {
         const response = await getTagList({ user_id: user_id });

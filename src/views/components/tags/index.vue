@@ -67,6 +67,12 @@ const handleDetail = (id) => {
     border-radius: 5px;
     width: 320px;
     background-color: #ffffff;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; /* 添加过渡效果 */
+}
+
+.tag-item:hover {
+    background-color: #e4e6eb; /* 鼠标悬浮时背景变灰 */
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1); /* 添加轻微阴影，模拟凸起效果 */
 }
 
 .tag-item-single {

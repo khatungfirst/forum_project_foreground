@@ -23,7 +23,7 @@ const isAuthorInfo = ref(false);
 
 // 作者对象
 const authorInfo = ref({
-    author_id: userStore.userInfo?.id || 0, // 当前作者的id
+    author_id: userStore.userInfo.id, // 当前作者的id
     head: '', // 作者头像
     nickname: '', // 作者昵称
     signature: '', // 作者个签
@@ -132,7 +132,7 @@ onMounted(async () => {
 // 作者相关内容的初始化方法
 const authorInit = async () => {
     const authorId = {
-        author_id: userStore.userInfo.id || 0
+        author_id: userStore.userInfo.id
     };
     const authorData = await getAuthorDetail(authorId);
     console.log('authorData', authorData);
@@ -222,7 +222,7 @@ watch(
                     <n-avatar
                         size="large"
                         round
-                        :src="userStore.userInfo.avatar_path || ''"
+                        :src="userStore.userInfo.avatar_path"
                         style="margin: 0 20px"
                         class="avater"
                         @click="toggleAuthorInfo"
@@ -345,7 +345,7 @@ watch(
 
 .content {
     background-color: #f2f3f5;
-    // padding: 20px;
+    padding: 20px;
 }
 
 .icon-xiaoxi {
