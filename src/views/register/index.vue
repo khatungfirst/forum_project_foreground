@@ -133,47 +133,47 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="login-container">
-        <div class="header">
+    <!-- <div class="login-container"> -->
+    <!-- <div class="header">
             <span :class="{ active: currentRoute === '/login' }" @click="router.push('/login')">登录</span>
             <span :class="{ active: currentRoute === '/register' }" @click="router.push('/register')">注册</span>
-        </div>
-        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleResister">
-            <n-form-item label="邮箱" path="email">
-                <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
-                    <template #suffix>
-                        <span class="forgot-password-btn" @click="sendVerify_code">
-                            {{ isCounting ? `${countdown}秒后重试` : '发送验证码' }}
-                        </span>
-                    </template>
-                </n-input>
-            </n-form-item>
-            <n-form-item label="验证码" path="verify_code">
-                <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="密码" path="password">
-                <n-input
-                    v-model:value="form.password"
-                    type="password"
-                    placeholder="请输入密码"
-                    class="common-input"
-                ></n-input>
-            </n-form-item>
-            <n-form-item label="重复密码" path="re_password">
-                <n-input
-                    v-model:value="form.re_password"
-                    type="password"
-                    placeholder="请输入重复密码"
-                    class="common-input"
-                ></n-input>
-            </n-form-item>
-            <n-form-item>
-                <div class="button-wrapper">
-                    <n-button @click="handleResister" class="common-button">注册</n-button>
-                </div>
-            </n-form-item>
-        </n-form>
-    </div>
+        </div> -->
+    <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleResister">
+        <n-form-item label="邮箱" path="email">
+            <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
+                <template #suffix>
+                    <span class="forgot-password-btn" @click="sendVerify_code">
+                        {{ isCounting ? `${countdown}秒后重试` : '发送验证码' }}
+                    </span>
+                </template>
+            </n-input>
+        </n-form-item>
+        <n-form-item label="验证码" path="verify_code">
+            <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
+        </n-form-item>
+        <n-form-item label="密码" path="password">
+            <n-input
+                v-model:value="form.password"
+                type="password"
+                placeholder="请输入密码"
+                class="common-input"
+            ></n-input>
+        </n-form-item>
+        <n-form-item label="重复密码" path="re_password">
+            <n-input
+                v-model:value="form.re_password"
+                type="password"
+                placeholder="请输入重复密码"
+                class="common-input"
+            ></n-input>
+        </n-form-item>
+        <n-form-item>
+            <div class="button-wrapper">
+                <n-button @click="handleResister" class="common-button">注册</n-button>
+            </div>
+        </n-form-item>
+    </n-form>
+    <!-- </div> -->
 </template>
 
 <style scoped>
