@@ -14,6 +14,7 @@ import { getFirstOrderComments } from '@/config/apis/comments';
 import { debounce } from '@/utils/debounce.ts';
 //引入全局状态管理
 import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
 //引入自定义组件
 import IconWrapper from '@/views/components/icon/IconWrapper.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
@@ -21,6 +22,7 @@ import authorMessage from '@/views/articleDetail/authorMessage/index.vue';
 import FirstOrderComments from '@/views/articleDetail/firstOrderComments/index.vue';
 import skeleton from '@/views/components/skeleton/index.vue';
 import PublishButton from '@/views/components/PublishButton/index.vue';
+import author from '@/views/components/Author/index.vue';
 //引入外部组件
 import { useMessage } from 'naive-ui';
 import { LikeFilled, MessageTwotone, StarFilled, EyeOutlined, PlusCircleFilled, CheckCircleFilled } from '@vicons/antd';
@@ -39,6 +41,8 @@ const message = useMessage();
 const isPerson = ref(false);
 
 const userInfo = useUserStore();
+
+const useTourist = useTouristPattern();
 
 // ---------------------------生命周期---------------------------------
 
@@ -59,6 +63,43 @@ onBeforeUnmount(() => {
     window.removeEventListener('scroll', handleScroll);
     window.removeEventListener('scroll', scroll());
 });
+
+//----------------------------游客模式---------------------------------
+
+//控制登录组件是否出现
+const loginAppear = ref(false);
+
+//触发登录的事件类型
+const triggerType = ref('');
+
+//告知子组件是否已经登录完毕
+const isLogin = ref(false);
+
+//登录后继续执行操作
+const performOperation = (type: string) => {
+    loginAppear.value = false;
+    switch (type) {
+        case '点赞':
+            debouncedLikePost();
+            break;
+        case '收藏':
+            debouncedCollectionPost();
+            break;
+        case '发表评论':
+            LoginVis.value = false;
+            break;
+        case '点赞一级评论':
+            isLogin.value = true;
+    }
+};
+
+watch(
+    () => useTourist.triggerType,
+    (newVal) => {
+        loginAppear.value = true;
+        triggerType.value = newVal;
+    }
+);
 
 // ---------------------------文章模块---------------------------------
 
@@ -124,22 +165,27 @@ const contents = computed(() => {
 
 //点赞的方法
 const like = async () => {
-    currentIcon.value[0] = !currentIcon.value[0];
-    if (currentIcon.value[0]) {
-        articleInfo.likeTotal = articleInfo.likeTotal + 1;
+    if (userInfo.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '点赞';
     } else {
-        articleInfo.likeTotal = articleInfo.likeTotal - 1;
-    }
-    const data = {
-        article_id: articleInfo.id,
-        like_status: currentIcon.value[0]
-    };
-    const { code } = await likeInter(data);
-    console.log(currentIcon.value[0], '点赞状态');
-    if (code === 2000 && currentIcon.value[0] === true) {
-        message.success('点赞成功');
-    } else {
-        message.success('取消点赞成功');
+        currentIcon.value[0] = !currentIcon.value[0];
+        if (currentIcon.value[0]) {
+            articleInfo.likeTotal = articleInfo.likeTotal + 1;
+        } else {
+            articleInfo.likeTotal = articleInfo.likeTotal - 1;
+        }
+        const data = {
+            article_id: articleInfo.id,
+            like_status: currentIcon.value[0]
+        };
+        const { code } = await likeInter(data);
+        console.log(currentIcon.value[0], '点赞状态');
+        if (code === 2000 && currentIcon.value[0] === true) {
+            message.success('点赞成功');
+        } else {
+            message.success('取消点赞成功');
+        }
     }
 };
 
@@ -148,22 +194,26 @@ const debouncedLikePost = debounce(like, 300);
 
 //收藏的方法
 const collect = async () => {
-    //
-    currentIcon.value[1] = !currentIcon.value[1];
-    if (currentIcon.value[1]) {
-        articleInfo.collections = articleInfo.collections + 1;
+    if (userInfo.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '收藏';
     } else {
-        articleInfo.collections = articleInfo.collections - 1;
-    }
-    const data = {
-        article_id: articleInfo.id,
-        collection_status: currentIcon.value[1]
-    };
-    const { code } = await collectionInter(data);
-    if (code === 2000 && currentIcon.value[1] === true) {
-        message.success('收藏成功');
-    } else {
-        message.success('取消收藏成功');
+        currentIcon.value[1] = !currentIcon.value[1];
+        if (currentIcon.value[1]) {
+            articleInfo.collections = articleInfo.collections + 1;
+        } else {
+            articleInfo.collections = articleInfo.collections - 1;
+        }
+        const data = {
+            article_id: articleInfo.id,
+            collection_status: currentIcon.value[1]
+        };
+        const { code } = await collectionInter(data);
+        if (code === 2000 && currentIcon.value[1] === true) {
+            message.success('收藏成功');
+        } else {
+            message.success('取消收藏成功');
+        }
     }
 };
 
@@ -302,7 +352,7 @@ const head_shot = userInfo.userInfo?.avatar_path || '';
 //评论相关数据
 const commentInfo = reactive({
     article_id: paramId.value,
-    user_id: userInfo.userInfo.id ? userInfo.userInfo.id : 0,
+    user_id: userInfo.userInfo?.id ? userInfo.userInfo?.id : 0,
     offset: 1,
     limit: 4
 });
@@ -319,6 +369,7 @@ const initComments = async () => {
         if (data.first_comments_list.length > 0) {
             commentsList.value = data.first_comments_list;
             isHavaData.value = true;
+            console.log(commentsList.value, '000');
         }
         commentTotal.value = data.comments_total;
     }
@@ -326,7 +377,8 @@ const initComments = async () => {
 
 //跳转到登录页面的方法
 const login = () => {
-    router.push('/login');
+    loginAppear.value = true;
+    triggerType.value = '发表评论';
 };
 
 //点击评论图标的事件
@@ -474,7 +526,9 @@ watchEffect(async () => {
 </script>
 <template>
     <div class="wrap">
-        <div class="overlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
+        <div class="emojiOverlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
+        <div class="overlay" v-if="loginAppear"></div>
+        <author v-if="loginAppear" class="loginCom" :type="triggerType" @trigger-type="performOperation"></author>
         <div class="left">
             <div class="left-contains">
                 <transition name="scale">
@@ -578,6 +632,7 @@ watchEffect(async () => {
                                 v-for="(item, index) in commentsList"
                                 :key="index"
                                 @delete-firComments="deleteFirst"
+                                :isLogin="isLogin"
                             ></FirstOrderComments>
                         </n-infinite-scroll>
                     </div>
@@ -676,12 +731,24 @@ watchEffect(async () => {
     display: flex;
     background-color: #f2f3f5;
     margin-top: 75px;
-    .overlay {
+    position: relative;
+    .emojiOverlay {
         position: fixed; /* 固定定位 */
         top: 0;
         left: 0;
         @include all;
         z-index: 998;
+    }
+
+    @include overlay;
+
+    .loginCom {
+        z-index: 999;
+        position: fixed;
+        left: 50%;
+        top: 50px;
+        transform: translateX(-50%);
+        background-color: #fff;
     }
 
     .left {

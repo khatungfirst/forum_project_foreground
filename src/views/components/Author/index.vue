@@ -4,6 +4,15 @@ import Register from '@/views/register/index.vue';
 import findPassword from '@/views/findPassword/index.vue';
 import { ref } from 'vue';
 
+const props = defineProps({
+    type: {
+        type: String,
+        default: ''
+    }
+});
+
+const emit = defineEmits(['trigger-type']);
+
 // 当前激活的组件
 const activeComponent = ref('login');
 const ifShow = ref(true);
@@ -14,6 +23,10 @@ const switchComponent = (component) => {
 
 const closeAuthor = () => {
     ifShow.value = false;
+};
+
+const performOperation = (type) => {
+    emit('trigger-type', type);
 };
 </script>
 
@@ -34,6 +47,8 @@ const closeAuthor = () => {
         <component
             :is="activeComponent === 'login' ? Login : activeComponent === 'register' ? Register : findPassword"
             @switch-component="switchComponent"
+            :type="props.type"
+            @trigger-type="performOperation"
             @close-popup="closeAuthor"
         ></component>
         <!-- 关闭按钮 -->

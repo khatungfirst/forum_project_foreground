@@ -5,6 +5,12 @@ import { useRouter } from 'vue-router';
 import { login } from '../../config/apis/login';
 import { useMessage } from 'naive-ui';
 import { useUserStore } from '@/config/store/userStore';
+const props = defineProps({
+    type: {
+        type: String,
+        default: ''
+    }
+});
 // import findPassword from '../findPassword/index.vue';
 const router = useRouter();
 const formRef = ref(null);
@@ -19,7 +25,7 @@ const form = ref({
 const message = useMessage(); // 获取消息提示 API
 
 // 定义自定义事件
-const emit = defineEmits(['switch-component']);
+const emit = defineEmits(['switch-component', 'trigger-type']);
 
 const isLogging = ref(false); // 控制登录按钮的状态
 
@@ -62,11 +68,13 @@ const handleLogin = async () => {
             isLogging.value = false; // 请求完成后，解除加载状态
             message.success('登录成功！'); // 登录成功时显示提示
             userStore.login(response.data); // 登录成功，调用 login 方法
-            router.push('/home');
+            // router.push('/home');
         } else {
             console.error('登录失败:', response);
             message.error('登录失败: ' + (response.data?.message || '未知错误'));
         }
+        emit('trigger-type', props.type);
+        console.log(props.type, 'props.type');
     } catch (errors) {
         console.error('登录失败:', errors);
     }
