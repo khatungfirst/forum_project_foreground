@@ -36,7 +36,12 @@ const rules = ref({
         }
     ]
 });
+// 在 findPassword 子组件的 script setup 中
+const emit = defineEmits(['close-popup']);
 
+const closeAuthor = () => {
+    emit('close-popup');
+};
 const currentRoute = ref(router.currentRoute.value.path); // 使用响应式引用来存储当前路由
 
 // 使用 watchEffect 来响应路由变化
@@ -100,6 +105,7 @@ onMounted(() => {
     <!-- <div class="login-container"> -->
     <div class="header">
         <span>找回密码</span>
+        <n-icon><i class="close-button iconfont icon-guanbi" @click="closeAuthor"></i></n-icon>
     </div>
     <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
         <n-form-item label="邮箱" path="email">
@@ -129,6 +135,7 @@ onMounted(() => {
             </div>
         </n-form-item>
     </n-form>
+
     <!-- <div class="register" @click="goToRegister">
             <n-button class="common-button">注册</n-button>
         </div> -->
@@ -171,6 +178,7 @@ onMounted(() => {
 
 .n-form {
     width: 290px;
+    margin: 0 54px;
 }
 
 .n-form-item {
@@ -215,5 +223,17 @@ onMounted(() => {
 }
 .forgot-password-btn {
     color: #19a059;
+}
+
+.close-button {
+    position: absolute; /* 使用 absolute 定位 */
+    top: -36px;
+    right: -121px;
+    cursor: pointer;
+    z-index: 1000; /* 确保按钮在父容器内容之上 */
+}
+.icon-guanbi {
+    font-size: 18px;
+    color: #5c9e64;
 }
 </style>

@@ -6,15 +6,19 @@ import { ref } from 'vue';
 
 // 当前激活的组件
 const activeComponent = ref('login');
-
+const ifShow = ref(true);
 // 切换组件
 const switchComponent = (component) => {
     activeComponent.value = component;
 };
+
+const closeAuthor = () => {
+    ifShow.value = false;
+};
 </script>
 
 <template>
-    <div class="auth-container">
+    <div class="auth-container" v-if="ifShow">
         <div class="header" v-if="activeComponent !== `findPassword`">
             <span :class="{ active: activeComponent === 'login' }" @click="switchComponent('login')">登录</span>
             <span :class="{ active: activeComponent === 'register' }" @click="switchComponent('register')">注册</span>
@@ -24,12 +28,18 @@ const switchComponent = (component) => {
             >
                 找回密码
             </span> -->
+            <n-icon><i class="close-button iconfont icon-guanbi" @click="closeAuthor"></i></n-icon>
         </div>
         <!-- 动态加载组件 -->
         <component
             :is="activeComponent === 'login' ? Login : activeComponent === 'register' ? Register : findPassword"
             @switch-component="switchComponent"
+            @close-popup="closeAuthor"
         ></component>
+        <!-- 关闭按钮 -->
+        <!-- <button > -->
+
+        <!-- </button> -->
     </div>
 </template>
 
@@ -53,6 +63,7 @@ const switchComponent = (component) => {
     width: 100%;
     margin-bottom: 25px;
     padding: 0px 135px;
+    position: relative; /* 添加相对定位，使绝对定位的关闭按钮能够相对于此容器定位 */
 }
 
 .header span {
@@ -63,8 +74,21 @@ const switchComponent = (component) => {
 }
 
 .header .active {
+    top: 10px;
     color: #19a059 !important;
     text-decoration: underline !important;
     font-weight: 700 !important;
+}
+
+.close-button {
+    position: absolute; /* 使用 absolute 定位 */
+    top: -31px;
+    right: -111px;
+    cursor: pointer;
+    z-index: 1000; /* 确保按钮在父容器内容之上 */
+}
+.icon-guanbi {
+    font-size: 18px;
+    color: #5c9e64;
 }
 </style>
