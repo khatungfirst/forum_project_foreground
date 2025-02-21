@@ -6,6 +6,7 @@ import SecondOrderComments from '@/views/articleDetail/secondOrderComments/index
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { getSecondOrderComments } from '@/config/apis/comments';
 import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
 import '@/assets/css/icon/iconfont.css';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -48,6 +49,10 @@ const prop = defineProps({
             status: 1,
             parent_user_id: 0
         })
+    },
+    isLogin: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -58,12 +63,43 @@ const message = useMessage();
 
 const userInfo = useUserStore();
 
+const touristPattern = useTouristPattern();
+
+//通过defineEmits编译器宏生成emit方法来进行组件之间通信
+const emit = defineEmits(['delete-firComments', 'trigger-type']);
+
 //-----------------------------生命周期---------------------------
 
 // 监听窗口调整
 onMounted(async () => {
     getSecondComments();
 });
+
+watch(
+    () => prop.isLogin,
+    (newVal) => {
+        if (prop.isLogin) {
+            performOperation(touristPattern.triggerType);
+        }
+    }
+);
+
+//-----------------------------游客模块--------------------------
+
+//触发登录的事件类型
+const triggerType = ref('');
+
+//登录后的紧接操作
+const performOperation = (type: string) => {
+    console.log(type);
+    if (type === '回复一级评论') {
+        appear.value = true;
+    } else if (type === '点赞一级评论') {
+        console.log('uuuu');
+        like(likeObj);
+    }
+};
+
 //-----------------------------二级评论--------------------------
 
 //定义接收二级评论的数组
@@ -75,7 +111,7 @@ const isSecondComments = ref(false);
 //获取评论需要的相关属性
 const commentInfo = reactive({
     highest_id: prop.item.id,
-    user_id: userInfo.userInfo.id ? userInfo.userInfo.id : 0,
+    user_id: userInfo.userInfo?.id ? userInfo.userInfo?.id : 0,
     offset: 1,
     limit: 2
     // user_id: 0
@@ -140,10 +176,22 @@ const commentItems = reactive({
 });
 
 //解构点赞方法
-const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
+const { likeCounts, like, likeStatus, isTourist } = useLike(prop.item.likes_count, prop.item.status);
 const likeObj = {
     id: prop.item.id,
     status: prop.item.status === 2 ? 1 : 2
+};
+
+const likeFirst = (obj: object) => {
+    console.log(isTourist, 'issss');
+
+    if (isTourist.value) {
+        // triggerType.value = '点赞一级评论';
+        // emit('trigger-type', triggerType);
+        touristPattern.setType('点赞一级评论');
+    } else {
+        like(obj);
+    }
 };
 
 //跳转到指定用户会员中心
@@ -170,11 +218,14 @@ const emojiDisappear = () => {
 };
 
 const responseComments = () => {
-    appear.value = !appear.value;
-    console.log(appear.value, '打开评论1');
-    commentItems.highest_id = prop.item.id;
-    commentItems.parent_id = prop.item.id;
-    commentItems.parent_user_id = prop.item.user_id;
+    if (userInfo.token === '') {
+        triggerType.value = '回复一级评论';
+    } else {
+        appear.value = !appear.value;
+        commentItems.highest_id = prop.item.id;
+        commentItems.parent_id = prop.item.id;
+        commentItems.parent_user_id = prop.item.user_id;
+    }
 };
 let timer = null;
 
@@ -193,9 +244,6 @@ const cancelResponse = () => {
 
 //解构删除方法
 const { deleteCom } = useDeleteComments();
-
-//通过defineEmits编译器宏生成emit方法来进行组件之间通信
-const emit = defineEmits(['delete-firComments']);
 
 const deleteFun = async () => {
     await deleteCom(prop.item.id);
@@ -219,7 +267,7 @@ const handleMaskClick = () => {
 </script>
 <template>
     <div class="f-comments" ref="boxRef">
-        <div class="overlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
+        <div class="emojiOverlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
         <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(prop.item.user_id)" />
         <div class="avatar-other">
             <div class="first-comment">
@@ -237,7 +285,7 @@ const handleMaskClick = () => {
                         <span class="small-detail1">{{ prop.item.create_at }}</span>
                         <span
                             class="small-detail"
-                            @click="like(likeObj)"
+                            @click="likeFirst(likeObj)"
                             :style="{ color: likeStatus === 1 ? '#19A059' : '#8a919f' }"
                         >
                             <i class="iconfont">&#xe616;</i>
@@ -300,14 +348,14 @@ const handleMaskClick = () => {
     padding: 15px 0px;
     display: flex;
 
-    .overlay {
+    .emojiOverlay {
         position: fixed; /* 固定定位 */
         top: 0;
         left: 0;
         @include all;
         z-index: 998;
     }
-
+    @include overlay;
     .n-avatar {
         width: 40px;
     }
