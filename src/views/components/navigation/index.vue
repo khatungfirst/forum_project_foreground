@@ -13,6 +13,26 @@ import { getAuthorDetail } from '@/config/apis/articleDetail';
 import { logout } from '@/config/apis/login';
 const router = useRouter();
 const activeTab = ref('home');
+
+// 定义遮罩层
+const mask = ref(null);
+
+// 监听全局点击事件
+const handleClickOutside = (event) => {
+    if (isAuthorInfo.value && mask.value && !mask.value.contains(event.target)) {
+        isAuthorInfo.value = false;
+        console.log('不该触发', isAuthorInfo.value);
+    }
+};
+
+onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+
 const keyword = ref(''); // 定义搜索框内容变量
 const userStore = useUserStore();
 const messageStore = useMessageStore();
@@ -111,8 +131,10 @@ const handleSelect = (key) => {
 };
 
 const toggleAuthorInfo = () => {
-    // router.push(`/member/${userStore.userInfo.id}`);
+    console.log('isAuthorInfo before:', isAuthorInfo.value);
     isAuthorInfo.value = !isAuthorInfo.value;
+    console.log('isAuthorInfo after:', isAuthorInfo.value);
+    console.log('mask:', mask.value);
 };
 
 onMounted(async () => {
@@ -218,6 +240,7 @@ watch(
             </n-dropdown>
 
             <template v-if="userStore.isLoggedIn">
+                <!-- 添加。stop修饰符阻止事件冒泡 -->
                 <n-button n-button text>
                     <n-avatar
                         size="large"
@@ -225,10 +248,10 @@ watch(
                         :src="userStore.userInfo.avatar_path"
                         style="margin: 0 20px"
                         class="avater"
-                        @click="toggleAuthorInfo"
+                        @click.stop="toggleAuthorInfo"
                     />
                 </n-button>
-                <div class="author-message-card" v-if="isAuthorInfo">
+                <div v-if="isAuthorInfo" ref="mask" class="author-message-card">
                     <authorMessage :authorInfo="authorInfo">
                         <template #actions>
                             <hr class="article-rank-divider" />
