@@ -43,7 +43,7 @@ const isAuthorInfo = ref(false);
 
 // 作者对象
 const authorInfo = ref({
-    author_id: userStore.userInfo.id, // 当前作者的id
+    author_id: userStore.userInfo?.id || 0, // 当前作者的id
     head: '', // 作者头像
     nickname: '', // 作者昵称
     signature: '', // 作者个签
@@ -154,7 +154,7 @@ onMounted(async () => {
 // 作者相关内容的初始化方法
 const authorInit = async () => {
     const authorId = {
-        author_id: userStore.userInfo.id
+        author_id: userStore.userInfo?.id || 0
     };
     const authorData = await getAuthorDetail(authorId);
     console.log('authorData', authorData);
@@ -176,6 +176,7 @@ const handleLogout = async () => {
     await logout();
     userStore.logout();
     router.push('/home');
+    console.log(userStore.isLogin, '登录状态');
 };
 
 // 监听路由变化
