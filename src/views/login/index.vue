@@ -21,6 +21,8 @@ const message = useMessage(); // 获取消息提示 API
 // 定义自定义事件
 const emit = defineEmits(['switch-component']);
 
+const isLogging = ref(false); // 控制登录按钮的状态
+
 const rules = ref({
     email: [
         { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -51,10 +53,13 @@ watch(
 const handleLogin = async () => {
     try {
         await formRef.value.validate();
+        isLogging.value = true;
+
         const response = await login({ email: form.value.email, password: form.value.password });
         console.log('登录响应:', response);
 
         if (response.code === 2000 && response.data) {
+            isLogging.value = false; // 请求完成后，解除加载状态
             message.success('登录成功！'); // 登录成功时显示提示
             userStore.login(response.data); // 登录成功，调用 login 方法
             router.push('/home');
@@ -64,11 +69,6 @@ const handleLogin = async () => {
         }
     } catch (errors) {
         console.error('登录失败:', errors);
-        if (errors instanceof Error) {
-            message.error('登录失败: ' + errors.message);
-        } else {
-            message.error('登录失败: ' + JSON.stringify(errors));
-        }
     }
 };
 
@@ -107,7 +107,10 @@ const switchToFindPassword = () => {
         </n-form-item>
         <n-form-item>
             <div class="button-wrapper">
-                <n-button @click="handleLogin" class="common-button">登录</n-button>
+                <n-button @click="handleLogin" class="common-button" :disabled="isLogging">
+                    登录
+                    <n-spin :size="12" v-if="isLogging"></n-spin>
+                </n-button>
             </div>
         </n-form-item>
     </n-form>

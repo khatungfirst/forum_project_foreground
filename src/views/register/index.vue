@@ -13,7 +13,7 @@ const form = ref({
     verify_code: '',
     re_password: ''
 });
-
+const isLogging = ref(false); // 控制登录按钮的状态
 const message = useMessage(); // 获取消息提示 API
 const userStore = useUserStore();
 const rules = ref({
@@ -67,7 +67,7 @@ const sendVerify_code = async () => {
         message.error('请先输入邮箱地址');
         return;
     }
-    startCountdown(); // 立即启动倒计
+    startCountdown(); // 立即启动倒计时
     try {
         const email = form.value.email;
         const response = await verify_code({ email });
@@ -107,6 +107,8 @@ const startCountdown = () => {
 const handleResister = async () => {
     try {
         await formRef.value.validate();
+        isLogging.value = true;
+
         const response = await register({
             email: form.value.email,
             password: form.value.password,
@@ -116,6 +118,8 @@ const handleResister = async () => {
 
         if (response.code === 2000 && response.data) {
             message.success('注册成功！'); // 注册成功时显示提示
+            isLogging.value = false; // 请求完成后，解除加载状态
+
             userStore.login(response.data); // 登录成功，调用 login 方法
             router.push('/choosetag');
         } else {
@@ -169,7 +173,10 @@ onMounted(() => {
         </n-form-item>
         <n-form-item>
             <div class="button-wrapper">
-                <n-button @click="handleResister" class="common-button">注册</n-button>
+                <n-button @click="handleResister" class="common-button" :disabled="isLogging">
+                    注册
+                    <n-spin :size="12" v-if="isLogging"></n-spin>
+                </n-button>
             </div>
         </n-form-item>
     </n-form>
