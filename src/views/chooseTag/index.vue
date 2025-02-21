@@ -77,11 +77,11 @@ const gotoHome = () => {
                 >
                     {{ tag.name }}
                 </div>
-                <div class="action-buttons">
-                    <span v-if="!isManualSelectionStarted" class="random-btn" @click="randomSelect">随机选择5个</span>
-                    <span v-if="isManualSelectionStarted" class="confirm-btn" @click="confirmSelection">确定</span>
-                    <span class="skip" @click="gotoHome">跳过</span>
-                </div>
+            </div>
+            <div class="action-buttons">
+                <span v-if="!isManualSelectionStarted" class="random-btn" @click="randomSelect">随机选择5个</span>
+                <span v-if="isManualSelectionStarted" class="confirm-btn" @click="confirmSelection">确定</span>
+                <span class="skip" @click="gotoHome">跳过</span>
             </div>
         </div>
     </div>
@@ -96,11 +96,14 @@ const gotoHome = () => {
 }
 
 .choose_tag {
+    display: flex;
+    flex-direction: column;
     width: 680px;
     border: 1px solid #ccc;
     display: flex;
     justify-content: center; /* 水平居中 */
     align-items: center; /* 垂直居中 */
+    padding: 0 0 25px 0;
 }
 
 .tag-container {
@@ -153,9 +156,5 @@ const gotoHome = () => {
 .skip {
     font-weight: 900;
     color: #cecfce;
-}
-
-.action-buttons {
-    margin-top: 18px;
 }
 </style>

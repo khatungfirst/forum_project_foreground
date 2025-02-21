@@ -66,6 +66,9 @@ const sendVerify_code = async () => {
     if (!form.value.email) {
         message.error('请先输入邮箱地址');
         return;
+    } else if (isCounting.value) {
+        message.warning('验证码已发送, 请稍后再试');
+        return;
     }
     startCountdown(); // 立即启动倒计时
     try {
@@ -262,5 +265,6 @@ onMounted(() => {
 }
 .forgot-password-btn {
     color: #19a059;
+    cursor: pointer;
 }
 </style>
