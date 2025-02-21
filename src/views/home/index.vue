@@ -16,18 +16,25 @@ import { follower_article } from '@/config/apis/articleDetail';
 import { NButton } from 'naive-ui';
 import PublishButton from '../components/PublishButton/index.vue';
 import { useUserStore } from '@/config/store/userStore';
+
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
 const router = useRouter();
 const authors = ref([]); // 存储作者数据
 const articles = ref([]); // 存储文章数据
-const category_id = ref('0');
+const categoryMapping = ref({
+    综合: '0',
+    前端: '1',
+    后端: '2'
+});
+const selectedTab = ref('综合'); // 当前选中的 Tab
+const category_id = ref(categoryMapping.value[selectedTab.value]);
 const selectData = ref([]); // 存储文章列表数据
 const isLoading = ref(false);
 const noMore = ref(false);
 const dataObj = ref({
     keyword: '',
-    category_id: '0',
+    category_id: categoryMapping.value[selectedTab.value],
     page: 1,
     limit: 4,
     kind: '0'
@@ -99,7 +106,8 @@ const loadMoreData = async () => {
 const loadInitDebounce = debounce(loadMoreData, 300);
 
 const tabTop = (value) => {
-    category_id.value = value;
+    selectedTab.value = value;
+    category_id.value = categoryMapping.value[value];
 };
 
 const tabMiddle = (value) => {
@@ -161,21 +169,21 @@ const refreshArticles = () => {
                             type="card"
                             animated
                             @update:value="tabTop"
-                            v-model:value="category_id"
+                            v-model:value="selectedTab"
                             style="padding: 10px 20px"
                             placement="left"
                             tab-class="father-tab"
                         >
-                            <n-tab-pane name="1" tab="综合">
+                            <n-tab-pane name="综合" tab="综合">
                                 <SearchMiddleBox :category_id="category_id" />
                             </n-tab-pane>
-                            <n-tab-pane name="2" tab="前端">
+                            <n-tab-pane name="前端" tab="前端">
                                 <SearchMiddleBox :category_id="category_id" />
                             </n-tab-pane>
-                            <n-tab-pane name="3" tab="后端">
+                            <n-tab-pane name="后端" tab="后端">
                                 <SearchMiddleBox :category_id="category_id" />
                             </n-tab-pane>
-                            <n-tab-pane name="4" tab="关注">
+                            <n-tab-pane name="关注" tab="关注">
                                 <followArticle></followArticle>
                             </n-tab-pane>
                         </n-tabs>
@@ -186,23 +194,11 @@ const refreshArticles = () => {
                         <n-tab-pane name="0" tab="">
                             <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                                 <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                                <!-- <ul>
-                                <li class="load-ing" v-if="isLoading && !noMore">
-                                    <span class="text">正在全力加载中...</span>
-                                </li>
-                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
-                            </ul> -->
                             </n-infinite-scroll>
                         </n-tab-pane>
                         <n-tab-pane name="1" tab="">
                             <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
                                 <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                                <!-- <ul>
-                                <li class="load-ing" v-if="isLoading && !noMore">
-                                    <span class="text">正在全力加载中...</span>
-                                </li>
-                                <li v-if="noMore" class="load-ing">-没有更多了-</li>
-                            </ul> -->
                             </n-infinite-scroll>
                         </n-tab-pane>
                     </n-tabs>
