@@ -186,6 +186,9 @@ const isAuthorInfo = ref(false);
 //当前登录作者id
 const personId = userInfo.userInfo?.id || 0;
 
+//控制关注按钮的加载效果
+const loadButton = ref(false);
+
 //作者对象
 const authorInfo = reactive({
     author_id: articleInfo.author_id, //当前作者的id
@@ -222,22 +225,29 @@ const authorInit = async () => {
 
 //关注的方法
 const concern = async () => {
-    authorInfo.concern_status = !authorInfo.concern_status;
-    if (!authorInfo.concern_status) {
-        if (authorInfo.fans_count > 0) {
-            authorInfo.fans_count--;
+    loadButton.value = true;
+    try {
+        if (!authorInfo.concern_status) {
+            if (authorInfo.fans_count > 0) {
+                authorInfo.fans_count--;
+            }
+        } else {
+            authorInfo.fans_count++;
         }
-    } else {
-        authorInfo.fans_count++;
-    }
-    const data = {
-        followed_id: articleInfo.author_id
-    };
-    const { code } = await concernInter(data);
-    if (code === 2000 && authorInfo.concern_status === true) {
-        message.success('关注成功');
-    } else {
-        message.success('取消关注成功');
+        const data = {
+            followed_id: articleInfo.author_id
+        };
+        const { code } = await concernInter(data);
+        if (code === 2000 && authorInfo.concern_status === true) {
+            message.success('关注成功');
+        } else {
+            message.success('取消关注成功');
+        }
+        loadButton.value = false;
+        authorInfo.concern_status = !authorInfo.concern_status;
+    } catch (error) {
+        message.error(error);
+        loadButton.value = false;
     }
 };
 // 应用防抖到关注函数
@@ -585,10 +595,21 @@ watchEffect(async () => {
                         type="primary"
                         @click="debouncedConcernPost"
                         v-if="!authorInfo.concern_status"
+                        :loading="loadButton"
+                        icon-placement="right"
                     >
                         关注
                     </n-button>
-                    <n-button strong secondary round type="primary" @click="debouncedConcernPost" v-else>
+                    <n-button
+                        strong
+                        secondary
+                        round
+                        type="primary"
+                        @click="debouncedConcernPost"
+                        v-else
+                        :loading="loadButton"
+                        icon-placement="right"
+                    >
                         已关注
                     </n-button>
                     <n-button tertiary round type="primary" @click="personalLetter">私信</n-button>

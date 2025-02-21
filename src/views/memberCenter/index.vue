@@ -118,6 +118,9 @@ const isSelf = ref(true);
 //控制显示骨架屏
 const skeletonUser = ref(true);
 
+//控制关注按钮的加载效果
+const loadButton = ref(false);
+
 //定义当前会员中心人员的各种信息
 const user = reactive({
     id: paramId.value,
@@ -186,18 +189,25 @@ const commitSignature = async () => {
 
 //关注
 const concernFun = async () => {
-    user.concern_status = !user.concern_status;
-    const { code } = await concernInter({
-        followed_id: +user.id
-    });
-    if (code === 2000) {
-        if (user.concern_status) {
-            message.success('关注成功');
+    loadButton.value = true;
+    try {
+        const { code } = await concernInter({
+            followed_id: +user.id
+        });
+        if (code === 2000) {
+            if (user.concern_status) {
+                message.success('关注成功');
+            } else {
+                message.success('取消关注成功');
+            }
         } else {
-            message.success('取消关注成功');
+            message.error('关注失败');
         }
-    } else {
-        message.error('关注失败');
+        loadButton.value = false;
+        user.concern_status = !user.concern_status;
+    } catch (error) {
+        message.error(error);
+        loadButton.value = false;
     }
 };
 
@@ -302,6 +312,9 @@ const articleArr = ref([]);
 //定义变量接收标签的目前值
 const tabValue = ref('文章');
 
+//控制取消收藏按钮的加载效果
+const collectLoadButton = ref(false);
+
 //初始化文章的信息
 const articleInit = async () => {
     articleArr.value = [];
@@ -377,12 +390,14 @@ const deleteArticles = async (id) => {
 
 //取消收藏
 const cancelCollection = async (id) => {
+    collectLoadButton.value = true;
     const { code } = await collectionInter({
         article_id: id,
         collection_status: false
     });
-    if (code) {
+    if (code === 2000) {
         message.success('取消收藏成功！');
+        collectLoadButton.value = false;
         articleArr.value = articleArr.value.filter((item) => item.id !== id);
     }
 };
@@ -483,6 +498,8 @@ const searchFun = () => {
                                 @click="concern"
                                 v-if="!user.concern_status && !isSelf"
                                 class="concern"
+                                :loading="loadButton"
+                                icon-placement="right"
                             >
                                 关注
                             </n-button>
@@ -493,6 +510,8 @@ const searchFun = () => {
                                 @click="concern"
                                 v-if="user.concern_status && !isSelf"
                                 class="concern"
+                                :loading="loadButton"
+                                icon-placement="right"
                             >
                                 已关注
                             </n-button>
@@ -589,6 +608,8 @@ const searchFun = () => {
                                                     type="primary"
                                                     @click.stop="cancelCollection(item.id)"
                                                     v-if="isSelf"
+                                                    :loading="collectLoadButton"
+                                                    icon-placement="right"
                                                 >
                                                     取消收藏
                                                 </n-button>
@@ -740,7 +761,7 @@ const searchFun = () => {
                 .left-right {
                     .n-button {
                         margin: 20px 20px 0px 0px;
-                        width: 80px;
+                        // width: 80px;
                         float: right;
                     }
 
