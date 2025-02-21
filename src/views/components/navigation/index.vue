@@ -176,6 +176,7 @@ const handleLogout = async () => {
     await logout();
     userStore.logout();
     router.push('/home');
+    console.log(userStore.isLogin, '登录状态');
 };
 
 // 监听路由变化

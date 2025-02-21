@@ -36,19 +36,11 @@ const routers404: any = [
 const routes = [
     {
         path: '/',
-        redirect: '/login'
+        redirect: '/home'
     },
     {
         path: '/login',
         component: () => import('../../views/components/Author/index.vue')
-    },
-    {
-        path: '/register',
-        component: () => import('../../views/register/index.vue')
-    },
-    {
-        path: '/findPassword',
-        component: () => import('../../views/findPassword/index.vue')
     },
     {
         path: '/chooseTag',
@@ -68,7 +60,8 @@ const routes = [
             },
             {
                 path: '/articlerelease/:id',
-                component: () => import('../../views/articleRelease/index.vue')
+                component: () => import('../../views/articleRelease/index.vue'),
+                meta: { requiresAuth: true } // 添加 requiresAuth 标记
             },
             {
                 path: '/select',
@@ -76,7 +69,8 @@ const routes = [
             },
             {
                 path: '/settings',
-                component: () => import('../../views/settings/index.vue')
+                component: () => import('../../views/settings/index.vue'),
+                meta: { requiresAuth: true } // 添加 requiresAuth 标记
             },
             {
                 path: '/member/:id',
@@ -96,11 +90,13 @@ const routes = [
             },
             {
                 path: '/message',
-                component: () => import('../../views/message/index.vue')
+                component: () => import('../../views/message/index.vue'),
+                meta: { requiresAuth: true } // 添加 requiresAuth 标记
             }
         ]
     }
 ];
+
 routerArray.push(...routers404);
 routerArray.push(...routes);
 console.log(routerArray);

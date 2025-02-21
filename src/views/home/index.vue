@@ -170,9 +170,9 @@ const refreshArticles = () => {
                             animated
                             @update:value="tabTop"
                             v-model:value="selectedTab"
-                            style="padding: 10px 20px"
                             placement="left"
                             tab-class="father-tab"
+                            class="fatherrr"
                         >
                             <n-tab-pane name="综合" tab="综合">
                                 <SearchMiddleBox :category_id="category_id" />
@@ -187,21 +187,17 @@ const refreshArticles = () => {
                                 <followArticle></followArticle>
                             </n-tab-pane>
                         </n-tabs>
+                        <div class="search-mid">
+                            <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
+                                <n-tab-pane name="0" tab="">
+                                    <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                                </n-tab-pane>
+                                <n-tab-pane name="1" tab="">
+                                    <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                                </n-tab-pane>
+                            </n-tabs>
+                        </div>
                     </div>
-                </div>
-                <div class="search-mid">
-                    <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-                        <n-tab-pane name="0" tab="">
-                            <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                                <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                            </n-infinite-scroll>
-                        </n-tab-pane>
-                        <n-tab-pane name="1" tab="">
-                            <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                                <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                            </n-infinite-scroll>
-                        </n-tab-pane>
-                    </n-tabs>
                 </div>
             </div>
             <!-- 侧边栏（作家榜单与文章榜单） -->
@@ -240,7 +236,7 @@ const refreshArticles = () => {
     justify-content: center;
     // text-align: center;
     margin: 0 auto;
-    margin-top: 75px;
+    margin-top: 70px;
 }
 .home {
     display: flex;
@@ -251,9 +247,9 @@ const refreshArticles = () => {
     // margin: 0 auto;
 }
 
-.middle {
-    background-color: #ffffff;
-}
+// .middle {
+//     background-color: #ffffff;
+// }
 
 .main-content {
     flex-grow: 1;
@@ -281,6 +277,7 @@ const refreshArticles = () => {
 .search-mid {
     display: flex;
     flex-direction: column;
+    border-radius: 5px;
 }
 
 .search-mid img {
@@ -302,9 +299,9 @@ const refreshArticles = () => {
     font-size: 16px;
 }
 
-::v-deep(.n-scrollbar-content) {
-    padding-bottom: 140px;
-}
+// ::v-deep(.n-scrollbar-content) {
+//     padding-bottom: 140px;
+// }
 
 .load-ing {
     margin-top: 15px;
@@ -316,7 +313,7 @@ const refreshArticles = () => {
 
 .middle {
     width: 100%;
-    height: 90%;
+    // height: 90%;
     margin: 0 auto;
     display: flex;
     .left {
@@ -325,14 +322,14 @@ const refreshArticles = () => {
             height: 100%;
         }
         .n-tabs :deep(.n-tabs-nav) {
-            background-color: #fff;
-            margin-right: 15px;
+            margin-right: 22px;
         }
 
         .n-tabs :deep(.n-tab-pane) {
             width: 100%;
             background-color: #fff;
             padding: 0px;
+            border-radius: 5px;
         }
 
         .n-tabs :deep(.n-tabs-tab-wrapper) {
@@ -340,6 +337,7 @@ const refreshArticles = () => {
             border-radius: 40px;
             height: 60px;
             @include flex;
+            padding: 0 8px;
         }
 
         .n-tabs :deep(.n-tabs-tab) {
@@ -359,10 +357,18 @@ const refreshArticles = () => {
             text-align: center;
             justify-content: center;
         }
+        .fatherrr.n-tabs :deep(.n-tabs-nav-y-scroll) {
+            height: 240px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
 
         span {
             margin-left: 5px;
         }
     }
+}
+:deep(.n-tabs-nav--card-type n-tabs-nav--left n-tabs-nav) {
+    height: 240px;
 }
 </style>

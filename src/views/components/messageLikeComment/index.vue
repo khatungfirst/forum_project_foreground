@@ -25,7 +25,7 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
                 <span class="nickname" @click="() => emit('goToMember', comment.user_id)">
                     {{ comment.nickname }}
                 </span>
-                <span class="commented" v-if="comment.comment">点赞了你 [{{ comment.comment }}] 的评论</span>
+                <span class="commented">点赞了你在 《{{ comment.title }}》 的评论</span>
             </div>
             <p class="comment-text">{{ comment.content }}</p>
             <div class="comment-title" @click="() => emit('goToArticleDetail', comment.article_id)">
