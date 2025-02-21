@@ -142,6 +142,9 @@ const checkedValue = ref<string | null>(null);
 //存放封面图的数组
 const fileList = ref([]);
 
+//控制发布文章按钮的加载效果
+const publicLoadButton = ref(false);
+
 //制定表单的的校验规则
 const rules = {
     categories: { required: true, trigger: ['blur', 'input'], message: '请输入要选择的分类' },
@@ -234,6 +237,7 @@ const onUploadImg = async (files, callback) => {
 //真正发布的按钮的点击事件
 const publicArticle = async () => {
     // articleData.status = 'private';
+    publicLoadButton.value = true;
     if (articleData.category_id !== null && articleData.summary !== '' && articleData.status !== '') {
         const { code } = await publicArticles(articleData);
         if (code === 2000) {
@@ -244,6 +248,7 @@ const publicArticle = async () => {
     } else {
         message.error('千万不要忘记填写文章的类目、摘要和发布类型！');
     }
+    publicLoadButton.value = false;
 };
 </script>
 <template>
@@ -341,7 +346,17 @@ const publicArticle = async () => {
                 </n-form>
                 <div class="bottom">
                     <n-button tertiary round type="primary" @click="releaseCard">取消</n-button>
-                    <n-button strong secondary round type="primary" @click="publicArticle">发布</n-button>
+                    <n-button
+                        strong
+                        secondary
+                        round
+                        type="primary"
+                        @click="publicArticle"
+                        :loading="publicLoadButton"
+                        icon-placement="right"
+                    >
+                        发布
+                    </n-button>
                 </div>
             </div>
         </n-card>

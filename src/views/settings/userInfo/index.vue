@@ -13,6 +13,9 @@ const message = useMessage();
 //定义所有标签的数组
 const all_tag = ref([]);
 
+//控制保存修改资料的按钮加载效果
+const saveChangeLoadButton = ref(false);
+
 onMounted(async () => {
     const { data } = await getUserInfo();
     if (data) {
@@ -63,7 +66,9 @@ const update = async (msg1, msg2) => {
 
 //更新用户表单数据
 const changeForm = () => {
+    saveChangeLoadButton.value = true;
     update('信息更改成功', '信息更改失败');
+    saveChangeLoadButton.value = false;
     Object.assign(oldUserInfo, userInfo);
 };
 
@@ -169,7 +174,17 @@ const handlePreview = async (item) => {
             </div>
         </div>
         <div class="commitButton">
-            <n-button strong secondary round type="primary" @click="changeForm">保存修改</n-button>
+            <n-button
+                strong
+                secondary
+                round
+                type="primary"
+                @click="changeForm"
+                :loading="saveChangeLoadButton"
+                icon-placement="right"
+            >
+                保存修改
+            </n-button>
         </div>
         <P>标签管理</P>
         <div class="tag">

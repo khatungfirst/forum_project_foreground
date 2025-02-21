@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+// import axios from 'axios';
+import { getCompressImage } from '@/config/apis/publicArticle';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined, LikeTwotone } from '@vicons/antd';
 
@@ -59,20 +61,47 @@ const compressImage = async () => {
     console.log('压缩图片');
 
     //压缩封面图
-    const params = new URLSearchParams({
-        path: prop.item.image_url,
-        width: '150',
-        height: '100',
-        level: '5'
-    });
-    await fetch(`/instantly_compress_image?${params}`, {
-        method: 'GET'
-    }).then(async (res) => {
-        const blob = await res.blob();
-        // const imageU RL = URL.createObjectURL(blob);
-        // imageUrl.value = imageURL.replace('blob:', '');
-        console.log(blob, 'image');
-    });
+    // const params = new URLSearchParams({
+    //     path: prop.item.image_url,
+    //     width: '150',
+    //     height: '100',
+    //     level: '5'
+    // });
+    // await fetch(`/instantly_compress_image?${params}`, {
+    //     method: 'GET'
+    // }).then(async (res) => {
+    //     const blob = await res.blob();
+    //     const imageURL = URL.createObjectURL(blob);
+    //     imageUrl.value = imageURL.replace('blob:', '');
+    //     console.log(imageUrl.value, 'image');
+    // });
+    if (prop.item.image_url !== '') {
+        const res = await getCompressImage({
+            path: prop.item.image_url,
+            width: '150',
+            height: '100',
+            level: '5'
+        });
+        const blob = new Blob([res], { type: 'image/jpeg' });
+
+        // 创建一个临时 URL
+        imageUrl.value = URL.createObjectURL(blob).replace('blob:', '');
+        // const blob = res.blob();
+        console.log(imageUrl.value, 'blob');
+    }
+    // const params = reactive({
+    //     path: prop.item.image_url,
+    //     width: '150',
+    //     height: '100',
+    //     level: '5'
+    // });
+    // axios.get('/instantly_compress_image', { params }).then(async (res) => {
+    //     // const blob = await res.data.blob();
+    //     // const imageURL = URL.createObjectURL(blob);
+    //     // imageUrl.value = imageURL.replace('blob:', '');
+    //     // console.log(imageUrl.value, 'image');
+    //     console.log(res, 'res');
+    // });
 };
 
 //文章题目和概述高亮显示关键词
@@ -119,7 +148,7 @@ const highlightedSummary = ref(prop.item.summary);
             </div>
             <slot class="edit" name="edit"></slot>
             <div class="right" v-if="prop.item.image_url !== ''">
-                <img :src="imageUrl" alt="" />
+                <img :src="prop.item.image_url" alt="" />
             </div>
             <slot class="cancelCollect" name="cancelCollect"></slot>
         </li>

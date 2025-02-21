@@ -192,12 +192,16 @@ const inputValue = ref('');
 //输入框中的字数
 const fontNumber = computed(() => inputValue.value.length);
 
+//控制按钮的加载效果
+const loadButton = ref(false);
+
 //将emoji表情加入到评论中
 const handleEmoji = (e) => {
     inputValue.value = inputValue.value + e.native;
 };
 
 const publicFirst = async () => {
+    loadButton.value = true;
     const commentDetail = reactive({
         content: inputValue.value,
         path: fileListRef.value[0] ? fileListRef.value[0].url : '',
@@ -222,9 +226,9 @@ const publicFirst = async () => {
         }
     } catch (error) {
         console.log(error);
-
         message.error('发布评论失败');
     }
+    loadButton.value = false;
 };
 </script>
 <template>
@@ -291,7 +295,18 @@ const publicFirst = async () => {
                         </n-tooltip>
                     </div>
 
-                    <n-button strong secondary round type="primary" size="large" @click="publicFirst">发布</n-button>
+                    <n-button
+                        strong
+                        secondary
+                        round
+                        type="primary"
+                        size="large"
+                        @click="publicFirst"
+                        :loading="loadButton"
+                        icon-placement="right"
+                    >
+                        发布
+                    </n-button>
                 </div>
             </div>
         </div>

@@ -37,25 +37,30 @@ const concernStatus = ref(prop.item.is_followed);
 
 const loginId = userInfo.userInfo?.id || 0;
 
+//控制关注/取消关注关注的人的按钮加载效果
+const followLoadButton = ref(false);
+
 //声明一个变量接收粉丝数
 const fansCount = ref(prop.item.fans_count);
 
 //关注的方法
 const concernFun = async (id) => {
+    followLoadButton.value = true;
     const { code } = await concernInter({
         followed_id: id
     });
     if (code === 2000) {
-        concernStatus.value = concernStatus.value === 0 ? 1 : 0;
-
         if (concernStatus.value) {
             message.success('关注成功');
             fansCount.value++;
         } else {
             message.success('取消关注成功');
         }
+        followLoadButton.value = false;
+        concernStatus.value = concernStatus.value === 0 ? 1 : 0;
     } else {
         message.error('关注失败');
+        followLoadButton.value = false;
     }
 };
 const concern = debounce(concernFun, 500);
@@ -85,6 +90,8 @@ const routeMember = (id) => {
             type="primary"
             @click="concern(prop.item.id)"
             v-if="concernStatus === 0 && prop.item.id !== loginId"
+            :loading="followLoadButton"
+            icon-placement="right"
         >
             关注
         </n-button>
@@ -95,6 +102,8 @@ const routeMember = (id) => {
             type="primary"
             @click="concern(prop.item.id)"
             v-if="concernStatus === 1 && prop.item.id !== loginId"
+            :loading="followLoadButton"
+            icon-placement="right"
         >
             已关注
         </n-button>
