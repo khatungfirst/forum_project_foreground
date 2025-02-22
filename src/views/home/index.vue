@@ -44,6 +44,9 @@ const currentArticlePage = ref(1); // 当前文章页码
 const isAuthorDataShort = ref(false); // 作者数据是否不足五条
 const isArticleDataShort = ref(false); // 文章数据是否不足五条
 
+//控制显示骨架屏
+// const isSkeletonAuthor = ref(false);
+
 onMounted(async () => {
     await fetchAuthors();
     await fetchArticles();
@@ -54,14 +57,19 @@ const fetchAuthors = async () => {
     if (currentPage.value > 4) {
         currentPage.value = 1;
     }
+    // isSkeletonAuthor.value = true;
+    // console.log('isSkeletonAuthor.value:'.isSkeletonAuthor.value);
     const response = await author_rank({ page: currentPage.value, limit: 5, id: user_id });
     if (response.code === 2000) {
+        // isSkeletonAuthor.value = false;
+        // console.log('isSkeletonAuthor.value:'.isSkeletonAuthor.value);
         const validAuthors = response.data.user_heat_rank.filter((author) => author !== null);
         const cleanedAuthors = validAuthors.map((author) => ({
             ...author,
             avatar_path: author.avatar_path ? author.avatar_path.replace(/<[^>]*>/g, '') : null
         }));
         authors.value = cleanedAuthors;
+
         isAuthorDataShort.value = cleanedAuthors.length < 5; // 记录数据是否不足五条
     } else {
         console.error('获取作家排名失败');
@@ -209,6 +217,7 @@ const refreshArticles = () => {
                         :limit="5"
                         @refresh="refreshArticles"
                     />
+                    <!-- :isSkeletonAuthor="isSkeletonAuthor" -->
                 </div>
                 <div class="author-rank-list">
                     <AuthorRankItem
@@ -236,7 +245,7 @@ const refreshArticles = () => {
     justify-content: center;
     // text-align: center;
     margin: 0 auto;
-    margin-top: 70px;
+    margin-top: 75px;
 }
 .home {
     display: flex;

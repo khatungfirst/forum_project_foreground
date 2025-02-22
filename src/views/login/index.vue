@@ -97,7 +97,13 @@ const switchToFindPassword = () => {
             <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input"></n-input>
         </n-form-item>
         <n-form-item label="密码" path="password">
-            <n-input v-model:value="form.password" type="password" placeholder="请输入密码" class="common-input">
+            <n-input
+                v-model:value="form.password"
+                type="password"
+                show-password-on="click"
+                placeholder="请输入密码"
+                class="common-input"
+            >
                 <template #suffix>
                     <!-- <span class="forgot-password-btn" @click="router.push('/findPassword')">忘记密码</span> -->
 
@@ -204,6 +210,7 @@ const switchToFindPassword = () => {
 }
 
 .forgot-password-btn {
+    margin-right: 6px;
     color: #19a059;
 }
 </style>
