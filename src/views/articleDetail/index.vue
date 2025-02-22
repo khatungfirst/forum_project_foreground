@@ -100,7 +100,9 @@ watch(
         triggerType.value = newVal;
     }
 );
-
+const handleCloseAuthor = () => {
+    loginAppear.value = false;
+};
 // ---------------------------文章模块---------------------------------
 
 //定义图标颜色的属性
@@ -528,7 +530,13 @@ watchEffect(async () => {
     <div class="wrap">
         <div class="emojiOverlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
         <div class="overlay" v-if="loginAppear"></div>
-        <author v-if="loginAppear" class="loginCom" :type="triggerType" @trigger-type="performOperation"></author>
+        <author
+            v-if="loginAppear"
+            class="loginCom"
+            :type="triggerType"
+            @trigger-type="performOperation"
+            @close-author="handleCloseAuthor"
+        ></author>
         <div class="left">
             <div class="left-contains">
                 <transition name="scale">

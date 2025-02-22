@@ -122,7 +122,7 @@ const highlightedSummary = ref(prop.item.summary);
     padding: 10px 0px;
     border-bottom: 1px solid rgb(223, 217, 217);
     position: relative;
-    z-index: 999;
+    z-index: 997;
     width: 98%;
 
     .left {
