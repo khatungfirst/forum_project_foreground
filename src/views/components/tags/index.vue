@@ -1,7 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router';
 import { Tag_follow } from '../../../config/apis/tag';
-const router = useRouter();
+import { useUserStore } from '@/config/store/userStore';
+
 const emit = defineEmits(['follow']);
 const props = defineProps({
     tag: { type: Object, required: true },
