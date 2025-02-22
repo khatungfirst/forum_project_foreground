@@ -34,6 +34,17 @@ const rules = ref({
             message: '密码必须包含字母、数字和特殊符号',
             trigger: 'blur'
         }
+    ],
+    verify_code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+    re_password: [
+        { required: true, message: '请再次输入密码', trigger: 'blur' },
+        {
+            validator: (rule, value) => {
+                return value === form.value.password;
+            },
+            message: '确认密码与新密码不一致',
+            trigger: 'blur'
+        }
     ]
 });
 // 在 findPassword 子组件的 script setup 中
@@ -119,7 +130,13 @@ onMounted(() => {
             <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
         </n-form-item>
         <n-form-item label="密码" path="password">
-            <n-input v-model:value="form.password" placeholder="请输入密码" class="common-input"></n-input>
+            <n-input
+                v-model:value="form.password"
+                placeholder="请输入密码"
+                type="password"
+                class="common-input"
+                show-password-on="click"
+            ></n-input>
         </n-form-item>
         <n-form-item label="重复密码" path="re_password">
             <n-input
@@ -127,6 +144,7 @@ onMounted(() => {
                 type="password"
                 placeholder="请输入重复密码"
                 class="common-input"
+                show-password-on="click"
             ></n-input>
         </n-form-item>
         <n-form-item>

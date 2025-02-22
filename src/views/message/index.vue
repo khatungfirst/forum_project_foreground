@@ -69,53 +69,92 @@ const handleMaskClick = () => {
 };
 
 onMounted(async () => {
-    const commentResponse = await comment_message({ page: 1, limit: 5 });
+    getcommentResponse();
+
+    getlikeResponse();
+
+    getcollectResponse();
+
+    getfollowResponse();
+
+    getlikeCommentResponse();
+});
+
+const getcommentResponse = async () => {
+    const commentResponse = await comment_message({ page: 1, limit: 10 });
     if (commentResponse.code === 2000) {
         commentList.value = commentResponse.data.comment_list;
     } else {
         console.error('获取评论消息失败');
     }
+};
 
+const getlikeResponse = async () => {
     const likeResponse = await like_message({ page: 1, limit: 5 });
     if (likeResponse.code === 2000) {
         likeList.value = likeResponse.data.like_list;
     } else {
         console.error('获取点赞消息失败');
     }
+};
 
+const getcollectResponse = async () => {
     const collectResponse = await collect_message({ page: 1, limit: 5 });
     if (collectResponse.code === 2000) {
         collectList.value = collectResponse.data.collection_list;
     } else {
         console.error('获取收藏消息失败');
     }
+};
 
+const getfollowResponse = async () => {
     const followResponse = await follow_message({ page: 1, limit: 5 });
     if (followResponse.code === 2000) {
         followList.value = followResponse.data.follow_list;
     } else {
         console.error('获取关注消息失败');
     }
+};
 
+const getlikeCommentResponse = async () => {
     const likeCommentResponse = await comment_like_message({ page: 1, limit: 5 });
     if (likeCommentResponse.code === 2000) {
         likeCommentList.value = likeCommentResponse.data.like_list;
     } else {
         console.error('获取点赞评论消息失败');
     }
-});
+};
 
 const likeComment = async (comment) => {
-    const status = likedComments.value.has(comment.id) ? 2 : 1;
-    const response = await like_comment_message({ id: comment.id, status: status, user_id: comment.user_id });
+    comment.likeStatus = !comment.likeStatus; // 切换点赞状态
+
+    if (comment.likeStatus) {
+        comment.likes_count++; // 点赞+1
+    } else {
+        comment.likes_count--; // 点赞-1
+    }
+    console.log('b评论点赞状态:', comment.likeStatus);
+    // 调用接口更新点赞状态
+    const data = {
+        id: comment.id,
+        status: comment.likeStatus ? 2 : 1,
+        user_id: comment.user_id
+    };
+    console.log('传递的点赞状态:', data.status);
+
+    // const status = likedComments.value.has(comment.id) ? 2 : 1;
+    const response = await like_comment_message(data);
     if (response.code === 2000) {
-        if (status === 1) {
-            comment.likes_count += 1;
-            likedComments.value.add(comment.id);
-        } else {
-            comment.likes_count -= 1;
-            likedComments.value.delete(comment.id);
-        }
+        // if (status === 1) {
+        //     comment.likes_count += 1;
+        //     likedComments.value.add(comment.id);
+        // } else {
+        //     comment.likes_count -= 1;
+        //     likedComments.value.delete(comment.id);
+        // }
+        getcommentResponse();
+        console.log(111, commentResponse.data.comment_list);
+        console.log('点赞评论操作成功');
     } else {
         console.error('点赞操作失败:', response.message);
     }

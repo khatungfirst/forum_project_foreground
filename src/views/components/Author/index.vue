@@ -23,6 +23,7 @@ const switchComponent = (component) => {
 
 const closeAuthor = () => {
     ifShow.value = false;
+    emit('close-author'); // 触发关闭事件
 };
 
 const performOperation = (type) => {

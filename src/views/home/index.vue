@@ -15,8 +15,10 @@ import { getSelectArticle } from '@/config/apis/select';
 import { follower_article } from '@/config/apis/articleDetail';
 import { NButton } from 'naive-ui';
 import PublishButton from '../components/PublishButton/index.vue';
-import { useUserStore } from '@/config/store/userStore';
 
+import { useTouristPattern } from '@/config/store/touristPattern';
+import { useUserStore } from '@/config/store/userStore';
+import author from '@/views/components/Author/index.vue';
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
 const router = useRouter();
@@ -43,6 +45,60 @@ const currentPage = ref(1); // 当前作者页码
 const currentArticlePage = ref(1); // 当前文章页码
 const isAuthorDataShort = ref(false); // 作者数据是否不足五条
 const isArticleDataShort = ref(false); // 文章数据是否不足五条
+// 增加 authorToFollow 响应式变量,用于存储即将关注的作者 ID
+const authorToFollow = ref<number | null>(null);
+
+const useTourist = useTouristPattern();
+//控制显示骨架屏
+// const isSkeletonAuthor = ref(false);
+
+//----------------------------游客模式---------------------------------
+
+//控制登录组件是否出现
+const loginAppear = ref(false);
+
+//触发登录的事件类型
+const triggerType = ref('');
+
+//告知子组件是否已经登录完毕
+const isLogin = ref(false);
+
+//登录后继续执行操作
+// const performOperation = (type: string) => {
+//     loginAppear.value = false;
+//     switch (type) {
+//         case '关注':
+//             // 实现自动关注的方法
+//             isLogin.value = true;
+//             break;
+//     }
+// };
+const performOperation = (type: string) => {
+    loginAppear.value = false;
+    switch (type) {
+        case '关注':
+            // 自动关注
+            if (authorToFollow.value !== null) {
+                followAuthor({
+                    id: authorToFollow.value,
+                    is_followed: 1
+                });
+            }
+            isLogin.value = true;
+            break;
+    }
+};
+watch(
+    () => useTourist.triggerType,
+    (newVal) => {
+        loginAppear.value = true;
+        triggerType.value = newVal;
+    }
+);
+
+const handleCloseAuthor = () => {
+    loginAppear.value = false;
+};
 
 onMounted(async () => {
     await fetchAuthors();
@@ -54,14 +110,19 @@ const fetchAuthors = async () => {
     if (currentPage.value > 4) {
         currentPage.value = 1;
     }
+    // isSkeletonAuthor.value = true;
+    // console.log('isSkeletonAuthor.value:'.isSkeletonAuthor.value);
     const response = await author_rank({ page: currentPage.value, limit: 5, id: user_id });
     if (response.code === 2000) {
+        // isSkeletonAuthor.value = false;
+        // console.log('isSkeletonAuthor.value:'.isSkeletonAuthor.value);
         const validAuthors = response.data.user_heat_rank.filter((author) => author !== null);
         const cleanedAuthors = validAuthors.map((author) => ({
             ...author,
             avatar_path: author.avatar_path ? author.avatar_path.replace(/<[^>]*>/g, '') : null
         }));
         authors.value = cleanedAuthors;
+
         isAuthorDataShort.value = cleanedAuthors.length < 5; // 记录数据是否不足五条
     } else {
         console.error('获取作家排名失败');
@@ -115,26 +176,34 @@ const tabMiddle = (value) => {
     init();
 };
 
-const followAuthor = async (payload) => {
-    const { id, is_followed } = payload;
-    const author = authors.value.find((author) => author.id === id);
-    if (!author) return;
+const followAuthor = async (payload: { id: number; is_followed: number }) => {
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        authorToFollow.value = payload.id;
+        loginAppear.value = true;
+        triggerType.value = '关注';
+    } else {
+        const { id, is_followed } = payload;
+        const author = authors.value.find((author) => author.id === id);
+        if (!author) return;
 
-    try {
-        const response = await concernInter({ followed_id: id });
-        if (response.code === 2000) {
-            console.log(`关注作者成功`);
-            author.is_followed = is_followed;
-        } else {
-            console.error(`关注作者失败`, response.message);
-            alert(`关注失败: ${response.message}`);
+        try {
+            const response = await concernInter({ followed_id: id });
+            if (response.code === 2000) {
+                console.log(`关注作者成功`);
+                author.is_followed = is_followed;
+                // 清空 authorToFollow
+                authorToFollow.value = null;
+            } else {
+                console.error(`关注作者失败`, response.message);
+                alert(`关注失败: ${response.message}`);
+            }
+        } catch (error) {
+            console.error(`关注作者出错`, error);
+            alert(`关注出错: ${error.message}`);
         }
-    } catch (error) {
-        console.error(`关注作者出错`, error);
-        alert(`关注出错: ${error.message}`);
     }
 };
-
 const handleReleaseArticle = () => {
     router.push({ path: '/articlerelease/0' }); // 路由跳转发布文章页
 };
@@ -160,6 +229,14 @@ const refreshArticles = () => {
 
 <template>
     <div class="container">
+        <div class="overlay" v-if="loginAppear"></div>
+        <author
+            v-if="loginAppear"
+            class="loginCom"
+            :type="triggerType"
+            @trigger-type="performOperation"
+            @close-author="handleCloseAuthor"
+        ></author>
         <div class="home">
             <!-- 主内容区 -->
             <div class="main-content">
@@ -209,6 +286,7 @@ const refreshArticles = () => {
                         :limit="5"
                         @refresh="refreshArticles"
                     />
+                    <!-- :isSkeletonAuthor="isSkeletonAuthor" -->
                 </div>
                 <div class="author-rank-list">
                     <AuthorRankItem
@@ -236,7 +314,16 @@ const refreshArticles = () => {
     justify-content: center;
     // text-align: center;
     margin: 0 auto;
-    margin-top: 70px;
+    margin-top: 75px;
+}
+@include overlay;
+.loginCom {
+    z-index: 1000;
+    position: fixed;
+    left: 50%;
+    top: 50px;
+    transform: translateX(-50%);
+    background-color: #fff;
 }
 .home {
     display: flex;
