@@ -164,6 +164,7 @@ onMounted(() => {
                 type="password"
                 placeholder="请输入密码"
                 class="common-input"
+                show-password-on="click"
             ></n-input>
         </n-form-item>
         <n-form-item label="重复密码" path="re_password">
@@ -172,6 +173,7 @@ onMounted(() => {
                 type="password"
                 placeholder="请输入重复密码"
                 class="common-input"
+                show-password-on="click"
             ></n-input>
         </n-form-item>
         <n-form-item>
