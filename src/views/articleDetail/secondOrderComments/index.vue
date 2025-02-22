@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
 import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
@@ -44,6 +45,10 @@ const prop = defineProps({
             status: 1,
             parent_user_id: 0
         })
+    },
+    isLogin: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -51,9 +56,38 @@ const router = useRouter();
 
 const userInfo = useUserStore();
 
+const touristPattern = useTouristPattern();
+
 //定义消息提示对象
 // const message = useMessage();
 const emit = defineEmits(['delete-secComments', 'public-second']);
+
+//-----------------------------游客模块--------------------------
+
+watch(
+    () => prop.isLogin,
+    (newVal) => {
+        if (prop.isLogin) {
+            isSelf.value = prop.item.user_id === userInfo.userInfo?.id ? true : false;
+            performOperation(touristPattern.triggerType);
+        }
+    }
+);
+
+//登录后的紧接操作
+const performOperation = (type: string) => {
+    console.log(prop.item.user_id, userInfo.userInfo?.id, 'ppp');
+    if (type === '回复二级评论') {
+        if (likeObj.id === touristPattern.triggerContent) {
+            appear.value = true;
+        }
+    } else if (type === '点赞二级评论') {
+        console.log(likeObj.id, touristPattern.triggerContent, '1111');
+        if (likeObj.id === touristPattern.triggerContent) {
+            like(likeObj);
+        }
+    }
+};
 
 //--------------------------------评论有关方法--------------------------------
 
@@ -64,7 +98,7 @@ const appear = ref(false);
 const isResponseSelf = prop.item.user_id === prop.item.parent_user_id ? true : false;
 
 //判断这个评论是否是自己的评论
-const isSelf = prop.item.user_id === userInfo.userInfo?.id ? true : false;
+const isSelf = ref(prop.item.user_id === userInfo.userInfo?.id ? true : false);
 
 //控制emoji框是否显示
 const isEmojiDisappear = ref(false);
@@ -81,11 +115,20 @@ const commentItems = reactive({
 });
 
 //解构点赞评论方法
-const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
+const { likeCounts, like, likeStatus, isTourist } = useLike(prop.item.likes_count, prop.item.status);
 
 const likeObj = {
     id: prop.item.id,
     status: prop.item.status === 2 ? 1 : 2
+};
+
+const likeSecond = (obj: object) => {
+    if (isTourist) {
+        touristPattern.setType('点赞二级评论');
+        touristPattern.setTriggerId(obj.id);
+    } else {
+        like(obj);
+    }
 };
 
 //删除评论
@@ -117,13 +160,17 @@ const emojiDisappear = () => {
 };
 
 //回复评论的准备工作
-const responseComments = (id) => {
-    appear.value = !appear.value;
-    console.log(appear.value, '打开评论2');
-    commentItems.highest_id = prop.item.highest_id;
-    commentItems.parent_id = prop.item.id;
-    commentItems.parent_user_id = prop.item.user_id;
-    console.log(id);
+const responseComments = (obj: string) => {
+    if (userInfo.token === '') {
+        // triggerType.value = '回复一级评论';
+        touristPattern.setType('回复二级评论');
+        touristPattern.setTriggerId(obj.id);
+    } else {
+        appear.value = !appear.value;
+        commentItems.highest_id = prop.item.highest_id;
+        commentItems.parent_id = prop.item.id;
+        commentItems.parent_user_id = prop.item.user_id;
+    }
 };
 
 let timer = null;
@@ -174,14 +221,14 @@ const handleMaskClick = () => {
                 <span class="small-detail1">{{ prop.item.create_at }}</span>
                 <span
                     class="small-detail"
-                    @click="like(likeObj)"
+                    @click="likeSecond(likeObj)"
                     :style="{ color: likeStatus === 1 ? '#19A059' : '#8a919f' }"
                 >
                     <i class="iconfont">&#xe616;</i>
                     <span v-if="likeCounts === 0">点赞</span>
                     <span v-else>{{ likeCounts }}</span>
                 </span>
-                <span class="small-detail" @click="responseComments(prop.item.id)">
+                <span class="small-detail" @click="responseComments(likeObj)">
                     <i class="iconfont">&#xe6b3;</i>
                     <span>{{ appear ? '取消回复' : '回复' }}</span>
                 </span>

@@ -34,18 +34,18 @@ const prop = defineProps({
         },
         required: true,
         default: () => ({
-            id: 96,
-            nickname: '謇熙瑶',
-            create_at: '2024-12-03 06:37:05',
-            article_id: 42,
-            user_id: 84,
-            highest_id: 61,
-            parent_id: 21,
-            content: 'deserunt anim Excepteur',
-            likes_count: 76,
-            replies_count: 65,
-            path: 'cillum ut sint cupidatat',
-            comment_path: 'eiusmod nostrud do',
+            id: 0,
+            nickname: '',
+            create_at: '',
+            article_id: 0,
+            user_id: 0,
+            highest_id: 0,
+            parent_id: 0,
+            content: '',
+            likes_count: 0,
+            replies_count: 0,
+            path: '',
+            comment_path: '',
             status: 1,
             parent_user_id: 0
         })
@@ -75,28 +75,35 @@ onMounted(async () => {
     getSecondComments();
 });
 
+//-----------------------------游客模块--------------------------
+
+//通知二级评论已经登录
+const secondLogin = ref(false);
+
 watch(
     () => prop.isLogin,
     (newVal) => {
         if (prop.isLogin) {
-            performOperation(touristPattern.triggerType);
+            isCanDelete.value = prop.item.user_id === userInfo.userInfo?.id ? true : false;
+            if (touristPattern.triggerType === '点赞二级评论' || touristPattern.triggerType === '回复二级评论') {
+                secondLogin.value = true;
+            } else {
+                performOperation(touristPattern.triggerType);
+            }
         }
     }
 );
 
-//-----------------------------游客模块--------------------------
-
-//触发登录的事件类型
-const triggerType = ref('');
-
 //登录后的紧接操作
 const performOperation = (type: string) => {
-    console.log(type);
     if (type === '回复一级评论') {
-        appear.value = true;
+        if (likeObj.id === touristPattern.triggerContent) {
+            appear.value = true;
+        }
     } else if (type === '点赞一级评论') {
-        console.log('uuuu');
-        like(likeObj);
+        if (likeObj.id === touristPattern.triggerContent) {
+            like(likeObj);
+        }
     }
 };
 
@@ -183,12 +190,11 @@ const likeObj = {
 };
 
 const likeFirst = (obj: object) => {
-    console.log(isTourist, 'issss');
-
     if (isTourist.value) {
         // triggerType.value = '点赞一级评论';
         // emit('trigger-type', triggerType);
         touristPattern.setType('点赞一级评论');
+        touristPattern.setTriggerId(obj.id);
     } else {
         like(obj);
     }
@@ -217,9 +223,11 @@ const emojiDisappear = () => {
     isEmojiDisappear.value = false;
 };
 
-const responseComments = () => {
+const responseComments = (obj: object) => {
     if (userInfo.token === '') {
-        triggerType.value = '回复一级评论';
+        // triggerType.value = '回复一级评论';
+        touristPattern.setType('回复一级评论');
+        touristPattern.setTriggerId(obj.id);
     } else {
         appear.value = !appear.value;
         commentItems.highest_id = prop.item.id;
@@ -241,6 +249,9 @@ const cancelResponse = () => {
 };
 
 //--------------------------------删除、举报功能------------------------
+
+//判断是否具有删除权力
+const isCanDelete = ref(prop.item.user_id === iid.value);
 
 //解构删除方法
 const { deleteCom } = useDeleteComments();
@@ -292,7 +303,7 @@ const handleMaskClick = () => {
                             <span v-if="likeCounts === 0">点赞</span>
                             <span v-else>{{ likeCounts }}</span>
                         </span>
-                        <span class="small-detail" @click="responseComments">
+                        <span class="small-detail" @click="responseComments(likeObj)">
                             <i class="iconfont">&#xe6b3;</i>
                             <span>{{ appear ? '取消回复' : '回复' }}</span>
                         </span>
@@ -307,7 +318,7 @@ const handleMaskClick = () => {
                         ></commentDrawer>
                     </div>
                 </div>
-                <div class="more" v-if="prop.item.user_id === iid">
+                <div class="more" v-if="isCanDelete">
                     <n-popconfirm
                         :positive-text="null"
                         :negative-text="null"
@@ -330,6 +341,7 @@ const handleMaskClick = () => {
                     :key="index"
                     @delete-secComments="deleteSec"
                     @public-second="publicSecond"
+                    :isLogin="secondLogin"
                 ></SecondOrderComments>
                 <p @click="moreSecondComments" v-if="isSecondComments">
                     查看更多回复

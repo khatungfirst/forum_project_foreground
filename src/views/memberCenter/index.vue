@@ -6,6 +6,7 @@ import Article from '@/views/components/article/index.vue';
 import skeleton from '@/views/components/skeleton/index.vue';
 import FansInfo from '@/views/components/fansInfo/index.vue';
 import PublishButton from '../components/PublishButton/index.vue';
+import author from '@/views/components/Author/index.vue';
 //引入api
 import {
     getMemberInfo,
@@ -13,10 +14,11 @@ import {
     getArticleInfo,
     deleteArticle,
     getConcernList,
-    getConcernDetail
+    getConcernDetail,
+    getTouristArticleInfo
 } from '@/config/apis/member.ts';
-import { concernInter, collectionInter } from '@/config/apis/articleDetail';
-import { getNumberData } from '@/config/apis/settings.ts';
+import { concernInter, collectionInter, getTouristAuthorDetail } from '@/config/apis/articleDetail';
+import { getNumberData, getTouristNumberData } from '@/config/apis/settings.ts';
 //引入全局状态管理
 import { useUserStore } from '@/config/store/userStore';
 //引入公共方法
@@ -58,6 +60,22 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', scrollLoad);
 });
+
+//-----------------------游客模式------------------------------
+//控制登录组件是否出现
+const loginAppear = ref(false);
+
+//触发登录的事件
+const triggerType = ref('');
+
+//登录后的操作
+const performOperation = async (type: string) => {
+    loginAppear.value = false;
+    await userInfo();
+    if (type === '关注此用户' && !user.concern_status) {
+        concern();
+    }
+};
 
 //----------------监听跳转当前登录人的会员中心-------------------
 watch(
@@ -121,6 +139,9 @@ const skeletonUser = ref(true);
 //控制关注按钮的加载效果
 const loadButton = ref(false);
 
+//判断游客是否已经登录
+const isLogin = ref(false);
+
 //定义当前会员中心人员的各种信息
 const user = reactive({
     id: paramId.value,
@@ -146,23 +167,42 @@ const userInfo = async () => {
         isSelf.value = false;
     }
     skeletonUser.value = true;
-    const { data } = await getMemberInfo({
-        author_id: user.id
-    });
-    if (data) {
-        skeletonUser.value = false;
-        Object.assign(user, data);
+    if (userInfor.token === '') {
+        const { data } = await getTouristAuthorDetail({
+            author_id: user.id
+        });
+        if (data) {
+            skeletonUser.value = false;
+            Object.assign(user, data);
+        }
+    } else {
+        const { data } = await getMemberInfo({
+            author_id: user.id
+        });
+        if (data) {
+            skeletonUser.value = false;
+            Object.assign(user, data);
+        }
     }
 };
 
 //初始化微博、博客链接
 const linkInit = async () => {
-    const { data } = await getNumberData({
-        author_id: user.id
-    });
-    user.blog_link = data.blog_link;
-    user.weibo_link = data.weibo_link;
-    user.github_link = data.github_link;
+    if (userInfor.token === '') {
+        const { data } = await getTouristNumberData({
+            author_id: user.id
+        });
+        user.blog_link = data.blog_link;
+        user.weibo_link = data.weibo_link;
+        user.github_link = data.github_link;
+    } else {
+        const { data } = await getNumberData({
+            author_id: user.id
+        });
+        user.blog_link = data.blog_link;
+        user.weibo_link = data.weibo_link;
+        user.github_link = data.github_link;
+    }
 };
 
 //编辑个签
@@ -189,25 +229,30 @@ const commitSignature = async () => {
 
 //关注
 const concernFun = async () => {
-    loadButton.value = true;
-    try {
-        const { code } = await concernInter({
-            followed_id: +user.id
-        });
-        if (code === 2000) {
-            if (user.concern_status) {
-                message.success('关注成功');
+    if (userInfor.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '关注此用户';
+    } else {
+        loadButton.value = true;
+        try {
+            const { code } = await concernInter({
+                followed_id: +user.id
+            });
+            if (code === 2000) {
+                if (!user.concern_status) {
+                    message.success('关注成功');
+                } else {
+                    message.success('取消关注成功');
+                }
             } else {
-                message.success('取消关注成功');
+                message.error('关注失败');
             }
-        } else {
-            message.error('关注失败');
+            loadButton.value = false;
+            user.concern_status = !user.concern_status;
+        } catch (error) {
+            message.error(error);
+            loadButton.value = false;
         }
-        loadButton.value = false;
-        user.concern_status = !user.concern_status;
-    } catch (error) {
-        message.error(error);
-        loadButton.value = false;
     }
 };
 
@@ -319,10 +364,18 @@ const collectLoadButton = ref(false);
 const articleInit = async () => {
     articleArr.value = [];
     skeletonOther.value = true;
-    const { data } = await getArticleInfo(aticleType);
-    if (data) {
-        skeletonOther.value = false;
-        articleArr.value = data.dataList;
+    if (userInfor.token === '') {
+        const { data } = await getTouristArticleInfo(aticleType);
+        if (data) {
+            skeletonOther.value = false;
+            articleArr.value = data.dataList;
+        }
+    } else {
+        const { data } = await getArticleInfo(aticleType);
+        if (data) {
+            skeletonOther.value = false;
+            articleArr.value = data.dataList;
+        }
     }
 };
 
@@ -449,13 +502,15 @@ const searchFun = () => {
 </script>
 <template>
     <div class="wrap">
+        <div class="overlay" v-if="loginAppear"></div>
+        <author v-if="loginAppear" class="loginCom" :type="triggerType" @trigger-type="performOperation"></author>
         <div class="member-content">
             <div class="left">
                 <n-card size="huge">
                     <skeleton v-if="skeletonUser"></skeleton>
                     <div v-else class="information">
                         <div class="left-left">
-                            <n-avatar round :size="48" :src="user.head_shot" />
+                            <n-avatar round :size="48" :src="user.head_shot || ''" />
                             <n-ellipsis style="max-width: 240px; display: block; font-weight: 800; font-size: 18px">
                                 {{ user.nickname }}
                             </n-ellipsis>
@@ -464,7 +519,7 @@ const searchFun = () => {
                             </n-ellipsis>
                             <n-input
                                 ref="inputInstRef"
-                                v-model:value="user.signature"
+                                :value="user.signature"
                                 placeholder=""
                                 :disabled="isEdit"
                                 @blur="commitSignature"
@@ -635,6 +690,7 @@ const searchFun = () => {
                                         v-for="(item, index) in fansArr"
                                         :key="index"
                                         @jump-memberCenter="updateJumpInfo"
+                                        @concern="concern"
                                     ></FansInfo>
                                     <div class="loading">
                                         <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
@@ -701,6 +757,15 @@ const searchFun = () => {
     @include all;
     background-color: #f2f3f5;
     margin-top: 75px;
+    @include overlay;
+    .loginCom {
+        z-index: 999;
+        position: fixed;
+        left: 50%;
+        top: 50px;
+        transform: translateX(-50%);
+        background-color: #fff;
+    }
     .member-content {
         width: 80%;
         margin: 0 auto;
