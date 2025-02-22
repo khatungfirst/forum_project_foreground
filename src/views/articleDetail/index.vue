@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, provide } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 //引入api
 import {
@@ -7,7 +7,9 @@ import {
     getAuthorDetail,
     likeInter,
     collectionInter,
-    concernInter
+    concernInter,
+    getTouristAuthorDetail,
+    getTouristArticleDetail
 } from '@/config/apis/articleDetail';
 import { getFirstOrderComments } from '@/config/apis/comments';
 //引入公共方法
@@ -76,20 +78,37 @@ const triggerType = ref('');
 const isLogin = ref(false);
 
 //登录后继续执行操作
-const performOperation = (type: string) => {
+const performOperation = async (type: string) => {
     loginAppear.value = false;
+    LoginVis.value = false;
+    const loginTypes = ['点赞一级评论', '回复一级评论', '点赞二级评论', '回复二级评论'];
     switch (type) {
         case '点赞':
-            debouncedLikePost();
+            await initArticle();
+            if (!currentIcon.value[0]) {
+                debouncedLikePost();
+            }
             break;
         case '收藏':
-            debouncedCollectionPost();
+            await initArticle();
+            if (!currentIcon.value[1]) {
+                debouncedCollectionPost();
+            }
             break;
         case '发表评论':
             LoginVis.value = false;
             break;
-        case '点赞一级评论':
-            isLogin.value = true;
+        case '关注':
+            await authorInit();
+            if (!authorInfo.concern_status) {
+                debouncedConcernPost();
+            }
+            break;
+        default:
+            if (loginTypes.includes(type)) {
+                isLogin.value = true;
+            }
+            break;
     }
 };
 
@@ -137,10 +156,16 @@ const initArticle = async () => {
         id: articleInfo.id
     };
     isSkeleton.value = true;
-    const articleData = await getArticleDetail(articleId);
-    if (articleData) {
+    const articleData = ref(null);
+    if (userInfo.token === '') {
+        articleData.value = await getTouristArticleDetail(articleId);
+    } else {
+        articleData.value = await getArticleDetail(articleId);
+    }
+
+    if (articleData.value) {
         isSkeleton.value = false;
-        const article = articleData.data.article;
+        const article = articleData.value.data.article;
         articleInfo.likeTotal = article.likes_count;
         articleInfo.collections = article.collections_count;
         currentIcon.value[0] = article.like_status;
@@ -150,7 +175,7 @@ const initArticle = async () => {
         articleInfo.content = article.content;
         articleInfo.tags = article.tags;
         articleInfo.views_count = article.views_count;
-        about.value = articleData.data.about;
+        about.value = articleData.value.data.about;
         articleInfo.author_id = article.user_id;
         articleInfo.nickname = article.nickname;
         authorInit();
@@ -258,9 +283,15 @@ const authorInit = async () => {
     const authorId = {
         author_id: articleInfo.author_id
     };
-    const authorData = await getAuthorDetail(authorId);
-    if (authorData) {
-        const data = authorData.data;
+    const authorData = ref(null);
+
+    if (userInfo.token === '') {
+        authorData.value = await getTouristAuthorDetail(authorId);
+    } else {
+        authorData.value = await getAuthorDetail(authorId);
+    }
+    if (authorData.value) {
+        const data = authorData.value.data;
         authorInfo.author_id = articleInfo.author_id;
         authorInfo.head = data.head_shot;
         authorInfo.nickname = data.nickname;
@@ -277,29 +308,34 @@ const authorInit = async () => {
 
 //关注的方法
 const concern = async () => {
-    loadButton.value = true;
-    try {
-        if (!authorInfo.concern_status) {
-            if (authorInfo.fans_count > 0) {
-                authorInfo.fans_count--;
+    if (userInfo.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '关注';
+    } else {
+        loadButton.value = true;
+        try {
+            if (authorInfo.concern_status) {
+                if (authorInfo.fans_count > 0) {
+                    authorInfo.fans_count--;
+                }
+            } else {
+                authorInfo.fans_count++;
             }
-        } else {
-            authorInfo.fans_count++;
+            const data = {
+                followed_id: articleInfo.author_id
+            };
+            const { code } = await concernInter(data);
+            if (code === 2000 && !authorInfo.concern_status) {
+                message.success('关注成功');
+            } else {
+                message.success('取消关注成功');
+            }
+            loadButton.value = false;
+            authorInfo.concern_status = !authorInfo.concern_status;
+        } catch (error) {
+            message.error(error);
+            loadButton.value = false;
         }
-        const data = {
-            followed_id: articleInfo.author_id
-        };
-        const { code } = await concernInter(data);
-        if (code === 2000 && authorInfo.concern_status === true) {
-            message.success('关注成功');
-        } else {
-            message.success('取消关注成功');
-        }
-        loadButton.value = false;
-        authorInfo.concern_status = !authorInfo.concern_status;
-    } catch (error) {
-        message.error(error);
-        loadButton.value = false;
     }
 };
 // 应用防抖到关注函数
@@ -525,6 +561,16 @@ watchEffect(async () => {
     // 当 Markdown 内容变化时重新生成标题列表
     await getTitle();
 });
+
+//-----------------------------------发布文章-----------------------
+// const publicArticles = () => {
+//     console.log('fabu');
+
+//     if (userInfo.token === '') {
+//         loginAppear.value = true;
+//         triggerType.value = '发布文章';
+//     }
+// };
 </script>
 <template>
     <div class="wrap">
@@ -614,7 +660,14 @@ watchEffect(async () => {
             <div class="reviewModule">
                 <h2>评论 {{ commentTotal }}</h2>
                 <div class="loginRegist" v-if="LoginVis" ref="reviewBox">
-                    <n-avatar round size="large" :src="authorInfo.head" />
+                    <n-avatar
+                        round
+                        size="large"
+                        :src="
+                            userInfo.userInfo?.avatar_path ||
+                            'https://img.ixintu.com/download/jpg/20210107/f907205dea2b81710a49c05a0afb9d0a_512_512.jpg!bg'
+                        "
+                    />
                     <div class="loginBgc">
                         <n-button strong secondary round type="primary" @click="login">登录注册</n-button>
                         <span>登录后可评论</span>

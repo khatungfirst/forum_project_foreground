@@ -5,9 +5,14 @@ export const getMemberInfo = (params: any): Promise<any> => {
     return $get('/user/init_userinfo', params);
 };
 
-//2、获取文章或者收藏的对应数据
+//2-1、获取文章或者收藏的对应数据（登录后）
 export const getArticleInfo = (params: any): Promise<any> => {
     return $get('/article/get_type_data', params);
+};
+
+//2-2、获取文章或者收藏的对应数据(游客)
+export const getTouristArticleInfo = (params: any): Promise<any> => {
+    return $get('/article/tourists/get_type_data', params);
 };
 
 //3、获取对应关注列表的id
