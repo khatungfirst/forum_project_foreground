@@ -81,7 +81,7 @@ onMounted(async () => {
 });
 
 const getcommentResponse = async () => {
-    const commentResponse = await comment_message({ page: 1, limit: 5 });
+    const commentResponse = await comment_message({ page: 1, limit: 10 });
     if (commentResponse.code === 2000) {
         commentList.value = commentResponse.data.comment_list;
     } else {
@@ -133,12 +133,15 @@ const likeComment = async (comment) => {
     } else {
         comment.likes_count--; // 点赞-1
     }
+    console.log('b评论点赞状态:', comment.likeStatus);
     // 调用接口更新点赞状态
     const data = {
         id: comment.id,
-        status: comment.likeStatus ? 1 : 0,
+        status: comment.likeStatus ? 2 : 1,
         user_id: comment.user_id
     };
+    console.log('传递的点赞状态:', data.status);
+
     // const status = likedComments.value.has(comment.id) ? 2 : 1;
     const response = await like_comment_message(data);
     if (response.code === 2000) {
@@ -150,6 +153,7 @@ const likeComment = async (comment) => {
         //     likedComments.value.delete(comment.id);
         // }
         getcommentResponse();
+        console.log(111, commentResponse.data.comment_list);
         console.log('点赞评论操作成功');
     } else {
         console.error('点赞操作失败:', response.message);
