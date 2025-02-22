@@ -2,13 +2,13 @@
 import { useRouter } from 'vue-router';
 import { Tag_follow } from '../../../config/apis/tag';
 import { useUserStore } from '@/config/store/userStore';
-
+const userStore = useUserStore();
 const emit = defineEmits(['follow']);
 const props = defineProps({
     tag: { type: Object, required: true },
     isFollowing: { type: Boolean, default: false } // 接收父组件的加载状态
 });
-
+const tagToFollow = ref(null); // 用于存储待关注的标签id
 const isFollowed = ref(props.isFollowing);
 const loadingState = ref(false); // 存储每个标签的加载状态
 // const handleFollow = () => {
@@ -16,6 +16,13 @@ const loadingState = ref(false); // 存储每个标签的加载状态
 // };
 
 const handleFollow = async () => {
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        emit('follow', props.tag.id);
+        // loginAppear.value = true;
+        // console.log('关注了', loginAppear.value);
+        return;
+    }
     try {
         // 设置加载状态
         loadingState.value = true;
