@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router';
 import { concernInter } from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';
 import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
 import { useMessage } from 'naive-ui';
 
 const prop = defineProps({
@@ -24,6 +25,10 @@ const prop = defineProps({
             fans_count: 0,
             is_followed: 0
         })
+    },
+    islogin: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -33,9 +38,19 @@ const router = useRouter();
 
 const userInfo = useUserStore();
 
+const touristPattern = useTouristPattern();
+
 const concernStatus = ref(prop.item.is_followed);
 
 const loginId = userInfo.userInfo?.id || 0;
+
+//监听游客是否已经登录
+onMounted(() => {
+    if (!prop.item.is_followed && prop.islogin) {
+        console.log('kkk');
+        concern(touristPattern.triggerContent);
+    }
+});
 
 const emit = defineEmits(['jump-memberCenter', 'concern']);
 

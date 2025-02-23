@@ -141,8 +141,9 @@ const highlightedSummary = ref(prop.item.summary);
             span {
                 margin: 0px 5px;
                 font-size: 14px;
-                color: #868686;
+                color: #989da6;
                 padding: 0px 5px;
+                font-weight: 500;
             }
 
             .time {
