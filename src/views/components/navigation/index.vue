@@ -191,99 +191,106 @@ watch(
 </script>
 
 <template>
-    <div class="nav-container">
-        <div class="nav">
-            <img src="" alt="" />
-            <span class="title">思悟</span>
-            <div class="tabs">
-                <router-link
-                    to="/home"
-                    class="nav-link"
-                    :class="{ active: activeTab === 'home' }"
-                    @click="switchTab('home')"
+    <div class="all">
+        <div class="nav-container">
+            <div class="nav">
+                <img src="" alt="" />
+                <span class="title">思悟</span>
+                <div class="tabs">
+                    <router-link
+                        to="/home"
+                        class="nav-link"
+                        :class="{ active: activeTab === 'home' }"
+                        @click="switchTab('home')"
+                    >
+                        首页
+                    </router-link>
+                    <router-link
+                        to="/tag"
+                        class="nav-link"
+                        :class="{ active: activeTab === 'tag' }"
+                        @click="switchTab('tag')"
+                    >
+                        标签
+                    </router-link>
+                </div>
+            </div>
+            <div class="actions">
+                <n-input
+                    v-model:value="keyword"
+                    placeholder="搜一搜..."
+                    class="search-input"
+                    @focus="handleFocus"
+                    @keydown.enter="handleSearch"
                 >
-                    首页
-                </router-link>
-                <router-link
-                    to="/tag"
-                    class="nav-link"
-                    :class="{ active: activeTab === 'tag' }"
-                    @click="switchTab('tag')"
+                    <template #prefix>
+                        <n-icon :component="IosSearch" />
+                    </template>
+                </n-input>
+                <n-dropdown
+                    trigger="click"
+                    :show="showDropdown"
+                    :options="options"
+                    @select="handleSelect"
+                    size="large"
+                    style="width: 75px"
                 >
-                    标签
-                </router-link>
+                    <n-button @click="handleClick" n-button text style="font-size: 24px">
+                        <n-icon><i class="iconfont icon-xiaoxi"></i></n-icon>
+                        <span v-if="hasNewMessage" class="new-message-dot"></span>
+                    </n-button>
+                </n-dropdown>
+
+                <template v-if="userStore.isLoggedIn">
+                    <!-- 添加。stop修饰符阻止事件冒泡 -->
+                    <n-button n-button text>
+                        <n-avatar
+                            size="large"
+                            round
+                            :src="userStore.userInfo.avatar_path"
+                            style="margin: 0 20px"
+                            class="avater"
+                            @click.stop="toggleAuthorInfo"
+                        />
+                    </n-button>
+                    <div v-if="isAuthorInfo" ref="mask" class="author-message-card">
+                        <authorMessage :authorInfo="authorInfo">
+                            <template #actions>
+                                <hr class="article-rank-divider" />
+                                <div class="actions-slot">
+                                    <n-button quaternary @click="handleSettings">
+                                        <n-icon>
+                                            <i class="iconfont icon-icon02 button_icon" style="font-size: 24px"></i>
+                                        </n-icon>
+                                        <span class="button_text">设置</span>
+                                    </n-button>
+                                    <n-button quaternary @click="handleLogout">
+                                        <n-icon><i class="iconfont icon-tuichu button_icon"></i></n-icon>
+                                        <span class="button_text">退出</span>
+                                    </n-button>
+                                </div>
+                            </template>
+                        </authorMessage>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <n-button @click="handleLogin" class="common-button">登录注册</n-button>
+                </template>
             </div>
         </div>
-        <div class="actions">
-            <n-input
-                v-model:value="keyword"
-                placeholder="搜一搜..."
-                class="search-input"
-                @focus="handleFocus"
-                @keydown.enter="handleSearch"
-            >
-                <template #prefix>
-                    <n-icon :component="IosSearch" />
-                </template>
-            </n-input>
-            <n-dropdown
-                trigger="click"
-                :show="showDropdown"
-                :options="options"
-                @select="handleSelect"
-                size="large"
-                style="width: 75px"
-            >
-                <n-button @click="handleClick" n-button text style="font-size: 24px">
-                    <n-icon><i class="iconfont icon-xiaoxi"></i></n-icon>
-                    <span v-if="hasNewMessage" class="new-message-dot"></span>
-                </n-button>
-            </n-dropdown>
-
-            <template v-if="userStore.isLoggedIn">
-                <!-- 添加。stop修饰符阻止事件冒泡 -->
-                <n-button n-button text>
-                    <n-avatar
-                        size="large"
-                        round
-                        :src="userStore.userInfo.avatar_path"
-                        style="margin: 0 20px"
-                        class="avater"
-                        @click.stop="toggleAuthorInfo"
-                    />
-                </n-button>
-                <div v-if="isAuthorInfo" ref="mask" class="author-message-card">
-                    <authorMessage :authorInfo="authorInfo">
-                        <template #actions>
-                            <hr class="article-rank-divider" />
-                            <div class="actions-slot">
-                                <n-button quaternary @click="handleSettings">
-                                    <n-icon>
-                                        <i class="iconfont icon-icon02 button_icon" style="font-size: 24px"></i>
-                                    </n-icon>
-                                    <span class="button_text">设置</span>
-                                </n-button>
-                                <n-button quaternary @click="handleLogout">
-                                    <n-icon><i class="iconfont icon-tuichu button_icon"></i></n-icon>
-                                    <span class="button_text">退出</span>
-                                </n-button>
-                            </div>
-                        </template>
-                    </authorMessage>
-                </div>
-            </template>
-
-            <template v-else>
-                <n-button @click="handleLogin" class="common-button">登录注册</n-button>
-            </template>
+        <div class="content">
+            <router-view />
         </div>
-    </div>
-    <div class="content">
-        <router-view />
     </div>
 </template>
 
 <style scoped lang="scss">
+.all {
+    width: 100%;
+    height: 100%;
+    background-color: #f2f3f5;
+}
 .nav-container {
     display: flex;
     position: fixed; // 固定在页面顶部
@@ -369,7 +376,7 @@ watch(
 
 .content {
     background-color: #f2f3f5;
-    padding: 20px;
+    padding: 20px 0px;
 }
 
 .icon-xiaoxi {
