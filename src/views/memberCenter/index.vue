@@ -134,8 +134,6 @@ const scrollLoad = () => {
     // 获取页面的滚动高度
     const scrollHeight = document.documentElement.scrollHeight;
 
-    console.log(scrollTop, windowHeight, scrollHeight);
-
     // 判断是否滚动到页面底部
     if (scrollTop + windowHeight + 1 >= scrollHeight) {
         if (tabValue.value === '关注') {
@@ -334,32 +332,40 @@ const fansList = async () => {
         if (fansData) {
             fansArr.value = fansData.data.user_info_list;
         }
+        if (!data.is_have_data) {
+            noMore.value = true;
+            console.log(noMore, 'ooo');
+        }
     }
 };
 
 //下拉加载关注列表数据
 const fansLoadInit = async () => {
-    if (isLoading.value) return;
-    isLoading.value = true;
-
-    setTimeout(async () => {
-        fansType.page++;
-        const { data } = await getConcernList(fansType);
-        if (data) {
-            isLoading.value = false;
-            if (data.ids.ids.length === 0) {
-                noMore.value = true;
-            } else {
-                fansId.value.push(...data.ids.ids);
-                const fansData = await getConcernDetail({
-                    ids: fansId.value,
-                    keyword: fansType.keyword,
-                    user_id: isTourist.value ? 0 : userInfor.userInfo.id
-                });
-                fansArr.value = fansData.data.user_info_list;
+    if (!noMore.value) {
+        if (isLoading.value) return;
+        isLoading.value = true;
+        setTimeout(async () => {
+            fansType.page++;
+            const { data } = await getConcernList(fansType);
+            if (data) {
+                isLoading.value = false;
+                if (data.ids.ids.length === 0) {
+                    noMore.value = true;
+                } else {
+                    fansId.value.push(...data.ids.ids);
+                    const fansData = await getConcernDetail({
+                        ids: fansId.value,
+                        keyword: fansType.keyword,
+                        user_id: isTourist.value ? 0 : userInfor.userInfo.id
+                    });
+                    fansArr.value = fansData.data.user_info_list;
+                }
+                if (!data.is_have_data) {
+                    noMore.value = true;
+                }
             }
-        }
-    }, 1000);
+        }, 1000);
+    }
 };
 
 //跳转到关注人的会员中心
@@ -398,18 +404,26 @@ const collectLoadButton = ref(false);
 const articleInit = async () => {
     articleArr.value = [];
     skeletonOther.value = true;
+    const getData = async (fetchFunction) => {
+        try {
+            const { data } = await fetchFunction();
+            if (data) {
+                articleArr.value = data.dataList;
+                if (!data.next) {
+                    noMore.value = true;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            skeletonOther.value = false;
+        }
+    };
+
     if (userInfor.token === '') {
-        const { data } = await getTouristArticleInfo(aticleType);
-        if (data) {
-            skeletonOther.value = false;
-            articleArr.value = data.dataList;
-        }
+        getData(() => getTouristArticleInfo(aticleType));
     } else {
-        const { data } = await getArticleInfo(aticleType);
-        if (data) {
-            skeletonOther.value = false;
-            articleArr.value = data.dataList;
-        }
+        getData(() => getArticleInfo(aticleType));
     }
 };
 
@@ -442,7 +456,7 @@ const tabChange = (value: string) => {
 
 //下拉加载文章数据
 const loadInit = async () => {
-    if (isTourist.value) {
+    if (isTourist.value && !noMore.value) {
         if (isLoading.value) return;
         isLoading.value = true;
         setTimeout(async () => {
@@ -453,7 +467,7 @@ const loadInit = async () => {
                     articleArr.value.push(...data.dataList);
                 }
                 isLoading.value = false;
-                if (data.dataList.length === 0) {
+                if (!data.next) {
                     noMore.value = true;
                 }
             }
@@ -469,7 +483,7 @@ const loadInit = async () => {
                     articleArr.value.push(...data.dataList);
                 }
                 isLoading.value = false;
-                if (data.dataList.length === 0) {
+                if (!data.next) {
                     noMore.value = true;
                 }
             }
@@ -833,7 +847,7 @@ const searchFun = () => {
         width: 80%;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: 3fr 1fr;
+        grid-template-columns: 7fr 2fr;
         // padding-top: 20px;
 
         .left {
@@ -996,7 +1010,7 @@ const searchFun = () => {
             margin-left: 20px;
 
             .n-button {
-                width: 90%;
+                width: 100%;
                 height: 40px;
                 margin: 20px 0px 30px 0px;
             }
@@ -1005,7 +1019,7 @@ const searchFun = () => {
                 padding-bottom: 20px;
             }
             .n-card {
-                width: 90%;
+                width: 100%;
                 margin-bottom: 20px;
                 border-radius: 5px;
 
