@@ -139,14 +139,8 @@ const handleCloseAuthor = () => {
             @trigger-type="performOperation"
             @close-author="handleCloseAuthor"
         ></author>
-        <div class="tag-list-container">
-            <TagItem
-                v-for="tag in tags"
-                :key="tag.id"
-                :tag="tag"
-                :is-following="tag.status === 1"
-                @follow="follow_tag(tag.id)"
-            />
+        <div class="tag-list-container" @follow="follow_tag(tag.id)">
+            <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" :is-following="tag.status === 1" />
         </div>
         <div>
             <PublishButton></PublishButton>
@@ -159,7 +153,7 @@ const handleCloseAuthor = () => {
 .content {
     display: flex;
     justify-content: center;
-    margin-top: 85px;
+    margin-top: 35px;
 }
 
 @include overlay;
@@ -173,26 +167,30 @@ const handleCloseAuthor = () => {
 }
 
 .tag-list-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    // padding: 100px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); // 设置为四列
+    gap: 20px; // 控制网格之间的间距
+    padding: 20px;
+    width: 80%;
+    cursor: pointer;
 }
 
-.tag-list-container {
-    display: flex;
-    // flex-wrap: nowrap;
-    justify-content: space-between;
-    // padding: 0px 90px;
-    gap: 20px; /* 控制标签之间的间距 */
-    width: 75%;
-}
+// .tag-list-container {
+//     display: flex;
+//     // flex-wrap: nowrap;
+//     justify-content: space-between;
+//     // padding: 0px 90px;
+//     gap: 20px; /* 控制标签之间的间距 */
+//     width: 75%;
+// }
 
 .tag-item-single {
     // width: 16%; /* 控制每个标签的宽度 */
-    border: 1px solid #ccc;
+    // border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;
     background-color: #ffffff;
+    // 设置最小宽度以防止内容太少时网格过窄
+    min-width: 200px;
 }
 </style>

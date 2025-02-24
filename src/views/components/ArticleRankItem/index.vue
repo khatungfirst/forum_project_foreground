@@ -55,9 +55,13 @@ const loadMoreData = () => {
     <div class="article-rank-item">
         <div class="article-rank-item_container">
             <div class="article-rank-item_header">
-                <i class="iconfont icon-zuozhe"></i>
-                <span>文章榜单</span>
-                <i class="iconfont icon-gengxin" @click="refreshArticles" style="cursor: pointer"></i>
+                <div class="header-left">
+                    <i class="iconfont icon-zuozhe"></i>
+                    <span>文章榜单</span>
+                </div>
+                <div class="header-right">
+                    <i class="iconfont icon-gengxin" @click="refreshArticles" style="cursor: pointer"></i>
+                </div>
             </div>
             <hr class="article-rank-divider" />
             <div class="article-rank-item_content">
@@ -106,8 +110,20 @@ const loadMoreData = () => {
     font-size: 17px;
     margin-bottom: 10px;
     text-align: left;
+    display: flex; /* 使用 flexbox 布局 */
+    align-items: center; /* 垂直居中 */
+    width: 100%; /* 确保占满容器宽度 */
+    justify-content: space-between;
+}
+.header-left {
+    display: flex;
+    align-items: center;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+}
 .article-rank-item_content {
     display: flex;
     flex-direction: column;
@@ -152,7 +168,7 @@ const loadMoreData = () => {
 }
 
 .icon-gengxin {
-    font-size: 24px;
+    font-size: 22px;
     color: #a9a5a5;
     float: right;
     margin-right: 20px;

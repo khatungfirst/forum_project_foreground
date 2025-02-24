@@ -322,7 +322,7 @@ const refreshArticles = () => {
     // text-align: center;
     // margin: 0 auto;
     width: 80%;
-    margin-top: 75px;
+    margin-top: 55px;
 }
 @include overlay;
 .loginCom {
