@@ -64,9 +64,11 @@ const refreshAuthors = () => {
     <div class="author-rank-item">
         <div class="author-rank-item_container">
             <div class="author-rank-item_header">
-                <i class="iconfont icon-zuozhe1"></i>
-                <span>作家榜单</span>
-                <i class="iconfont icon-gengxin" @click="refreshAuthors"></i>
+                <div class="author-rank-item_left">
+                    <i class="iconfont icon-zuozhe1"></i>
+                    <span>作家榜单</span>
+                </div>
+                <i class="iconfont icon-gengxin author-rank-item_right" @click="refreshAuthors"></i>
             </div>
             <hr class="author-rank-divider" />
             <div class="author-rank-item_content">
@@ -124,11 +126,23 @@ const refreshAuthors = () => {
 }
 
 .author-rank-item_header {
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    width: 100%; /* 确保占满容器宽度 */
+    justify-content: space-between;
     font-size: 17px;
     margin-bottom: 10px;
     text-align: left;
 }
+.author-rank-item_left {
+    display: flex;
+    align-items: center;
+}
 
+.author-rank-item_right {
+    display: flex;
+    align-items: center;
+}
 .author-rank-item_content {
     display: flex;
     flex-direction: column;
@@ -200,12 +214,12 @@ const refreshAuthors = () => {
 }
 
 .iconfont .icon-zuozhe1 {
-    font-size: 24px;
+    font-size: 26px;
     color: #19a059;
 }
 
 .icon-gengxin {
-    font-size: 24px;
+    font-size: 22px;
     color: #a9a5a5;
     float: right;
     margin-right: 20px;

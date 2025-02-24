@@ -350,10 +350,10 @@ watch(
     top: 0;
     left: 0;
     right: 0;
-    z-index: 996; // 确保导航栏在最上层
+    z-index: 998; // 确保导航栏在最上层
     justify-content: space-between;
     align-items: center;
-    padding: 15px 120px;
+    padding: 15px 110px;
     background-color: #ffffff;
 }
 

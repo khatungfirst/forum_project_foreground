@@ -123,29 +123,29 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
         <div class="container">
             <div class="tag-list-container">
                 <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" />
-            </div>
-            <div class="search-mid">
-                <n-tabs type="line" animated v-model:value="currentTab">
-                    <n-tab-pane name="0" tab="热门">
-                        <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                            <Article v-for="article in articles" :key="article.id" :item="article" />
-                        </n-infinite-scroll>
-                    </n-tab-pane>
-                    <n-tab-pane name="1" tab="最新">
-                        <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                        <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
-                            <Article v-for="article in articles" :key="article.id" :item="article" />
-                        </n-infinite-scroll>
-                    </n-tab-pane>
-                </n-tabs>
-                <div class="loading" v-if="isLoading && !noMore">
-                    <!-- <span class="videos">
+                <div class="search-mid">
+                    <n-tabs type="line" animated v-model:value="currentTab">
+                        <n-tab-pane name="0" tab="热门">
+                            <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                            <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                                <Article v-for="article in articles" :key="article.id" :item="article" />
+                            </n-infinite-scroll>
+                        </n-tab-pane>
+                        <n-tab-pane name="1" tab="最新">
+                            <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
+                            <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                                <Article v-for="article in articles" :key="article.id" :item="article" />
+                            </n-infinite-scroll>
+                        </n-tab-pane>
+                    </n-tabs>
+                    <div class="loading" v-if="isLoading && !noMore">
+                        <!-- <span class="videos">
                     <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
                 </span> -->
-                    <span class="text">加载中，数据正在飞速赶来~</span>
+                        <span class="text">加载中，数据正在飞速赶来~</span>
+                    </div>
+                    <div v-if="noMore" class="loading">-已经触及俺的底线啦~-</div>
                 </div>
-                <div v-if="noMore" class="loading">-已经触及俺的底线啦~-</div>
             </div>
         </div>
         <PublishButton></PublishButton>
@@ -156,7 +156,8 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 .content {
     display: flex;
     /* justify-content: center; */
-    /* margin-top: 65px; */
+    /* margin-top: 55px; */
+    width: 100%;
 }
 .wrapper {
     display: flex;
@@ -168,10 +169,10 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 
 .container {
     width: 100%;
-    max-width: 1200px; /* 最大宽度，防止内容过宽 */
     padding: 0;
     box-sizing: border-box; /* 确保 padding 不影响宽度 */
     margin: 0 auto; /* 让 container 水平居中 */
+    margin-top: 55px;
 }
 
 .tag-list-container {
@@ -181,13 +182,14 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 .search-mid {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    /* gap: 20px; */
     padding: 20px;
     background-color: white;
     margin-top: 20px;
     /* 根据需要调整宽度 */
-    margin: 20px auto; /* 水平居中 */
+    margin: 20px auto;
     text-align: left; /* 确保内容不居中 */
+    max-width: 1200px;
 }
 
 .loading {
