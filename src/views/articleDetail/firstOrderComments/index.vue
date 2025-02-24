@@ -132,7 +132,11 @@ const getSecondComments = async () => {
         if (data) {
             if (data.second_comments_list.length > 0) {
                 commentList.value = data.second_comments_list;
-                isSecondComments.value = true;
+                if (data.last_flag === '没有更多评论了') {
+                    isSecondComments.value = false;
+                } else {
+                    isSecondComments.value = true;
+                }
             } else {
                 isSecondComments.value = false;
             }
@@ -151,7 +155,11 @@ const moreSecondComments = async () => {
     if (data) {
         if (data.second_comments_list.length > 0) {
             commentList.value.push(...data.second_comments_list);
-            isSecondComments.value = true;
+            if (data.last_flag === '没有更多评论了') {
+                isSecondComments.value = false;
+            } else {
+                isSecondComments.value = true;
+            }
         } else {
             isSecondComments.value = false;
         }

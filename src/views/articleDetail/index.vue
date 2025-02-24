@@ -351,10 +351,23 @@ const personalLetter = () => {
 
 //页面滚动到一定位置触发的事件：作者信息的位置
 const handleScroll = () => {
-    if (window.scrollY >= 260) {
-        isAuthorInfo.value = true;
+    // 获取当前滚动位置
+    const scrollTop = window.scrollY;
+    // 获取页面的总高度
+    const windowHeight = window.innerHeight;
+    // 获取页面的滚动高度
+    const scrollHeight = document.documentElement.scrollHeight;
+
+    // 判断是否滚动到页面底部
+    if (scrollTop + windowHeight + 1 >= scrollHeight) {
+        console.log('滚动到底部');
+        handleLoadComment();
     } else {
-        isAuthorInfo.value = false;
+        if (window.scrollY >= 260) {
+            isAuthorInfo.value = true;
+        } else {
+            isAuthorInfo.value = false;
+        }
     }
 };
 
@@ -379,7 +392,7 @@ const commentTotal = ref(0);
 const LoginVis = ref(true);
 
 //判断新加载是否获得了数据
-const isHavaData = ref(false);
+const isHavaData = ref(true);
 
 //控制emoji框是否显示
 const isEmojiDisappear = ref(false);
@@ -389,6 +402,9 @@ const reviewBox = ref(null);
 
 //获取当前登录人的头像
 const head_shot = userInfo.userInfo?.avatar_path || '';
+
+//是否在加载评论
+const isLoading = ref(false);
 
 //评论相关数据
 const commentInfo = reactive({
@@ -402,6 +418,7 @@ const commentInfo = reactive({
 const initComments = async () => {
     commentInfo.offset = 1;
     commentsList.value = [];
+    isLoading.value = true;
     if (userInfo.token) {
         LoginVis.value = false;
     }
@@ -409,11 +426,13 @@ const initComments = async () => {
     if (data) {
         if (data.first_comments_list.length > 0) {
             commentsList.value = data.first_comments_list;
-            isHavaData.value = true;
-            console.log(commentsList.value, '000');
+            if (data.last_flag === '没有更多评论了') {
+                isHavaData.value = false;
+            }
         }
         commentTotal.value = data.comments_total;
     }
+    isLoading.value = false;
 };
 
 //跳转到登录页面的方法
@@ -456,17 +475,18 @@ const deleteFirst = (id) => {
 //评论的下拉事件
 const handleLoad = async () => {
     if (isHavaData.value) {
+        isLoading.value = true;
         commentInfo.offset = commentInfo.offset + 1;
         const { data } = await getFirstOrderComments(commentInfo);
         if (data) {
             if (data.first_comments_list.length > 0) {
                 commentsList.value.push(...data.first_comments_list);
-                isHavaData.value = true;
-            } else {
-                isHavaData.value = false;
-                commentInfo.offset = commentInfo.offset - 1;
+                if (data.last_flag === '没有更多评论了') {
+                    isHavaData.value = false;
+                }
             }
         }
+        isLoading.value = false;
     }
 };
 const handleLoadComment = debounce(handleLoad, 200);
@@ -698,6 +718,10 @@ const pubicArticle = () => {
                                 @delete-firComments="deleteFirst"
                                 :isLogin="isLogin"
                             ></FirstOrderComments>
+                            <div class="load-ing">
+                                <span class="text" v-if="isLoading && isHavaData">加载中，数据正在飞速赶来~</span>
+                                <span v-if="!isHavaData" class="text">-已经触及俺的底线啦~-</span>
+                            </div>
                         </n-infinite-scroll>
                     </div>
                 </div>
@@ -868,7 +892,7 @@ const pubicArticle = () => {
     }
     .middle {
         position: relative; /* 使子元素可以绝对定位 */
-        width: 60%;
+        // width: 60%;
         flex: 1;
         margin: 0px 20px;
         .article-detail {
@@ -978,6 +1002,13 @@ const pubicArticle = () => {
                         width: 200px;
                     }
                 }
+                .load-ing {
+                    margin-top: 15px;
+                    text-align: center;
+                    width: 100%;
+                    color: #7d8791;
+                    bottom: 0px;
+                }
             }
         }
 
@@ -986,10 +1017,11 @@ const pubicArticle = () => {
         }
     }
     .right {
-        width: 25%;
+        width: 17%;
+        margin-right: 10%;
 
         .author-detail {
-            width: 70%;
+            width: 100%;
             // height: 200px;
             background-color: #fff;
             margin-bottom: 20px;
@@ -1006,7 +1038,7 @@ const pubicArticle = () => {
         }
 
         .right-second {
-            width: 70%;
+            width: 100%;
         }
 
         .fixed {
