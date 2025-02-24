@@ -155,9 +155,9 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 <style scoped>
 .content {
     display: flex;
-    /* justify-content: center; */
-    /* margin-top: 55px; */
-    width: 100%;
+    justify-content: center;
+    /* width: 80%; */
+    padding: 20px 50px;
 }
 .wrapper {
     display: flex;
@@ -168,7 +168,7 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 }
 
 .container {
-    width: 100%;
+    width: 78%;
     padding: 0;
     box-sizing: border-box; /* 确保 padding 不影响宽度 */
     margin: 0 auto; /* 让 container 水平居中 */
