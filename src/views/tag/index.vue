@@ -123,12 +123,22 @@ const getTagListAgain = async () => {
         console.error('重新请求标签数据出错:', error);
     }
 };
+
+const handleCloseAuthor = () => {
+    loginAppear.value = false;
+};
 </script>
 
 <template>
     <div class="content">
         <div class="overlay" v-if="loginAppear"></div>
-        <author v-if="loginAppear" class="loginCom" :type="triggerType" @trigger-type="performOperation"></author>
+        <author
+            v-if="loginAppear"
+            class="loginCom"
+            :type="triggerType"
+            @trigger-type="performOperation"
+            @close-author="handleCloseAuthor"
+        ></author>
         <div class="tag-list-container">
             <TagItem
                 v-for="tag in tags"
@@ -149,7 +159,7 @@ const getTagListAgain = async () => {
 .content {
     display: flex;
     justify-content: center;
-    margin-top: 65px;
+    margin-top: 85px;
 }
 
 @include overlay;
@@ -166,20 +176,20 @@ const getTagListAgain = async () => {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    padding: 100px;
+    // padding: 100px;
 }
 
 .tag-list-container {
     display: flex;
-    flex-wrap: wrap;
+    // flex-wrap: nowrap;
     justify-content: space-between;
-    padding: 0px 90px;
+    // padding: 0px 90px;
     gap: 20px; /* 控制标签之间的间距 */
-    width: 87%;
+    width: 75%;
 }
 
 .tag-item-single {
-    width: calc(33% - 20px); /* 控制每个标签的宽度 */
+    // width: 16%; /* 控制每个标签的宽度 */
     border: 1px solid #ccc;
     border-radius: 5px;
     padding: 10px;

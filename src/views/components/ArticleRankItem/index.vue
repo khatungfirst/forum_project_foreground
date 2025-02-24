@@ -72,7 +72,7 @@ const loadMoreData = () => {
                     </div>
                 </div>
             </div>
-            <hr class="article-rank-divider" />
+            <!-- <hr class="article-rank-divider" /> -->
             <div class="article-rank-more">
                 <!-- <span>查看更多</span> -->
             </div>
@@ -87,7 +87,7 @@ const loadMoreData = () => {
     align-items: center;
     padding: 10px;
     border-radius: 5px;
-    width: 290px;
+    /* width: 290px; */
 }
 
 .article-rank-item_single {

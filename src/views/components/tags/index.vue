@@ -11,6 +11,8 @@ const props = defineProps({
 const tagToFollow = ref(null); // 用于存储待关注的标签id
 const isFollowed = ref(props.isFollowing);
 const loadingState = ref(false); // 存储每个标签的加载状态
+const router = useRouter();
+
 // const handleFollow = () => {
 //     emit('follow', props.tag.id);
 // };

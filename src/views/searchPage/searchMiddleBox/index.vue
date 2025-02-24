@@ -162,7 +162,7 @@ const scrollLoad = () => {
 <style scoped lang="scss">
 @use '@/assets/styles/mixin.scss' as *;
 .search-mid {
-    width: 80%;
+    width: 70%;
     margin: 0 auto;
     .n-tabs {
         width: 100%;
