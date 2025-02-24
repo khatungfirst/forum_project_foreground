@@ -112,6 +112,7 @@ const handleCloseAuthor = () => {
         background-color: #f2f3f5;
         border-radius: 5px;
         padding-top: 50px;
+        margin-top: 6px;
 
         .n-tabs :deep(.n-tabs-nav-scroll-content) {
             height: 50px;
