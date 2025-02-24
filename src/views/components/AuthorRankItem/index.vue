@@ -92,7 +92,7 @@ const refreshAuthors = () => {
                     </div>
                 </div>
             </div>
-            <hr class="author-rank-divider" />
+            <!-- <hr class="author-rank-divider" /> -->
             <div class="author-rank-more">
                 <!-- <span>查看更多></span> -->
             </div>
@@ -108,7 +108,7 @@ const refreshAuthors = () => {
     padding: 10px;
     /* border: 1px solid #ccc; */
     border-radius: 5px;
-    width: 290px;
+    /* width: 290px; */
 }
 
 .author-rank-item_single {

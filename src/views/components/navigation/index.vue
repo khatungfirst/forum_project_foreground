@@ -11,6 +11,10 @@ import authorMessage from '../../../views/articleDetail/authorMessage/index.vue'
 import { getAuthorDetail } from '@/config/apis/articleDetail';
 // import { eventBus } from '@/utils/eventBus.ts';
 import { logout } from '@/config/apis/login';
+
+import { useTouristPattern } from '@/config/store/touristPattern';
+import author from '@/views/components/Author/index.vue';
+const useTourist = useTouristPattern();
 const router = useRouter();
 const activeTab = ref('home');
 
@@ -81,9 +85,58 @@ const options = ref([
         disabled: true
     }
 ]);
+//----------------------------游客模式---------------------------------
 
+//控制登录组件是否出现
+const loginAppear = ref(false);
+
+//触发登录的事件类型
+const triggerType = ref('');
+
+//告知子组件是否已经登录完毕
+const isLogin = ref(false);
+
+//登录后继续执行操作
+// const performOperation = (type: string) => {
+//     loginAppear.value = false;
+//     switch (type) {
+//         case '关注':
+//             // 实现自动关注的方法
+//             isLogin.value = true;
+//             break;
+//     }
+// };
+const performOperation = () => {
+    loginAppear.value = false;
+    switch (type) {
+        case '消息':
+            // 自动关注
+
+            isLogin.value = true;
+            break;
+    }
+};
+watch(
+    () => useTourist.triggerType,
+    (newVal) => {
+        loginAppear.value = true;
+        triggerType.value = newVal;
+    }
+);
+
+const handleCloseAuthor = () => {
+    loginAppear.value = false;
+};
+// ---------------------
 const handleClick = () => {
-    showDropdownRef.value = !showDropdownRef.value;
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        loginAppear.value = true;
+        triggerType.value = '消息';
+        console.log(' loginAppear.value', loginAppear.value);
+    } else {
+        showDropdownRef.value = !showDropdownRef.value;
+    }
 };
 
 const currentComponent = computed(() => {
@@ -226,14 +279,7 @@ watch(
                     <n-icon :component="IosSearch" />
                 </template>
             </n-input>
-            <n-dropdown
-                trigger="click"
-                :show="showDropdown"
-                :options="options"
-                @select="handleSelect"
-                size="large"
-                style="width: 75px"
-            >
+            <n-dropdown :show="showDropdown" :options="options" @select="handleSelect" size="large" style="width: 75px">
                 <n-button @click="handleClick" n-button text style="font-size: 24px">
                     <n-icon><i class="iconfont icon-xiaoxi"></i></n-icon>
                     <span v-if="hasNewMessage" class="new-message-dot"></span>
@@ -278,22 +324,26 @@ watch(
             </template>
         </div>
     </div>
+
     <div class="content">
         <router-view />
     </div>
 </template>
 
 <style scoped lang="scss">
+@use '@/assets/styles/mixin.scss' as *;
+
+@include overlay;
 .nav-container {
     display: flex;
     position: fixed; // 固定在页面顶部
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1000; // 确保导航栏在最上层
+    z-index: 996; // 确保导航栏在最上层
     justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
+    padding: 15px 120px;
     background-color: #ffffff;
 }
 
@@ -369,7 +419,7 @@ watch(
 
 .content {
     background-color: #f2f3f5;
-    padding: 20px;
+    // padding: 20px;
 }
 
 .icon-xiaoxi {

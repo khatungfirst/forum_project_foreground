@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/config/store/userStore';
+const userStore = useUserStore();
+
 const prop = defineProps({
     authorInfo: {
         type: Object as () => {
@@ -30,6 +33,7 @@ const router = useRouter();
 
 const jumpCenter = (id) => {
     router.push(`/member/${id}`);
+    userStore.jumpToMemberCenter = id;
 };
 </script>
 <template>
