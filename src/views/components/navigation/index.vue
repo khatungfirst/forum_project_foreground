@@ -353,8 +353,9 @@ watch(
     z-index: 996; // 确保导航栏在最上层
     justify-content: space-between;
     align-items: center;
-    padding: 15px 120px;
+    padding: 15px 152px;
     background-color: #ffffff;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .nav {
