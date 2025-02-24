@@ -169,8 +169,8 @@ const handlePreview = async (item) => {
                     <n-avatar round size="large" :src="userInfo.path" style="width: 100%; height: 100%" />
                 </n-upload>
                 <p>上传头像</p>
-                <p class="small">格式：支持JPG、PNG、JPEG</p>
-                <p class="small">大小：5M以内</p>
+                <p class="small">格式：支持JPG、PNG、JPEG、GIF</p>
+                <p class="small">大小：2M以内</p>
             </div>
         </div>
         <div class="commitButton">
