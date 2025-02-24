@@ -93,7 +93,7 @@ const highlightedSummary = ref(prop.item.summary);
             <slot class="edit" name="edit"></slot>
             <div class="right" v-if="prop.item.image_url !== ''">
                 <img
-                    :src="`${prop.item.image_url}?path=${prop.item.image_url}width=150&height=100&level=5`"
+                    :src="`${prop.item.image_url}?path=${prop.item.image_url}width=150&height=100&level=0`"
                     alt="封面图"
                 />
             </div>

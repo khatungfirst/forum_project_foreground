@@ -64,7 +64,7 @@ const goBack = () => {
     overflow: hidden;
     margin-top: 55px;
     .top {
-        width: 75%;
+        width: 80%;
         height: 50px;
         line-height: 50px;
         margin: 15px auto;
@@ -82,7 +82,7 @@ const goBack = () => {
     }
 
     .middle {
-        width: 75%;
+        width: 80%;
         height: 90%;
         margin: 0 auto;
         display: flex;

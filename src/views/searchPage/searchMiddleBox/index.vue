@@ -53,15 +53,18 @@ const init = async () => {
     if (data && data.selectedList.length > 0) {
         selectData.value = data.selectedList;
         isHaveData.value = false;
+        if (!data.next) {
+            noMore.value = true;
+        }
     }
 };
 
 watch(
     () => userStore.selectInfo,
-    (newVal, oldVal) => {
+    (newVal) => {
         dataObj.keyword = newVal;
+        dataObj.page = 1;
         init();
-        console.log(oldVal, '======');
     },
     { immediate: true }
 );
@@ -79,17 +82,20 @@ const dataContainer = ref(null);
 const loadInit = async () => {
     if (isLoading.value) return;
     isLoading.value = true;
-    setTimeout(async () => {
-        dataObj.page++;
-        const { data } = await getSelectArticle(dataObj);
-        if (data && data.selectedList.length > 0 && selectData) {
-            selectData.value.push(...data.selectedList);
-        } else {
-            dataObj.page--;
-            noMore.value = true;
-        }
-        isLoading.value = false;
-    }, 200);
+    if (!noMore.value) {
+        setTimeout(async () => {
+            dataObj.page++;
+            const { data } = await getSelectArticle(dataObj);
+            if (data && data.selectedList.length > 0 && selectData) {
+                selectData.value.push(...data.selectedList);
+                if (!data.next) {
+                    console.log('没有更多数据了');
+                    noMore.value = true;
+                }
+            }
+            isLoading.value = false;
+        }, 200);
+    }
 };
 const loadInitDebounce = debounce(loadInit, 300);
 
