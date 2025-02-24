@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+// import { ref } from 'vue';
+// import { useRouter } from 'vue-router';
 
-const router = useRouter();
-const isHover = ref(false);
+// const router = useRouter();
+// const isHover = ref(false);
 
-const handleReleaseArticle = () => {
-    router.push({ path: '/articlerelease/0' }); // 路由跳转到发布文章页面
-};
+// const handleReleaseArticle = () => {
+//     router.push({ path: '/articlerelease/0' }); // 路由跳转到发布文章页面
+// };
 </script>
 
 <template>
     <div class="publish">
-        <div class="publish-icon-border" @click="handleReleaseArticle">
+        <div class="publish-icon-border">
             <i class="iconfont icon-bianji"></i>
         </div>
         <n-button strong secondary round type="primary" class="button hide-button">

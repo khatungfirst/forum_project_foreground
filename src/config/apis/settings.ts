@@ -10,9 +10,14 @@ export const changeLetterStatus = (params: any): Promise<any> => {
     return $post('/user/private_settings', params);
 };
 
-///获取到账号管理的各项数据
+//获取到账号管理的各项数据
 export const getNumberData = (params: any): Promise<any> => {
     return $get('/user/account_settings', params);
+};
+
+///获取到账号管理的各项数据(游客)
+export const getTouristNumberData = (params: any): Promise<any> => {
+    return $get('/tourist/account_settings', params);
 };
 
 //改变账号管理的数据

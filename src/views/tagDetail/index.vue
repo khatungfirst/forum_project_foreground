@@ -143,9 +143,9 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
                     <!-- <span class="videos">
                     <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
                 </span> -->
-                    <span class="text">正在全力加载中...</span>
+                    <span class="text">加载中，数据正在飞速赶来~</span>
                 </div>
-                <div v-if="noMore" class="loading">-没有更多了-</div>
+                <div v-if="noMore" class="loading">-已经触及俺的底线啦~-</div>
             </div>
         </div>
         <PublishButton></PublishButton>

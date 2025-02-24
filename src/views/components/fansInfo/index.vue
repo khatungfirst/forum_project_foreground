@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router';
 import { concernInter } from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';
 import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
 import { useMessage } from 'naive-ui';
 
 const prop = defineProps({
@@ -24,6 +25,10 @@ const prop = defineProps({
             fans_count: 0,
             is_followed: 0
         })
+    },
+    islogin: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -33,9 +38,29 @@ const router = useRouter();
 
 const userInfo = useUserStore();
 
+const touristPattern = useTouristPattern();
+
 const concernStatus = ref(prop.item.is_followed);
 
 const loginId = userInfo.userInfo?.id || 0;
+
+//监听游客是否已经登录
+onUpdated(() => {
+    if (prop.islogin) {
+        if (!prop.item.is_followed && prop.item.id === touristPattern.triggerContent) {
+            concern(touristPattern.triggerContent);
+        }
+    }
+});
+
+watch(
+    () => prop.item.is_followed,
+    (newVal) => {
+        concernStatus.value = newVal;
+    }
+);
+
+const emit = defineEmits(['jump-memberCenter', 'concern']);
 
 //控制关注/取消关注关注的人的按钮加载效果
 const followLoadButton = ref(false);
@@ -45,27 +70,30 @@ const fansCount = ref(prop.item.fans_count);
 
 //关注的方法
 const concernFun = async (id) => {
-    followLoadButton.value = true;
-    const { code } = await concernInter({
-        followed_id: id
-    });
-    if (code === 2000) {
-        if (concernStatus.value) {
-            message.success('关注成功');
-            fansCount.value++;
-        } else {
-            message.success('取消关注成功');
-        }
-        followLoadButton.value = false;
-        concernStatus.value = concernStatus.value === 0 ? 1 : 0;
+    if (userInfo.token === '') {
+        emit('concern');
     } else {
-        message.error('关注失败');
-        followLoadButton.value = false;
+        followLoadButton.value = true;
+        const { code } = await concernInter({
+            followed_id: id
+        });
+        if (code === 2000) {
+            if (!concernStatus.value) {
+                message.success('关注成功');
+                fansCount.value++;
+            } else {
+                message.success('取消关注成功');
+                fansCount.value--;
+            }
+            followLoadButton.value = false;
+            concernStatus.value = concernStatus.value === 0 ? 1 : 0;
+        } else {
+            message.error('关注失败');
+            followLoadButton.value = false;
+        }
     }
 };
 const concern = debounce(concernFun, 500);
-
-const emit = defineEmits(['jump-memberCenter']);
 
 //跳转到关注人的会员中心
 const routeMember = (id) => {

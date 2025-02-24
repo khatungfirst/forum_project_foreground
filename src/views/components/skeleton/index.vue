@@ -7,4 +7,8 @@
         <n-skeleton text style="width: 51%" animated />
     </div>
 </template>
-<style lang="scss"></style>
+<style lang="scss">
+.ske {
+    height: 100%;
+}
+</style>
