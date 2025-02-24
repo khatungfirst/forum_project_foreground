@@ -755,7 +755,7 @@ const pubicArticle = () => {
                                     @click.stop="rollTo(item, index)"
                                     :class="index === heightTitle ? 'title-active' : ''"
                                 >
-                                    <a style="cursor: pointer">{{ item.title }}</a>
+                                    <a style="cursor: pointer; word-break: break-all">{{ item.title }}</a>
                                 </div>
                             </div>
                         </n-collapse-item>
@@ -1017,7 +1017,7 @@ const pubicArticle = () => {
         .catalogue {
             // width: 70%;
             background-color: #fff;
-            // padding: 15px;
+            padding-bottom: 5px;
             margin-bottom: 20px;
             border-radius: 5px;
 
@@ -1028,6 +1028,7 @@ const pubicArticle = () => {
 
             .catalogue-detail div {
                 margin-bottom: 10px;
+                padding-right: 5px;
             }
 
             .title-active {

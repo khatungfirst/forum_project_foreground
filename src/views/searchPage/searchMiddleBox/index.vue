@@ -41,7 +41,7 @@ const dataObj = reactive({
     keyword: route.query.keyword,
     category_id: prop.category_id,
     page: 1,
-    limit: 5,
+    limit: 6,
     kind: '0'
 });
 
@@ -118,35 +118,35 @@ const scrollLoad = () => {
 <template>
     <div class="search-mid">
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-            <n-tab-pane name="0" tab="热门" ref="dataContainer">
+            <n-tab-pane name="0" tab="热门" ref="dataContainer" style="min-height: 750px">
                 <skeleton v-if="isSkeleton"></skeleton>
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
                 <n-infinite-scroll
-                    style="min-height: 800px"
+                    style="min-height: 750px"
                     :distance="20"
                     @load="loadInitDebounce"
                     v-if="!isHaveData && !isSkeleton"
                 >
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
-                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                        <span v-if="noMore" class="text">-没有更多了-</span>
+                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                     </div>
                 </n-infinite-scroll>
             </n-tab-pane>
-            <n-tab-pane name="1" tab="最新" ref="dataContainer">
+            <n-tab-pane name="1" tab="最新" ref="dataContainer" style="min-height: 750px">
                 <skeleton v-if="isSkeleton"></skeleton>
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
                 <n-infinite-scroll
-                    style="min-height: 800px"
+                    style="min-height: 750px"
                     :distance="20"
                     @load="loadInitDebounce"
                     v-if="!isHaveData && !isSkeleton"
                 >
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
-                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                        <span v-if="noMore" class="text">-没有更多了-</span>
+                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                     </div>
                 </n-infinite-scroll>
             </n-tab-pane>
@@ -180,7 +180,7 @@ const scrollLoad = () => {
         }
 
         .load-ing {
-            margin-top: 15px;
+            margin: 15px 0px 15px 0px;
             text-align: center;
             width: 100%;
             color: #7d8791;

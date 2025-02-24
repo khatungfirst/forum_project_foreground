@@ -45,12 +45,20 @@ const concernStatus = ref(prop.item.is_followed);
 const loginId = userInfo.userInfo?.id || 0;
 
 //监听游客是否已经登录
-onMounted(() => {
-    if (!prop.item.is_followed && prop.islogin) {
-        console.log('kkk');
-        concern(touristPattern.triggerContent);
+onUpdated(() => {
+    if (prop.islogin) {
+        if (!prop.item.is_followed && prop.item.id === touristPattern.triggerContent) {
+            concern(touristPattern.triggerContent);
+        }
     }
 });
+
+watch(
+    () => prop.item.is_followed,
+    (newVal) => {
+        concernStatus.value = newVal;
+    }
+);
 
 const emit = defineEmits(['jump-memberCenter', 'concern']);
 
@@ -70,11 +78,12 @@ const concernFun = async (id) => {
             followed_id: id
         });
         if (code === 2000) {
-            if (concernStatus.value) {
+            if (!concernStatus.value) {
                 message.success('关注成功');
                 fansCount.value++;
             } else {
                 message.success('取消关注成功');
+                fansCount.value--;
             }
             followLoadButton.value = false;
             concernStatus.value = concernStatus.value === 0 ? 1 : 0;
