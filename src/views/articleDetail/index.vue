@@ -104,6 +104,9 @@ const performOperation = async (type: string) => {
                 debouncedConcernPost();
             }
             break;
+        case '发布文章':
+            router.push(`/articlerelease/0`);
+            break;
         default:
             if (loginTypes.includes(type)) {
                 isLogin.value = true;
@@ -563,14 +566,14 @@ watchEffect(async () => {
 });
 
 //-----------------------------------发布文章-----------------------
-// const publicArticles = () => {
-//     console.log('fabu');
-
-//     if (userInfo.token === '') {
-//         loginAppear.value = true;
-//         triggerType.value = '发布文章';
-//     }
-// };
+const pubicArticle = () => {
+    if (userInfo.token === '') {
+        triggerType.value = '发布文章';
+        loginAppear.value = true;
+    } else {
+        router.push(`/articlerelease/0`);
+    }
+};
 </script>
 <template>
     <div class="wrap">
@@ -752,7 +755,7 @@ watchEffect(async () => {
                                     @click.stop="rollTo(item, index)"
                                     :class="index === heightTitle ? 'title-active' : ''"
                                 >
-                                    <a style="cursor: pointer">{{ item.title }}</a>
+                                    <a style="cursor: pointer; word-break: break-all">{{ item.title }}</a>
                                 </div>
                             </div>
                         </n-collapse-item>
@@ -783,7 +786,7 @@ watchEffect(async () => {
                 </div>
             </div>
         </div>
-        <PublishButton></PublishButton>
+        <PublishButton @click="pubicArticle"></PublishButton>
     </div>
 </template>
 <style scoped lang="scss">
@@ -791,7 +794,7 @@ watchEffect(async () => {
 .wrap {
     display: flex;
     background-color: #f2f3f5;
-    margin-top: 75px;
+    margin-top: 85px;
     position: relative;
     .emojiOverlay {
         position: fixed; /* 固定定位 */
@@ -1014,7 +1017,7 @@ watchEffect(async () => {
         .catalogue {
             // width: 70%;
             background-color: #fff;
-            // padding: 15px;
+            padding-bottom: 5px;
             margin-bottom: 20px;
             border-radius: 5px;
 
@@ -1025,6 +1028,7 @@ watchEffect(async () => {
 
             .catalogue-detail div {
                 margin-bottom: 10px;
+                padding-right: 5px;
             }
 
             .title-active {

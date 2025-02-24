@@ -228,43 +228,44 @@ const refreshArticles = () => {
 </script>
 
 <template>
-    <div class="container">
-        <div class="overlay" v-if="loginAppear"></div>
-        <author
-            v-if="loginAppear"
-            class="loginCom"
-            :type="triggerType"
-            @trigger-type="performOperation"
-            @close-author="handleCloseAuthor"
-        ></author>
-        <div class="home">
-            <!-- 主内容区 -->
-            <div class="main-content">
-                <div class="middle">
-                    <div class="left">
-                        <n-tabs
-                            type="card"
-                            animated
-                            @update:value="tabTop"
-                            v-model:value="selectedTab"
-                            placement="left"
-                            tab-class="father-tab"
-                            class="fatherrr"
-                        >
-                            <n-tab-pane name="综合" tab="综合">
-                                <SearchMiddleBox :category_id="category_id" />
-                            </n-tab-pane>
-                            <n-tab-pane name="前端" tab="前端">
-                                <SearchMiddleBox :category_id="category_id" />
-                            </n-tab-pane>
-                            <n-tab-pane name="后端" tab="后端">
-                                <SearchMiddleBox :category_id="category_id" />
-                            </n-tab-pane>
-                            <n-tab-pane name="关注" tab="关注">
-                                <followArticle></followArticle>
-                            </n-tab-pane>
-                        </n-tabs>
-                        <div class="search-mid">
+    <div class="content">
+        <div class="container">
+            <div class="overlay" v-if="loginAppear"></div>
+            <author
+                v-if="loginAppear"
+                class="loginCom"
+                :type="triggerType"
+                @trigger-type="performOperation"
+                @close-author="handleCloseAuthor"
+            ></author>
+            <div class="home">
+                <!-- 主内容区 -->
+                <div class="main-content">
+                    <div class="middle">
+                        <div class="left">
+                            <n-tabs
+                                type="card"
+                                animated
+                                @update:value="tabTop"
+                                v-model:value="selectedTab"
+                                placement="left"
+                                tab-class="father-tab"
+                                class="fatherrr"
+                            >
+                                <n-tab-pane name="综合" tab="综合">
+                                    <SearchMiddleBox :category_id="category_id" />
+                                </n-tab-pane>
+                                <n-tab-pane name="前端" tab="前端">
+                                    <SearchMiddleBox :category_id="category_id" />
+                                </n-tab-pane>
+                                <n-tab-pane name="后端" tab="后端">
+                                    <SearchMiddleBox :category_id="category_id" />
+                                </n-tab-pane>
+                                <n-tab-pane name="关注" tab="关注">
+                                    <followArticle></followArticle>
+                                </n-tab-pane>
+                            </n-tabs>
+                            <!-- <div class="search-mid">
                             <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
                                 <n-tab-pane name="0" tab="">
                                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
@@ -273,31 +274,32 @@ const refreshArticles = () => {
                                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                                 </n-tab-pane>
                             </n-tabs>
+                        </div> -->
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- 侧边栏（作家榜单与文章榜单） -->
-            <div class="side-bar">
-                <div class="article-rank-list">
-                    <ArticleRankItem
-                        :articles="articles"
-                        :page="currentArticlePage"
-                        :limit="5"
-                        @refresh="refreshArticles"
-                    />
-                    <!-- :isSkeletonAuthor="isSkeletonAuthor" -->
+                <!-- 侧边栏（作家榜单与文章榜单） -->
+                <div class="side-bar">
+                    <div class="article-rank-list">
+                        <ArticleRankItem
+                            :articles="articles"
+                            :page="currentArticlePage"
+                            :limit="5"
+                            @refresh="refreshArticles"
+                        />
+                        <!-- :isSkeletonAuthor="isSkeletonAuthor" -->
+                    </div>
+                    <div class="author-rank-list">
+                        <AuthorRankItem
+                            :authors="authors"
+                            :page="currentPage"
+                            :limit="5"
+                            @follow="followAuthor"
+                            @refresh="refreshAuthors"
+                        />
+                    </div>
+                    <PublishButton></PublishButton>
                 </div>
-                <div class="author-rank-list">
-                    <AuthorRankItem
-                        :authors="authors"
-                        :page="currentPage"
-                        :limit="5"
-                        @follow="followAuthor"
-                        @refresh="refreshAuthors"
-                    />
-                </div>
-                <PublishButton></PublishButton>
             </div>
         </div>
     </div>
@@ -308,13 +310,19 @@ const refreshArticles = () => {
 .red {
     color: red;
 }
-.container {
-    padding: 0 20px 20px 20px;
+
+.content {
     display: flex;
     justify-content: center;
+}
+
+.container {
+    padding: 0 20px 20px 20px;
+
     // text-align: center;
-    margin: 0 auto;
-    margin-top: 75px;
+    // margin: 0 auto;
+    width: 80%;
+    margin-top: 55px;
 }
 @include overlay;
 .loginCom {
@@ -330,13 +338,9 @@ const refreshArticles = () => {
     flex-direction: row;
     height: 100vh;
     // padding: 0 90px;
-    width: 97%;
+    width: 100%;
     // margin: 0 auto;
 }
-
-// .middle {
-//     background-color: #ffffff;
-// }
 
 .main-content {
     flex-grow: 1;
@@ -344,10 +348,11 @@ const refreshArticles = () => {
     overflow: hidden;
     margin-right: 20px;
     border-radius: 5px;
+    width: 74%;
 }
 
 .side-bar {
-    width: 300px; /* 侧边栏宽度 */
+    width: 21%;
     background-color: #f2f3f5;
     // overflow-y: auto;
 }
@@ -357,7 +362,7 @@ const refreshArticles = () => {
     padding: 10px;
     background-color: #fff;
     border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    // box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
 }
 
@@ -419,22 +424,27 @@ const refreshArticles = () => {
             border-radius: 5px;
         }
 
-        .n-tabs :deep(.n-tabs-tab-wrapper) {
-            width: 134px;
-            border-radius: 40px;
-            height: 60px;
-            @include flex;
-            padding: 0 8px;
+        .n-tabs :deep(.n-tabs-wrapper) {
+            display: flex;
+            // justify-content: center;
+            flex-wrap: nowrap;
+            position: relative;
+            padding: 0 15px;
         }
 
         .n-tabs :deep(.n-tabs-tab) {
             background-color: #fff;
             border: none;
             border-radius: 40px;
-            font-size: 15px;
-            color: #8d9ec2;
-        }
 
+            margin: 0 auto;
+            margin-top: 15px;
+        }
+        :deep(.father-tab.n-tabs-tab) {
+            // background-color: #daf0e4;
+            color: #8d9ec2;
+            font-size: 15px;
+        }
         :deep(.father-tab.n-tabs-tab--active) {
             background-color: #daf0e4;
             height: 40px;
@@ -444,8 +454,14 @@ const refreshArticles = () => {
             text-align: center;
             justify-content: center;
         }
+        .n-tab-pane :deep(.search-mid) {
+            width: 100%;
+        }
+        .n-tab-pane :deep(.search-mid .n-tabs) {
+            padding: 10px 20px 0px 30px;
+        }
         .fatherrr.n-tabs :deep(.n-tabs-nav-y-scroll) {
-            height: 240px;
+            height: 260px;
             background-color: #fff;
             border-radius: 5px;
         }

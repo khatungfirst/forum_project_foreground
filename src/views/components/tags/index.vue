@@ -11,6 +11,8 @@ const props = defineProps({
 const tagToFollow = ref(null); // 用于存储待关注的标签id
 const isFollowed = ref(props.isFollowing);
 const loadingState = ref(false); // 存储每个标签的加载状态
+const router = useRouter();
+
 // const handleFollow = () => {
 //     emit('follow', props.tag.id);
 // };
@@ -74,7 +76,7 @@ const handleDetail = (id) => {
                 </div>
             </div>
             <div class="tag-item-description">
-                <span>{{ props.tag.description }}</span>
+                {{ props.tag.description }}
             </div>
             <div class="tag-item_follow">
                 <button class="tag-item_button" :disabled="loadingState" @click="handleFollow">
@@ -91,17 +93,18 @@ const handleDetail = (id) => {
     display: flex;
     /* flex-direction: column; */
     align-items: center;
-    padding: 10px;
-    border: 1px solid #ccc;
+    padding: 12px;
+    /* border: 1px solid #ccc; */
     border-radius: 5px;
-    width: 320px;
+    /* width: 345px; */
+    height: 196px;
     background-color: #ffffff;
     transition: background-color 0.2s ease, box-shadow 0.2s ease; /* 添加过渡效果 */
 }
 
 .tag-item:hover {
-    background-color: #e4e6eb; /* 鼠标悬浮时背景变灰 */
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1); /* 添加轻微阴影，模拟凸起效果 */
+    /* background-color: #e4e6eb; 鼠标悬浮时背景变灰 */
+    box-shadow: 3px 3px 5px 2px rgba(0, 0, 0, 0.3); /* 添加轻微阴影，模拟凸起效果 */
 }
 
 .tag-item-single {
@@ -144,10 +147,11 @@ const handleDetail = (id) => {
 }
 
 .tag-item-description {
-    margin: 1px 0;
+    /* margin: 1px 0; */
     font-size: 14px;
     color: #7d7b7b;
-    width: 100%;
+    width: 260px;
+    height: 45px;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
@@ -158,6 +162,10 @@ const handleDetail = (id) => {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.tag-item_follow:hover {
+    color: #24314c;
 }
 .tag-item_button {
     cursor: pointer;

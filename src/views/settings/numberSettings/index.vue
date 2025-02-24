@@ -35,17 +35,17 @@ const githubInputInstRef = ref<InputInst | null>(null);
 ///GitHub输入框是否禁用
 const githubStatus = ref(true);
 
-//获取到密码输入框
-const passwordInputInstRef = ref<InputInst | null>(null);
+//获取到个人博客输入框
+const blogInputInstRef = ref<InputInst | null>(null);
 
 ///密码输入框是否禁用
-const passwordStatus = ref(true);
+const blogStatus = ref(true);
 
 //账号设置的各个属性
 const numberSettings = reactive({
     id: 0,
     email: '',
-    blog_linkblog_link: '',
+    blog_link: '',
     weibo_link: '',
     github_link: '',
     password: ''
@@ -64,9 +64,9 @@ const handleFocus = (e) => {
             githubInputInstRef.value?.focus();
         }, 10);
     } else {
-        passwordStatus.value = false;
+        blogStatus.value = false;
         setTimeout(() => {
-            passwordInputInstRef.value?.focus();
+            blogInputInstRef.value?.focus();
         }, 10);
     }
 };
@@ -78,7 +78,7 @@ const loseFocus = async (e) => {
     } else if (e === 'github_link') {
         githubStatus.value = true;
     } else {
-        passwordStatus.value = true;
+        blogStatus.value = true;
     }
     const { code } = await changeNumberData(numberSettings);
     if (code === 2000) {
@@ -117,6 +117,18 @@ const loseFocus = async (e) => {
                     @blur="loseFocus('github_link')"
                 />
                 <n-button text @click="handleFocus('github_link')">编辑</n-button>
+            </li>
+            <li>
+                <span>个人博客</span>
+                <n-input
+                    ref="blogInputInstRef"
+                    v-model:value="numberSettings.blog_link"
+                    placeholder=""
+                    clearable="true"
+                    :disabled="blogStatus"
+                    @blur="loseFocus('blog_link')"
+                />
+                <n-button text @click="handleFocus('blog_link')">编辑</n-button>
             </li>
             <!-- <li>
                 <span>密码</span>
