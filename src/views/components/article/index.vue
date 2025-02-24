@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
-// import axios from 'axios';
-import { getCompressImage } from '@/config/apis/publicArticle';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined, LikeTwotone } from '@vicons/antd';
 
@@ -65,7 +63,7 @@ const highlightedSummary = ref(prop.item.summary);
                 </div>
                 <n-ellipsis
                     :line-clamp="2"
-                    style="color: #868686; font-size: 12px; margin: 8px 0px"
+                    style="color: #868686; font-size: 14px; margin: 8px 0px"
                     v-html="highlightedSummary"
                 ></n-ellipsis>
                 <div class="detail-bottom">
@@ -139,10 +137,10 @@ const highlightedSummary = ref(prop.item.summary);
         }
         .detail-bottom {
             span {
-                margin: 0px 5px;
+                margin-right: 5px;
                 font-size: 14px;
                 color: #989da6;
-                padding: 0px 5px;
+                padding-right: 5px;
                 font-weight: 500;
             }
 
@@ -154,6 +152,7 @@ const highlightedSummary = ref(prop.item.summary);
 
             .icon {
                 position: relative;
+                margin-right: 15px;
             }
 
             .icon :deep(svg) {

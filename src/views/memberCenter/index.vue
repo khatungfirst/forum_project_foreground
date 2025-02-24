@@ -54,6 +54,9 @@ const touristPattern = useTouristPattern();
 //判断是否是游客
 const isTourist = ref(false);
 
+//控制当前页面的用户是否是当前登录的用户
+const isSelf = ref(true);
+
 //------------------------生命周期---------------------
 
 onMounted(async () => {
@@ -84,11 +87,12 @@ const isLogin = ref(false);
 const performOperation = async (type: string) => {
     loginAppear.value = false;
     isSelf.value = true;
+    isTourist.value = false;
     await userInfo();
     if (type === '关注此用户' && !user.concern_status) {
         concern();
     } else if (type === '关注其关注的人') {
-        fansList();
+        await fansList();
         isLogin.value = true;
     } else if (type === '发布文章') {
         router.push(`/articlerelease/0`);
@@ -152,9 +156,6 @@ const isEdit = ref(true);
 
 //获取到输入框
 const inputInstRef = ref<InputInst | null>(null);
-
-//控制当前页面的用户是否是当前登录的用户
-const isSelf = ref(true);
 
 //控制显示骨架屏
 const skeletonUser = ref(true);
@@ -328,7 +329,7 @@ const fansList = async () => {
         const fansData = await getConcernDetail({
             ids: fansId.value,
             keyword: fansType.keyword,
-            id: isTourist.value ? 0 : userInfor.userInfo.id
+            user_id: isTourist.value ? 0 : userInfor.userInfo.id
         });
         if (fansData) {
             fansArr.value = fansData.data.user_info_list;
@@ -353,7 +354,7 @@ const fansLoadInit = async () => {
                 const fansData = await getConcernDetail({
                     ids: fansId.value,
                     keyword: fansType.keyword,
-                    id: isTourist.value ? 0 : userInfor.userInfo.id
+                    user_id: isTourist.value ? 0 : userInfor.userInfo.id
                 });
                 fansArr.value = fansData.data.user_info_list;
             }
@@ -590,15 +591,15 @@ const searchFun = () => {
                         </div>
                         <div class="left-right">
                             <div class="icons">
-                                <a :href="user.blog_link">
+                                <a :href="user.blog_link" v-if="user.blog_link !== ''">
                                     <i class="iconfont">&#xe668;</i>
                                 </a>
-                                <a :href="user.weibo_link">
+                                <a :href="user.weibo_link" v-if="user.weibo_link !== ''">
                                     <Icon size="18">
                                         <WeiboOutlined />
                                     </Icon>
                                 </a>
-                                <a :href="user.github_link">
+                                <a :href="user.github_link" v-if="user.github_link !== ''">
                                     <Icon size="18">
                                         <GithubFilled />
                                     </Icon>
@@ -659,7 +660,7 @@ const searchFun = () => {
                                 </Icon>
                             </div>
                         </template>
-                        <n-tab-pane name="文章" tab="文章">
+                        <n-tab-pane name="文章" tab="文章" style="min-height: 600px">
                             <skeleton v-if="skeletonOther"></skeleton>
                             <div v-else>
                                 <div class="empty-box" v-if="articleArr.length === 0">
@@ -695,13 +696,13 @@ const searchFun = () => {
                                         </template>
                                     </Article>
                                     <div class="loading">
-                                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                                        <span v-if="noMore" class="text">-没有更多了-</span>
+                                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                                     </div>
                                 </n-infinite-scroll>
                             </div>
                         </n-tab-pane>
-                        <n-tab-pane name="收藏" tab="收藏">
+                        <n-tab-pane name="收藏" tab="收藏" style="min-height: 600px">
                             <skeleton v-if="skeletonOther"></skeleton>
                             <div v-else>
                                 <div class="empty-box" v-if="articleArr.length === 0">
@@ -733,14 +734,14 @@ const searchFun = () => {
                                         </template>
                                     </Article>
                                     <div class="loading">
-                                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                                        <span v-if="noMore" class="text">-没有更多了-</span>
+                                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                                     </div>
                                 </n-infinite-scroll>
                             </div>
                         </n-tab-pane>
-                        <n-tab-pane name="关注" tab="关注">
-                            <skeleton v-if="skeletonOther"></skeleton>
+                        <n-tab-pane name="关注" tab="关注" style="min-height: 600px">
+                            <skeleton v-if="skeletonOther" style="height: 100%"></skeleton>
                             <div v-else>
                                 <div class="empty-box" v-if="fansArr.length === 0">
                                     <img src="../../assets/images/empty.png" />
@@ -755,15 +756,15 @@ const searchFun = () => {
                                         :islogin="isLogin"
                                     ></FansInfo>
                                     <div class="loading">
-                                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                                        <span v-if="noMore" class="text">-没有更多了-</span>
+                                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                                     </div>
                                 </n-infinite-scroll>
                             </div>
                         </n-tab-pane>
                     </n-tabs>
                 </n-card>
-                <!-- <div v-if="noMore" class="loading">-没有更多了-</div> -->
+                <!-- <div v-if="noMore" class="loading">-已经触及俺的底线啦~-</div> -->
             </div>
             <div class="right">
                 <n-button strong secondary round type="primary" @click="pubicArticle">
@@ -1000,6 +1001,9 @@ const searchFun = () => {
                 margin: 20px 0px 30px 0px;
             }
 
+            .achievements {
+                padding-bottom: 20px;
+            }
             .n-card {
                 width: 90%;
                 margin-bottom: 20px;

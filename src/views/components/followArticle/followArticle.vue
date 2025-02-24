@@ -92,8 +92,8 @@ const tabMiddle = (value: string) => {
                 <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
-                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                        <span v-if="noMore" class="text">-没有更多了-</span>
+                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                     </div>
                 </n-infinite-scroll>
             </n-tab-pane>
@@ -102,8 +102,8 @@ const tabMiddle = (value: string) => {
                 <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
-                        <span class="text" v-if="isLoading && !noMore">正在全力加载中...</span>
-                        <span v-if="noMore" class="text">-没有更多了-</span>
+                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
                     </div>
                 </n-infinite-scroll>
             </n-tab-pane>
