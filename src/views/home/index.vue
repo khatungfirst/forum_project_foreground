@@ -336,16 +336,17 @@ const refreshArticles = () => {
 .home {
     display: flex;
     flex-direction: row;
-    height: 100vh;
+    // height: 100vh;
     // padding: 0 90px;
     width: 100%;
+    height: 100%;
     // margin: 0 auto;
 }
 
 .main-content {
     flex-grow: 1;
     // padding: 15px;
-    overflow: hidden;
+    // overflow: hidden;
     margin-right: 20px;
     border-radius: 5px;
     width: 74%;
