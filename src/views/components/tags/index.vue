@@ -8,7 +8,7 @@ const props = defineProps({
     tag: { type: Object, required: true },
     isFollowing: { type: Boolean, default: false } // 接收父组件的加载状态
 });
-const tagToFollow = ref(null); // 用于存储待关注的标签id
+// const tagToFollow = ref(null); // 用于存储待关注的标签id
 const isFollowed = ref(props.isFollowing);
 const loadingState = ref(false); // 存储每个标签的加载状态
 const router = useRouter();
@@ -20,9 +20,9 @@ const router = useRouter();
 const handleFollow = async () => {
     if (userStore.token === '') {
         // 存储当前作者 ID
-        emit('follow', props.tag.id);
+        emit('follow', props.tag.id, '关注');
         // loginAppear.value = true;
-        // console.log('关注了', loginAppear.value);
+        console.log('关注了');
         return;
     }
     try {
@@ -97,6 +97,7 @@ const handleDetail = (id) => {
     /* border: 1px solid #ccc; */
     border-radius: 5px;
     /* width: 345px; */
+    width: 100%;
     height: 196px;
     background-color: #ffffff;
     transition: background-color 0.2s ease, box-shadow 0.2s ease; /* 添加过渡效果 */
@@ -177,6 +178,6 @@ const handleDetail = (id) => {
     /* padding: 8px 125px; */
     margin: 6px 0;
     padding: 5px 0;
-    width: 270px;
+    width: 100%;
 }
 </style>

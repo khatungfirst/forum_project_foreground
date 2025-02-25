@@ -171,6 +171,10 @@ const scrollLoad = () => {
         width: 100%;
         background-color: #fff;
         padding: 10px 20px 0px 20px;
+        :deep(.n-tabs-tab__label) {
+            font-size: 16px;
+        }
+
         .n-tab-pane {
             width: 100%;
             position: relative;
