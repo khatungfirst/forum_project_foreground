@@ -91,7 +91,7 @@ const loadMoreData = () => {
     align-items: center;
     padding: 10px;
     border-radius: 5px;
-    width: 290px;
+    /* width: 290px; */
 }
 
 .article-rank-item_single {

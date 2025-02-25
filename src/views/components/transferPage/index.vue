@@ -26,7 +26,7 @@ const startCountdown = () => {
             if (flag.value === 0) {
                 startCountdown(); // 递归调用，直到剩余时间为0
             }
-        }, 10000); // 每隔1秒更新一次
+        }, 1000); // 每隔1秒更新一次
     }
     console.log('倒计时');
 
@@ -71,7 +71,6 @@ const continuePublic = () => {
     top: 13%;
     height: 85vh;
     background-color: #fff;
-    margin-top: 80px;
     p {
         font-size: 23px;
         color: #19a059;
