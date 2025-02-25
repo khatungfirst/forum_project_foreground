@@ -151,6 +151,9 @@ const currentComponent = computed(() => {
 const switchTab = (tabName) => {
     activeTab.value = tabName;
     router.push(`/${tabName}`);
+    if (tabName === 'home') {
+        userStore.selectInfo = '';
+    }
 };
 
 const handleFocus = () => {

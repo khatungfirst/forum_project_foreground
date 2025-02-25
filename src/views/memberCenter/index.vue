@@ -595,7 +595,7 @@ const searchFun = () => {
                             </n-ellipsis>
                             <n-input
                                 ref="inputInstRef"
-                                :value="user.signature"
+                                v-model:value="user.signature"
                                 placeholder=""
                                 :disabled="isEdit"
                                 @blur="commitSignature"

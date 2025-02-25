@@ -71,6 +71,7 @@ const continuePublic = () => {
     top: 13%;
     height: 85vh;
     background-color: #fff;
+    margin-top: 80px;
     p {
         font-size: 23px;
         color: #19a059;
