@@ -30,6 +30,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', scrollLoad);
 });
+
 //---------------------------------------初始化-------------------------------------
 //用来存放后端传来的相关数据
 const selectData = ref([]);
@@ -56,6 +57,8 @@ const init = async () => {
         if (!data.next) {
             noMore.value = true;
         }
+    } else {
+        isHaveData.value = true;
     }
 };
 
@@ -168,6 +171,10 @@ const scrollLoad = () => {
         width: 100%;
         background-color: #fff;
         padding: 10px 20px 0px 20px;
+        :deep(.n-tabs-tab__label) {
+            font-size: 16px;
+        }
+
         .n-tab-pane {
             width: 100%;
             position: relative;

@@ -106,14 +106,17 @@ const isLogin = ref(false);
 //             break;
 //     }
 // };
-const performOperation = () => {
+const performOperation = (type) => {
     loginAppear.value = false;
     switch (type) {
         case '消息':
             // 自动关注
 
             isLogin.value = true;
+            router.push(`/message`); // 跳转到消息页面
             break;
+        case '登录':
+            isLogin.value = true;
     }
 };
 watch(
@@ -150,6 +153,9 @@ const currentComponent = computed(() => {
 
 const switchTab = (tabName) => {
     activeTab.value = tabName;
+    if (tabName === 'home') {
+        userStore.selectInfo = '';
+    }
     router.push(`/${tabName}`);
 };
 
@@ -172,14 +178,27 @@ const handleSearch = () => {
 };
 
 const handleLogin = () => {
-    router.push('/login');
+    // router.push('/login');
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        loginAppear.value = true;
+        triggerType.value = '登录';
+        console.log(' loginAppear.value', loginAppear.value);
+    }
 };
 
 const handleSelect = (key) => {
-    messageStore.clearNewMessage(key);
-    showDropdownRef.value = false;
-    if (key !== 'system' && key !== 'messages') {
-        router.push(`/message`); // 跳转到消息页面，并携带参数
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        loginAppear.value = true;
+        triggerType.value = '消息';
+        console.log(' loginAppear.value', loginAppear.value);
+    } else {
+        messageStore.clearNewMessage(key);
+        showDropdownRef.value = false;
+        if (key !== 'system' && key !== 'messages') {
+            router.push(`/message`); // 跳转到消息页面
+        }
     }
 };
 
@@ -245,6 +264,14 @@ watch(
 
 <template>
     <div class="all">
+        <div class="overlay" v-if="loginAppear"></div>
+        <author
+            v-if="loginAppear"
+            class="loginCom"
+            :type="triggerType"
+            @trigger-type="performOperation"
+            @close-author="handleCloseAuthor"
+        ></author>
         <div class="nav-container">
             <div class="nav">
                 <img src="" alt="" />
@@ -281,7 +308,6 @@ watch(
                     </template>
                 </n-input>
                 <n-dropdown
-                    trigger="click"
                     :show="showDropdown"
                     :options="options"
                     @select="handleSelect"
@@ -339,6 +365,16 @@ watch(
 </template>
 
 <style scoped lang="scss">
+@use '@/assets/styles/mixin.scss' as *;
+@include overlay;
+.loginCom {
+    z-index: 1000;
+    position: fixed;
+    left: 50%;
+    top: 50px;
+    transform: translateX(-50%);
+    background-color: #fff;
+}
 .all {
     width: 100%;
     height: 100%;
@@ -353,7 +389,7 @@ watch(
     z-index: 998; // 确保导航栏在最上层
     justify-content: space-between;
     align-items: center;
-    padding: 15px 110px;
+    padding: 15px 120px;
     background-color: #ffffff;
     box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
