@@ -384,7 +384,7 @@ const publicArticle = async () => {
     @include overlay;
     @include all;
     display: grid;
-    grid-template-rows: 1fr 13fr;
+    grid-template-rows: 1fr 18fr;
     overflow: hidden;
     position: relative;
     margin-top: 55px;

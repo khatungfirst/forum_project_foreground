@@ -142,25 +142,15 @@ axios.interceptors.response.use(
 
         // 需要特殊处理请求被取消的情况
         // 如果不是取消请求导致的, 就进行重新发送
-        // if (!axios.isCancel(error) && enableRetryModel) {
-        //     // 请求重发
-        //     return againRequest(error, axios, retryConfig);
-        // }
-
-        // // 处理错误状态码
-        // enableErrorMessage && httpErrorStatusHandle(error, axios);
-
-        // return Promise.reject(error); // 错误继续返回给到具体页面
-        if (error.code === 'ECONNABORTED' && enableRetryModel) {
-            // 判断是否是超时错误
+        if (!axios.isCancel(error) && enableRetryModel) {
             // 请求重发
             return againRequest(error, axios, retryConfig);
-        } else {
-            // 处理其他类型错误
-            enableErrorMessage && httpErrorStatusHandle(error, axios);
-            // 如果不是超时错误且不取消请求情况下，继续返回错误
-            return Promise.reject(error);
         }
+
+        // 处理错误状态码
+        enableErrorMessage && httpErrorStatusHandle(error, axios);
+
+        return Promise.reject(error); // 错误继续返回给到具体页面
     }
 );
 

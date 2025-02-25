@@ -15,7 +15,7 @@ const tags = ref([]);
 const router = useRouter();
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
-// const loadingState = ref(false); // 存储每个标签的加载状态
+
 //----------------------------游客模式---------------------------------
 
 //控制登录组件是否出现
@@ -37,7 +37,7 @@ const isLogin = ref(false);
 //             break;
 //     }
 // };
-const performOperation = (type) => {
+const performOperation = () => {
     loginAppear.value = false;
     switch (type) {
         case '关注':
@@ -48,12 +48,9 @@ const performOperation = (type) => {
             //         is_followed: 1
             //     });
             // }
-            follow_tag();
+            follow_tag(id);
             isLogin.value = true;
             break;
-        case '发布文章':
-            isLogin.value = true;
-            router.push(`/articlerelease/0`);
     }
 };
 
@@ -87,24 +84,27 @@ const follow_tag = async (id) => {
     } else {
         try {
             // 设置加载状态
-            // loadingState.value[id] = true;
+            loadingState.value[id] = true;
 
-            // const response = await Tag_follow({ id: id });
-            // if (response.code === 2000) {
-            //     // 更新本地标签数据
-            //     const index = tags.value.findIndex((tag) => tag.id === id);
-            //     if (index !== -1) {
-            //         tags.value[index].is_followed = true;
-            //     } else {
-            //         tags.value.push({ id, is_followed: true });
-            //     }
-            // 重新获取整个标签列表
-            await getTagListAgain();
+            const response = await Tag_follow({ id: id });
+            if (response.code === 2000) {
+                // 更新本地标签数据
+                const index = tags.value.findIndex((tag) => tag.id === id);
+                if (index !== -1) {
+                    tags.value[index].is_followed = true;
+                } else {
+                    tags.value.push({ id, is_followed: true });
+                }
+                // 重新获取整个标签列表
+                await getTagListAgain();
+            } else {
+                console.error('关注标签失败:', response.message);
+            }
         } catch (error) {
             console.error('Error following tag:', error);
         } finally {
             // 请求完成后，解除加载状态
-            // loadingState.value[id] = false;
+            loadingState.value[id] = false;
         }
     }
 };
@@ -115,7 +115,7 @@ const getTagListAgain = async () => {
         if (response.code === 2000) {
             tags.value = response.data.tag_list;
             // 重置加载状态
-            // loadingState.value = {};
+            loadingState.value = {};
         } else {
             console.error('重新获取标签数据失败');
         }
@@ -126,15 +126,6 @@ const getTagListAgain = async () => {
 
 const handleCloseAuthor = () => {
     loginAppear.value = false;
-};
-
-const pubicArticle = () => {
-    if (userStore.token === '') {
-        triggerType.value = '发布文章';
-        loginAppear.value = true;
-    } else {
-        router.push(`/articlerelease/0`);
-    }
 };
 </script>
 
@@ -148,17 +139,11 @@ const pubicArticle = () => {
             @trigger-type="performOperation"
             @close-author="handleCloseAuthor"
         ></author>
-        <div class="tag-list-container">
-            <TagItem
-                v-for="tag in tags"
-                :key="tag.id"
-                :tag="tag"
-                :is-following="tag.status === 1"
-                @follow="follow_tag(tag.id)"
-            />
+        <div class="tag-list-container" @follow="follow_tag(tag.id)">
+            <TagItem v-for="tag in tags" :key="tag.id" :tag="tag" :is-following="tag.status === 1" />
         </div>
         <div>
-            <PublishButton @click="pubicArticle"></PublishButton>
+            <PublishButton></PublishButton>
         </div>
     </div>
 </template>
@@ -168,6 +153,7 @@ const pubicArticle = () => {
 .content {
     display: flex;
     justify-content: center;
+    margin-top: 35px;
 }
 
 @include overlay;
@@ -184,24 +170,10 @@ const pubicArticle = () => {
     display: grid;
     grid-template-columns: repeat(4, 1fr); // 设置为四列
     gap: 20px; // 控制网格之间的间距
-    // padding: 20px;
+    padding: 20px;
     width: 80%;
     cursor: pointer;
-    margin-top: 55px;
 }
-// .tag-list-container {
-//     display: flex;
-//     flex-wrap: wrap;
-//     width: 80%;
-//     margin-top: 55px;
-//     :deep(.tag-item) {
-//         flex: 1 0 100%;
-//         max-width: 283px;
-//         gap: 20px;
-//         padding: 10px;
-//         margin: 10px;
-//     }
-// }
 
 // .tag-list-container {
 //     display: flex;

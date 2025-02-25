@@ -5,10 +5,6 @@ const props = defineProps({
     tag: {
         type: Object,
         required: true
-    },
-    showFollowButton: {
-        type: Boolean,
-        default: true // 默认显示关注按钮
     }
 });
 
@@ -32,7 +28,7 @@ const handleFollow = () => {
             <div class="tag-item-description">
                 <span>{{ tag.description }}</span>
             </div>
-            <div class="tag-item_follow" v-if="showFollowButton">
+            <div class="tag-item_follow">
                 <button class="tag-item_button" @click="handleFollow">
                     {{ tag.status === 1 ? '已关注√' : '关注' }}
                 </button>
