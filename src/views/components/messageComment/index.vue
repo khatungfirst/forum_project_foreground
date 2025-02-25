@@ -45,7 +45,7 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
                     <!-- {{ comment.likeStatus ? '已赞' : '赞' }} {{ comment.likes_count }} 次赞 -->
                 </span>
 
-                <span class="comment-reply" @click="() => emit('showCommentBox', comment)">回复</span>
+                <!-- <span class="comment-reply" @click="() => emit('showCommentBox', comment)">回复</span> -->
             </div>
         </div>
     </div>

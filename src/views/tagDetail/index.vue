@@ -8,7 +8,10 @@ import { NTabs, NTabPane, NInfiniteScroll } from 'naive-ui';
 import _ from 'lodash'; // 导入 Lodash
 import { useUserStore } from '@/config/store/userStore';
 import PublishButton from '../components/PublishButton/index.vue';
+import { useTouristPattern } from '@/config/store/touristPattern';
 // import { debounce } from '@/utils/debounce.ts';
+import author from '@/views/components/Author/index.vue';
+
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
 const route = useRoute();
@@ -25,8 +28,67 @@ const articles = ref([]); // 存储文章数据
 const isLoading = ref(false);
 const noMore = ref(false);
 const currentTab = ref('0'); // 当前选中的标签
+//----------------------------游客模式---------------------------------
+const useTourist = useTouristPattern();
+//控制登录组件是否出现
+const loginAppear = ref(false);
 
+//触发登录的事件类型
+const triggerType = ref('');
+
+//告知子组件是否已经登录完毕
+const isLogin = ref(false);
+
+//登录后继续执行操作
+// const performOperation = (type: string) => {
+//     loginAppear.value = false;
+//     switch (type) {
+//         case '关注':
+//             // 实现自动关注的方法
+//             isLogin.value = true;
+//             break;
+//     }
+// };
+
+const loadingState = ref(false); // 存储每个标签的加载状态
+const pubicArticle = () => {
+    if (userStore.token === '') {
+        triggerType.value = '发布文章';
+        loginAppear.value = true;
+    } else {
+        route.push(`/articlerelease/0`);
+    }
+};
+
+const performOperation = (type) => {
+    loginAppear.value = false;
+    switch (type) {
+        case '关注':
+            // 自动关注
+            follow_tag(currentTag.value.id);
+            updateTagList();
+
+            isLogin.value = true;
+
+            break;
+    }
+};
+watch(
+    () => useTourist.triggerType,
+    (newVal) => {
+        loginAppear.value = true;
+        triggerType.value = newVal;
+    }
+);
+
+const handleCloseAuthor = () => {
+    loginAppear.value = false;
+};
+// -----------------------------------
 onMounted(async () => {
+    updateTagList();
+});
+const updateTagList = async () => {
     try {
         const response = await getTagList({ user_id: user_id });
         if (response.code === 2000 && Array.isArray(response.data.tag_list)) {
@@ -39,7 +101,7 @@ onMounted(async () => {
         console.error('请求标签数据出错:', error);
     }
     await fetchArticles();
-});
+};
 
 watch(
     () => route.params.id,
@@ -69,23 +131,30 @@ const fetchCurrentTag = (tagId) => {
 };
 
 const follow_tag = async (id) => {
-    try {
-        const response = await Tag_follow({ id: id });
-        if (response.code === 2000) {
-            // 重新获取标签列表
-            const tagsResponse = await getTagList({ user_id: user_id });
-            if (tagsResponse.code === 2000 && Array.isArray(tagsResponse.data.tag_list)) {
-                tags.value = tagsResponse.data.tag_list;
-                // 更新当前标签的详细信息
-                fetchCurrentTag(route.params.id);
-            } else {
-                console.error('获取标签数据失败');
+    if (userStore.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '关注';
+    } else {
+        try {
+            // 设置加载状态
+            loadingState.value = true;
+            const response = await Tag_follow({ id: id });
+            if (response.code === 2000) {
+                const tagsResponse = await getTagList({ user_id: user_id });
+                if (tagsResponse.code === 2000 && Array.isArray(tagsResponse.data.tag_list)) {
+                    tags.value = tagsResponse.data.tag_list;
+                    const tag = tags.value.find((tag) => tag.id === id);
+                    if (tag) {
+                        tag.status = 1; // 更新状态为已关注
+                        currentTag.value = tag; // 更新 currentTag
+                    }
+                    // 请求完成后，解除加载状态
+                    loadingState.value = false;
+                }
             }
-        } else {
-            console.error('关注标签失败:', response.message);
+        } catch (error) {
+            console.error('Error following tag:', error);
         }
-    } catch (error) {
-        console.error('Error following tag:', error);
     }
 };
 
@@ -129,6 +198,14 @@ const currentTagStatus = computed(() => {
     <CurrentTagItem v-if="currentTag" :tag="currentTag" @follow="follow_tag" :showFollowButton="false"></CurrentTagItem>
 
     <div class="container">
+        <div class="overlay" v-if="loginAppear"></div>
+        <author
+            v-if="loginAppear"
+            class="loginCom"
+            :type="triggerType"
+            @trigger-type="performOperation"
+            @close-author="handleCloseAuthor"
+        ></author>
         <div class="search-mid">
             <n-tabs type="line" animated v-model:value="currentTab">
                 <template #suffix>
@@ -143,6 +220,7 @@ const currentTagStatus = computed(() => {
                             v-if="currentTagStatus === 1"
                         >
                             关注
+                            <n-spin :size="12" v-if="loadingState" />
                         </n-button>
                         <n-button
                             v-else
@@ -155,6 +233,7 @@ const currentTagStatus = computed(() => {
                             @click="follow_tag(currentTag.id)"
                         >
                             已关注
+                            <n-spin :size="12" v-if="loadingState" />
                         </n-button>
                     </div>
                 </template>
@@ -185,10 +264,20 @@ const currentTagStatus = computed(() => {
             <div v-if="noMore" class="loading">-已经触及俺的底线啦~-</div>
         </div>
     </div>
-    <PublishButton></PublishButton>
+    <PublishButton @click="pubicArticle"></PublishButton>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
+@use '@/assets/styles/mixin.scss' as *;
+@include overlay;
+.loginCom {
+    z-index: 1000;
+    position: fixed;
+    left: 50%;
+    top: 50px;
+    transform: translateX(-50%);
+    background-color: #fff;
+}
 :deep(.tag-item-single) {
     margin-top: 33px;
     padding: 40px 0 30px 220px;
@@ -199,11 +288,11 @@ const currentTagStatus = computed(() => {
 
 .button {
     cursor: pointer;
-    background-color: #f0f0f0;
+    /* background-color: #f0f0f0; */
     border: none;
     border-radius: 50px;
     outline: none;
-    color: #19a059;
+    /* color: #19a059; */
     /* padding: 8px 125px; */
     /* margin: 6px 0; */
     /* padding: 5px 0; */
@@ -242,7 +331,7 @@ const currentTagStatus = computed(() => {
 
 .tag-item_button {
     cursor: pointer;
-    background-color: #f0f0f0;
+
     border: none;
     border-radius: 50px;
     outline: none;
