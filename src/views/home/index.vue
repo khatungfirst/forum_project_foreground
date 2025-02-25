@@ -164,17 +164,10 @@ const fetchArticles = async () => {
 //     isLoading.value = false;
 // };
 
-// const loadInitDebounce = debounce(loadMoreData, 300);
-
 const tabTop = (value) => {
     selectedTab.value = value;
     category_id.value = categoryMapping.value[value];
 };
-
-// const tabMiddle = (value) => {
-//     dataObj.value.kind = value;
-//     init();
-// };
 
 const followAuthor = async (payload: { id: number; is_followed: number }) => {
     if (userStore.token === '') {
