@@ -227,9 +227,12 @@ const linkInit = async () => {
 //编辑个签
 const edit = () => {
     isEdit.value = false;
-    setTimeout(() => {
-        inputInstRef.value.focus();
-    }, 100);
+    nextTick(() => {
+        if (inputInstRef.value) {
+            inputInstRef.value.focus();
+        }
+    });
+    console.log(user.signature, 'signature');
 };
 
 //输入框失焦后提交编辑的个签
@@ -334,7 +337,6 @@ const fansList = async () => {
         }
         if (!data.is_have_data) {
             noMore.value = true;
-            console.log(noMore, 'ooo');
         }
     }
 };
@@ -456,38 +458,40 @@ const tabChange = (value: string) => {
 
 //下拉加载文章数据
 const loadInit = async () => {
-    if (isTourist.value && !noMore.value) {
-        if (isLoading.value) return;
-        isLoading.value = true;
-        setTimeout(async () => {
-            aticleType.page++;
-            const { data } = await getTouristArticleInfo(aticleType);
-            if (data) {
-                if (data.dataList.length > 0) {
-                    articleArr.value.push(...data.dataList);
+    if (!noMore.value) {
+        if (isTourist.value) {
+            if (isLoading.value) return;
+            isLoading.value = true;
+            setTimeout(async () => {
+                aticleType.page++;
+                const { data } = await getTouristArticleInfo(aticleType);
+                if (data) {
+                    if (data.dataList.length > 0) {
+                        articleArr.value.push(...data.dataList);
+                    }
+                    isLoading.value = false;
+                    if (!data.next) {
+                        noMore.value = true;
+                    }
                 }
-                isLoading.value = false;
-                if (!data.next) {
-                    noMore.value = true;
+            }, 1000);
+        } else {
+            if (isLoading.value) return;
+            isLoading.value = true;
+            setTimeout(async () => {
+                aticleType.page++;
+                const { data } = await getArticleInfo(aticleType);
+                if (data) {
+                    if (data.dataList.length > 0) {
+                        articleArr.value.push(...data.dataList);
+                    }
+                    isLoading.value = false;
+                    if (!data.next) {
+                        noMore.value = true;
+                    }
                 }
-            }
-        }, 1000);
-    } else {
-        if (isLoading.value) return;
-        isLoading.value = true;
-        setTimeout(async () => {
-            aticleType.page++;
-            const { data } = await getArticleInfo(aticleType);
-            if (data) {
-                if (data.dataList.length > 0) {
-                    articleArr.value.push(...data.dataList);
-                }
-                isLoading.value = false;
-                if (!data.next) {
-                    noMore.value = true;
-                }
-            }
-        }, 1000);
+            }, 1000);
+        }
     }
 };
 
@@ -595,7 +599,7 @@ const searchFun = () => {
                             </n-ellipsis>
                             <n-input
                                 ref="inputInstRef"
-                                :value="user.signature"
+                                v-model:value="user.signature"
                                 placeholder=""
                                 :disabled="isEdit"
                                 @blur="commitSignature"

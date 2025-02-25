@@ -30,6 +30,7 @@ onMounted(async () => {
 onBeforeUnmount(() => {
     window.removeEventListener('scroll', scrollLoad);
 });
+
 //---------------------------------------初始化-------------------------------------
 //用来存放后端传来的相关数据
 const selectData = ref([]);
@@ -56,6 +57,8 @@ const init = async () => {
         if (!data.next) {
             noMore.value = true;
         }
+    } else {
+        isHaveData.value = true;
     }
 };
 

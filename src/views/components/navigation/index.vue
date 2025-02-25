@@ -153,6 +153,9 @@ const currentComponent = computed(() => {
 
 const switchTab = (tabName) => {
     activeTab.value = tabName;
+    if (tabName === 'home') {
+        userStore.selectInfo = '';
+    }
     router.push(`/${tabName}`);
 };
 
@@ -388,6 +391,7 @@ watch(
     align-items: center;
     padding: 15px 120px;
     background-color: #ffffff;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .nav {
