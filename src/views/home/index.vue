@@ -115,7 +115,7 @@ const handleCloseAuthor = () => {
 onMounted(async () => {
     await fetchAuthors();
     await fetchArticles();
-    init();
+    // init();
 });
 
 const fetchAuthors = async () => {
@@ -161,32 +161,32 @@ const fetchArticles = async () => {
 //     }
 // };
 
-const loadMoreData = async () => {
-    if (isLoading.value || noMore.value) return;
-    isLoading.value = true;
-    dataObj.value.page++;
-    const response = await getArticleByTag(dataObj.value);
-    if (response.code === 2000 && response.data.article_list.length > 0) {
-        articles.value.push(...response.data.article_list);
-        totalArticlesLoaded.value += response.data.article_list.length; // 更新已加载的文章总数
-    } else {
-        noMore.value = true;
-        dataObj.value.page--;
-    }
-    isLoading.value = false;
-};
+// const loadMoreData = async () => {
+//     if (isLoading.value || noMore.value) return;
+//     isLoading.value = true;
+//     dataObj.value.page++;
+//     const response = await getArticleByTag(dataObj.value);
+//     if (response.code === 2000 && response.data.article_list.length > 0) {
+//         articles.value.push(...response.data.article_list);
+//         totalArticlesLoaded.value += response.data.article_list.length; // 更新已加载的文章总数
+//     } else {
+//         noMore.value = true;
+//         dataObj.value.page--;
+//     }
+//     isLoading.value = false;
+// };
 
-const loadInitDebounce = debounce(loadMoreData, 300);
+// const loadInitDebounce = debounce(loadMoreData, 300);
 
 const tabTop = (value) => {
     selectedTab.value = value;
     category_id.value = categoryMapping.value[value];
 };
 
-const tabMiddle = (value) => {
-    dataObj.value.kind = value;
-    init();
-};
+// const tabMiddle = (value) => {
+//     dataObj.value.kind = value;
+//     init();
+// };
 
 const followAuthor = async (payload: { id: number; is_followed: number }) => {
     if (userStore.token === '') {

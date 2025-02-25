@@ -8,7 +8,7 @@ import { NTabs, NTabPane, NInfiniteScroll } from 'naive-ui';
 import _ from 'lodash'; // 导入 Lodash
 import { useUserStore } from '@/config/store/userStore';
 import PublishButton from '../components/PublishButton/index.vue';
-
+// import { debounce } from '@/utils/debounce.ts';
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
 const route = useRoute();
@@ -62,6 +62,7 @@ const fetchCurrentTag = (tagId) => {
     const tag = tags.value.find((tag) => tag.id === parseInt(tagId));
     if (tag) {
         currentTag.value = tag;
+        console.log('currentTag', currentTag);
     } else {
         console.error('未找到当前标签');
     }
@@ -116,6 +117,12 @@ const loadMoreData = async () => {
 };
 
 const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 debounce 函数
+// 应用防抖到关注函数
+// const debouncedConcernPost = debounce(concern, 500);
+const currentTagStatus = computed(() => {
+    const tag = tags.value.find((tag) => tag.id === currentTag.value.id);
+    return tag?.status || 1; // 默认值为 1（未关注）
+});
 </script>
 
 <template>
@@ -124,7 +131,33 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
     <div class="container">
         <div class="search-mid">
             <n-tabs type="line" animated v-model:value="currentTab">
-                <template #suffix>关注</template>
+                <template #suffix>
+                    <div class="button">
+                        <n-button
+                            strong
+                            secondary
+                            round
+                            type="primary"
+                            @click="follow_tag(currentTag.id)"
+                            icon-placement="right"
+                            v-if="currentTagStatus === 1"
+                        >
+                            关注
+                        </n-button>
+                        <n-button
+                            v-else
+                            strong
+                            secondary
+                            round
+                            type="primary"
+                            :loading="loadButton"
+                            icon-placement="right"
+                            @click="follow_tag(currentTag.id)"
+                        >
+                            已关注
+                        </n-button>
+                    </div>
+                </template>
                 <n-tab-pane name="0" tab="热门">
                     <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
                     <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
@@ -163,6 +196,20 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 .n-tabs :deep(.n-tabs-tab__label) {
     font-size: 16px;
 }
+
+.button {
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 50px;
+    outline: none;
+    color: #19a059;
+    /* padding: 8px 125px; */
+    /* margin: 6px 0; */
+    /* padding: 5px 0; */
+    width: 40%;
+}
+
 .container {
     box-sizing: border-box; /* 确保 padding 不影响宽度 */
     margin: 0 auto;
