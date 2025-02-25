@@ -110,7 +110,7 @@ const refreshAuthors = () => {
     padding: 10px;
     /* border: 1px solid #ccc; */
     border-radius: 5px;
-    width: 290px;
+    /* width: 290px; */
 }
 
 .author-rank-item_single {

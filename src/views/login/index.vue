@@ -62,6 +62,7 @@ const handleLogin = async () => {
         isLogging.value = true;
 
         const response = await login({ email: form.value.email, password: form.value.password });
+        console.log('登录响应:', response);
 
         if (response.code === 2000 && response.data) {
             isLogging.value = false; // 请求完成后，解除加载状态

@@ -73,15 +73,6 @@ const isLogin = ref(false);
 //             break;
 //     }
 // };
-const pubicArticle = () => {
-    if (userStore.token === '') {
-        triggerType.value = '发布文章';
-        loginAppear.value = true;
-    } else {
-        router.push(`/articlerelease/0`);
-    }
-};
-
 const performOperation = (type: string) => {
     loginAppear.value = false;
     switch (type) {
@@ -95,9 +86,6 @@ const performOperation = (type: string) => {
             }
             isLogin.value = true;
             break;
-        case '发布文章':
-            isLogin.value = true;
-            router.push(`/articlerelease/0`);
     }
 };
 watch(
@@ -115,7 +103,7 @@ const handleCloseAuthor = () => {
 onMounted(async () => {
     await fetchAuthors();
     await fetchArticles();
-    init();
+    // init();
 });
 
 const fetchAuthors = async () => {
@@ -161,32 +149,32 @@ const fetchArticles = async () => {
 //     }
 // };
 
-const loadMoreData = async () => {
-    if (isLoading.value || noMore.value) return;
-    isLoading.value = true;
-    dataObj.value.page++;
-    const response = await getArticleByTag(dataObj.value);
-    if (response.code === 2000 && response.data.article_list.length > 0) {
-        articles.value.push(...response.data.article_list);
-        totalArticlesLoaded.value += response.data.article_list.length; // 更新已加载的文章总数
-    } else {
-        noMore.value = true;
-        dataObj.value.page--;
-    }
-    isLoading.value = false;
-};
+// const loadMoreData = async () => {
+//     if (isLoading.value || noMore.value) return;
+//     isLoading.value = true;
+//     dataObj.value.page++;
+//     const response = await getArticleByTag(dataObj.value);
+//     if (response.code === 2000 && response.data.article_list.length > 0) {
+//         articles.value.push(...response.data.article_list);
+//         totalArticlesLoaded.value += response.data.article_list.length; // 更新已加载的文章总数
+//     } else {
+//         noMore.value = true;
+//         dataObj.value.page--;
+//     }
+//     isLoading.value = false;
+// };
 
-const loadInitDebounce = debounce(loadMoreData, 300);
+// const loadInitDebounce = debounce(loadMoreData, 300);
 
 const tabTop = (value) => {
     selectedTab.value = value;
     category_id.value = categoryMapping.value[value];
 };
 
-const tabMiddle = (value) => {
-    dataObj.value.kind = value;
-    init();
-};
+// const tabMiddle = (value) => {
+//     dataObj.value.kind = value;
+//     init();
+// };
 
 const followAuthor = async (payload: { id: number; is_followed: number }) => {
     if (userStore.token === '') {
@@ -215,6 +203,9 @@ const followAuthor = async (payload: { id: number; is_followed: number }) => {
             alert(`关注出错: ${error.message}`);
         }
     }
+};
+const handleReleaseArticle = () => {
+    router.push({ path: '/articlerelease/0' }); // 路由跳转发布文章页
 };
 
 const refreshAuthors = () => {
@@ -270,7 +261,7 @@ const refreshArticles = () => {
                                 <n-tab-pane name="后端" tab="后端">
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
-                                <n-tab-pane name="关注" tab="关注" v-if="userStore.token">
+                                <n-tab-pane name="关注" tab="关注">
                                     <followArticle></followArticle>
                                 </n-tab-pane>
                             </n-tabs>
@@ -307,7 +298,7 @@ const refreshArticles = () => {
                             @refresh="refreshAuthors"
                         />
                     </div>
-                    <PublishButton @click="pubicArticle"></PublishButton>
+                    <PublishButton></PublishButton>
                 </div>
             </div>
         </div>
@@ -326,7 +317,10 @@ const refreshArticles = () => {
 }
 
 .container {
-    padding: 0 0px 20px 0px;
+    padding: 0 20px 20px 20px;
+
+    // text-align: center;
+    // margin: 0 auto;
     width: 80%;
     margin-top: 55px;
 }
@@ -341,7 +335,7 @@ const refreshArticles = () => {
 }
 .home {
     display: flex;
-    // flex-direction: row;
+    flex-direction: row;
     // height: 100vh;
     // padding: 0 90px;
     width: 100%;
@@ -359,7 +353,7 @@ const refreshArticles = () => {
 }
 
 .side-bar {
-    // width: 21%;
+    width: 21%;
     background-color: #f2f3f5;
     // overflow-y: auto;
 }
@@ -468,10 +462,9 @@ const refreshArticles = () => {
             padding: 10px 20px 0px 30px;
         }
         .fatherrr.n-tabs :deep(.n-tabs-nav-y-scroll) {
+            height: 260px;
             background-color: #fff;
             border-radius: 5px;
-            height: fit-content;
-            padding-bottom: 15px;
         }
 
         span {

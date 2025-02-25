@@ -3,30 +3,22 @@ import { ref, reactive, onMounted } from 'vue';
 import Article from '@/views/components/article/index.vue';
 import { follower_article } from '@/config/apis/articleDetail';
 import { debounce } from '@/utils/debounce.ts';
-import { useUserStore } from '@/config/store/userStore';
+
 // 存储关注的人的文章数据
 const followedArticles = ref([]);
-const userStore = useUserStore();
-const emit = defineEmits(['follow']);
+
 // 获取关注的人的文章
 const fetchFollowedArticles = async () => {
-    if (userStore.token === '') {
-        // 存储当前作者 ID
-        console.log(809347);
-        emit('follow');
-        return;
+    console.log('触发获取关注的人文章', 111);
+    const response = await follower_article({
+        page: dataObj.page,
+        limit: dataObj.limit,
+        kind: dataObj.kind
+    });
+    if (response.code === 2000) {
+        followedArticles.value = response.data.article_list;
     } else {
-        console.log('触发获取关注的人文章', 111);
-        const response = await follower_article({
-            page: dataObj.page,
-            limit: dataObj.limit,
-            kind: dataObj.kind
-        });
-        if (response.code === 2000) {
-            followedArticles.value = response.data.article_list;
-        } else {
-            console.error('获取关注的人的文章失败', response.message);
-        }
+        console.error('获取关注的人的文章失败', response.message);
     }
 };
 
@@ -95,8 +87,8 @@ const tabMiddle = (value: string) => {
 <template>
     <div class="search-mid">
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-            <n-tab-pane name="0" tab="热门" ref="dataContainer" style="min-height: 850px">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" class="img" />
+            <n-tab-pane name="0" tab="热门" ref="dataContainer">
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
                 <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
@@ -105,7 +97,7 @@ const tabMiddle = (value: string) => {
                     </div>
                 </n-infinite-scroll>
             </n-tab-pane>
-            <n-tab-pane name="1" tab="最新" ref="dataContainer" style="min-height: 850px">
+            <n-tab-pane name="1" tab="最新" ref="dataContainer">
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData" />
                 <n-infinite-scroll style="height: 800px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
@@ -135,19 +127,12 @@ const tabMiddle = (value: string) => {
             }
         }
 
-        .img {
-            // width: 100%;
-            // height: auto;
-            // position: absolute;
-            // left: 50%;
-            // transform: translateX(-50%);
-            // object-fit: contain;
-            width: 65%;
-            height: 70vh;
+        img {
+            width: 50%;
+            height: 80vh;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            object-fit: contain;
         }
 
         ::v-deep(.n-scrollbar-content) {
