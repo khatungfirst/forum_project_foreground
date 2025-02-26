@@ -289,16 +289,6 @@ const refreshArticles = () => {
                                     <followArticle></followArticle>
                                 </n-tab-pane>
                             </n-tabs>
-                            <!-- <div class="search-mid">
-                            <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-                                <n-tab-pane name="0" tab="">
-                                    <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                                </n-tab-pane>
-                                <n-tab-pane name="1" tab="">
-                                    <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                                </n-tab-pane>
-                            </n-tabs>
-                        </div> -->
                         </div>
                     </div>
                 </div>
