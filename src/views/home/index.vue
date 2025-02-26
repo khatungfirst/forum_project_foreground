@@ -258,7 +258,6 @@ const refreshArticles = () => {
                                 v-model:value="selectedTab"
                                 placement="left"
                                 tab-class="father-tab"
-                                class="fatherrr"
                             >
                                 <n-tab-pane name="综合" tab="综合">
                                     <template #tab>
@@ -473,7 +472,7 @@ const refreshArticles = () => {
         .n-tab-pane :deep(.search-mid .n-tabs) {
             padding: 10px 20px 0px 30px;
         }
-        .fatherrr.n-tabs :deep(.n-tabs-nav-y-scroll) {
+        .n-tabs :deep(.n-tabs-nav-y-scroll) {
             background-color: #fff;
             border-radius: 5px;
             height: fit-content;
