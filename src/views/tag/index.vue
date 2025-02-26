@@ -173,7 +173,41 @@ const handleCloseAuthor = () => {
     padding: 20px;
     width: 80%;
     cursor: pointer;
+    margin-top: 55px;
 }
+
+@media (max-width: 1380px) {
+    .tag-list-container {
+        grid-template-columns: repeat(3, 1fr); /* 屏幕缩小时变为两列布局 */
+    }
+}
+
+/* 媒体查询，当屏幕宽度小于768px时改变为两列布局 */
+@media (max-width: 1050px) {
+    .tag-list-container {
+        grid-template-columns: repeat(2, 1fr); /* 屏幕缩小时变为两列布局 */
+    }
+}
+
+@media (max-width: 710px) {
+    .tag-list-container {
+        grid-template-columns: repeat(1, 1fr); /* 屏幕缩小时变为两列布局 */
+    }
+}
+
+// .tag-list-container {
+//     display: flex;
+//     flex-wrap: wrap;
+//     width: 80%;
+//     margin-top: 55px;
+//     :deep(.tag-item) {
+//         flex: 1 0 100%;
+//         max-width: 283px;
+//         gap: 20px;
+//         padding: 10px;
+//         margin: 10px;
+//     }
+// }
 
 // .tag-list-container {
 //     display: flex;

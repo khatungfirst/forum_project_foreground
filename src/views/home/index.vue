@@ -48,12 +48,11 @@ const isArticleDataShort = ref(false); // 文章数据是否不足五条
 // 增加 authorToFollow 响应式变量,用于存储即将关注的作者 ID
 const authorToFollow = ref<number | null>(null);
 
-const useTourist = useTouristPattern();
 //控制显示骨架屏
 // const isSkeletonAuthor = ref(false);
 
 //----------------------------游客模式---------------------------------
-
+const useTourist = useTouristPattern();
 //控制登录组件是否出现
 const loginAppear = ref(false);
 
@@ -409,6 +408,7 @@ const refreshArticles = () => {
         }
         .n-tabs :deep(.n-tabs-nav) {
             margin-right: 22px;
+            display: block;
         }
 
         .n-tabs :deep(.n-tab-pane) {

@@ -1,5 +1,4 @@
 <script setup>
-
 const props = defineProps({
     followList: {
         type: Array,
@@ -27,11 +26,11 @@ const emit = defineEmits(['goToMember']);
                 <span class="date">{{ follow.daily_time }}</span>
             </div>
         </div>
-        <div class="follow-button">
+        <!-- <div class="follow-button">
             <button class="common-button" :class="{ 'is-followed': follow.is_followed === 1 }">
                 {{ follow.is_followed === 1 ? '已关注√' : '关注' }}
             </button>
-        </div>
+        </div> -->
     </div>
 </template>
 

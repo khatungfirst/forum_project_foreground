@@ -5,7 +5,7 @@ import Home from '../../../views/home/index.vue';
 import Tag from '../../../views/tag/index.vue';
 import { IosSearch } from '@vicons/ionicons4';
 import { useUserStore } from '@/config/store/userStore';
-import { useMessageStore } from '@/config/store/messageStore';
+// import { useMessageStore } from '@/config/store/messageStore';
 // import { get_latest_message } from '@/config/apis/message';
 import authorMessage from '../../../views/articleDetail/authorMessage/index.vue';
 import { getAuthorDetail } from '@/config/apis/articleDetail';
@@ -39,7 +39,7 @@ onBeforeUnmount(() => {
 
 const keyword = ref(''); // 定义搜索框内容变量
 const userStore = useUserStore();
-const messageStore = useMessageStore();
+// const messageStore = useMessageStore();
 const hasNewMessage = ref(false); // 响应式变量，表示是否有新消息
 
 // 定义简洁作者简介是否出现
@@ -136,6 +136,7 @@ const handleClick = () => {
         console.log(' loginAppear.value', loginAppear.value);
     } else {
         showDropdownRef.value = !showDropdownRef.value;
+        router.push(`/message`); // 跳转到消息页面
     }
 };
 
@@ -179,10 +180,14 @@ const handleLogin = () => {
 };
 
 const handleSelect = (key) => {
-    messageStore.clearNewMessage(key);
-    showDropdownRef.value = false;
-    if (key !== 'system' && key !== 'messages') {
-        router.push(`/message`); // 跳转到消息页面，并携带参数
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        loginAppear.value = true;
+        triggerType.value = '消息';
+        console.log(' loginAppear.value', loginAppear.value);
+    } else {
+        showDropdownRef.value = false;
+        router.push(`/message`); // 跳转到消息页面
     }
 };
 
@@ -237,12 +242,15 @@ const handleLogout = async () => {
 
 // 监听路由变化
 watch(
-    () => router.currentRoute.value,
-    (newRoute) => {
-        if (newRoute.path !== '/select') {
-            keyword.value = ''; // 清空搜索框内容
+    () => router.currentRoute.value.path,
+    (newPath) => {
+        if (newPath === '/home' || newPath === '/tag') {
+            activeTab.value = newPath === '/home' ? 'home' : 'tag';
+        } else {
+            activeTab.value = ''; // 清除效果
         }
-    }
+    },
+    { immediate: true } // 立即执行一次
 );
 </script>
 
