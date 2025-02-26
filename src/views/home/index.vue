@@ -261,15 +261,31 @@ const refreshArticles = () => {
                                 class="fatherrr"
                             >
                                 <n-tab-pane name="综合" tab="综合">
+                                    <template #tab>
+                                        <i class="iconfont icon-zonghe" style="font-size: 16px"></i>
+                                        <span>综合</span>
+                                    </template>
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
                                 <n-tab-pane name="前端" tab="前端">
+                                    <template #tab>
+                                        <i class="iconfont icon-WEBqianduan" style="font-size: 16px"></i>
+                                        <span>前端</span>
+                                    </template>
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
                                 <n-tab-pane name="后端" tab="后端">
+                                    <template #tab>
+                                        <i class="iconfont icon-houduankaifa" style="font-size: 16px"></i>
+                                        <span>后端</span>
+                                    </template>
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
                                 <n-tab-pane name="关注" tab="关注" v-if="userStore.token">
+                                    <template #tab>
+                                        <i class="iconfont icon-wodeguanzhu" style="font-size: 16px"></i>
+                                        <span>关注</span>
+                                    </template>
                                     <followArticle></followArticle>
                                 </n-tab-pane>
                             </n-tabs>
@@ -327,7 +343,7 @@ const refreshArticles = () => {
 .container {
     padding: 0 0px 20px 0px;
     width: 80%;
-    margin-top: 55px;
+    margin-top: 50px;
 }
 @include overlay;
 .loginCom {
