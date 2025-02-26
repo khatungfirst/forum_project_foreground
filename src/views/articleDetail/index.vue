@@ -818,7 +818,7 @@ const pubicArticle = () => {
 .wrap {
     display: flex;
     background-color: #f2f3f5;
-    margin-top: 85px;
+    margin-top: 75px;
     position: relative;
     .emojiOverlay {
         position: fixed; /* 固定定位 */

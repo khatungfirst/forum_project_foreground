@@ -421,6 +421,7 @@ const refreshArticles = () => {
         }
         .n-tabs :deep(.n-tabs-nav) {
             margin-right: 22px;
+            display: block;
         }
 
         .n-tabs :deep(.n-tab-pane) {

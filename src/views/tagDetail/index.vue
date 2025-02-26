@@ -11,7 +11,7 @@ import PublishButton from '../components/PublishButton/index.vue';
 import { useTouristPattern } from '@/config/store/touristPattern';
 // import { debounce } from '@/utils/debounce.ts';
 import author from '@/views/components/Author/index.vue';
-
+import skeleton from '@/views/components/skeleton/index.vue';
 const userStore = useUserStore();
 const user_id = userStore.userInfo?.id || 0;
 const route = useRoute();
@@ -28,6 +28,9 @@ const articles = ref([]); // 存储文章数据
 const isLoading = ref(false);
 const noMore = ref(false);
 const currentTab = ref('0'); // 当前选中的标签
+
+//控制显示骨架屏
+const isSkeleton = ref(true);
 //----------------------------游客模式---------------------------------
 const useTourist = useTouristPattern();
 //控制登录组件是否出现
@@ -87,7 +90,13 @@ const handleCloseAuthor = () => {
 // -----------------------------------
 onMounted(async () => {
     updateTagList();
+    window.addEventListener('scroll', scrollLoad);
 });
+
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', scrollLoad);
+});
+
 const updateTagList = async () => {
     try {
         const response = await getTagList({ user_id: user_id });
@@ -169,6 +178,7 @@ const fetchArticles = async () => {
     } catch (error) {
         console.error('请求标签下的文章出错:', error);
     }
+    isSkeleton.value = false; // 确保骨架屏隐藏
 };
 
 const loadMoreData = async () => {
@@ -192,6 +202,21 @@ const currentTagStatus = computed(() => {
     const tag = tags.value.find((tag) => tag.id === currentTag.value.id);
     return tag?.status || 1; // 默认值为 1（未关注）
 });
+
+const scrollLoad = () => {
+    // 获取当前滚动位置
+    const scrollTop = window.scrollY;
+    // 获取页面的总高度
+    const windowHeight = window.innerHeight;
+    // 获取页面的滚动高度
+    const scrollHeight = document.documentElement.scrollHeight;
+
+    // 判断是否滚动到页面底部
+    if (scrollTop + windowHeight + 1 >= scrollHeight) {
+        console.log('滚动到底部');
+        loadInitDebounce();
+    }
+};
 </script>
 
 <template>
@@ -239,13 +264,13 @@ const currentTagStatus = computed(() => {
                 </template>
                 <n-tab-pane name="0" tab="热门">
                     <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                    <n-infinite-scroll style="min-height: 800px" :distance="10" @load="loadInitDebounce">
                         <Article v-for="article in articles" :key="article.id" :item="article" />
                     </n-infinite-scroll>
                 </n-tab-pane>
                 <n-tab-pane name="1" tab="最新">
                     <img src="../../assets/images/noSelect.png" alt="" v-if="articles.length === 0" />
-                    <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+                    <n-infinite-scroll style="min-height: 800px" :distance="10" @load="loadInitDebounce">
                         <Article v-for="article in articles" :key="article.id" :item="article" />
                     </n-infinite-scroll>
                 </n-tab-pane>
@@ -317,6 +342,13 @@ const currentTagStatus = computed(() => {
     margin: 20px 0;
     text-align: left; /* 确保内容不居中 */
     /* max-width: 1200px; */
+    .n-tabs :deep(.n-tabs-nav-scroll-content) {
+        border: none;
+    }
+
+    .n-divider {
+        display: block;
+    }
 }
 
 .loading {
