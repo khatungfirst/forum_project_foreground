@@ -121,6 +121,9 @@ const handleCloseAuthor = () => {
             background-color: #fff;
             padding: 0 calc(5%);
         }
+        .n-tabs :deep(.n-tabs-tab__label) {
+            font-size: 16px;
+        }
     }
 }
 </style>
