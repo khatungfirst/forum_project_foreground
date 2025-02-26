@@ -242,31 +242,36 @@ const refreshArticles = () => {
                                 v-model:value="selectedTab"
                                 placement="left"
                                 tab-class="father-tab"
-                                class="fatherrr"
                             >
                                 <n-tab-pane name="综合" tab="综合">
+                                    <template #tab>
+                                        <i class="iconfont icon-zonghe" style="font-size: 16px"></i>
+                                        <span>综合</span>
+                                    </template>
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
                                 <n-tab-pane name="前端" tab="前端">
+                                    <template #tab>
+                                        <i class="iconfont icon-WEBqianduan" style="font-size: 16px"></i>
+                                        <span>前端</span>
+                                    </template>
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
                                 <n-tab-pane name="后端" tab="后端">
+                                    <template #tab>
+                                        <i class="iconfont icon-houduankaifa" style="font-size: 16px"></i>
+                                        <span>后端</span>
+                                    </template>
                                     <SearchMiddleBox :category_id="category_id" />
                                 </n-tab-pane>
-                                <n-tab-pane name="关注" tab="关注">
+                                <n-tab-pane name="关注" tab="关注" v-if="userStore.token">
+                                    <template #tab>
+                                        <i class="iconfont icon-wodeguanzhu" style="font-size: 16px"></i>
+                                        <span>关注</span>
+                                    </template>
                                     <followArticle></followArticle>
                                 </n-tab-pane>
                             </n-tabs>
-                            <!-- <div class="search-mid">
-                            <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-                                <n-tab-pane name="0" tab="">
-                                    <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                                </n-tab-pane>
-                                <n-tab-pane name="1" tab="">
-                                    <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
-                                </n-tab-pane>
-                            </n-tabs>
-                        </div> -->
                         </div>
                     </div>
                 </div>
@@ -314,7 +319,7 @@ const refreshArticles = () => {
     // text-align: center;
     // margin: 0 auto;
     width: 80%;
-    margin-top: 55px;
+    margin-top: 50px;
 }
 @include overlay;
 .loginCom {
@@ -454,8 +459,7 @@ const refreshArticles = () => {
         .n-tab-pane :deep(.search-mid .n-tabs) {
             padding: 10px 20px 0px 30px;
         }
-        .fatherrr.n-tabs :deep(.n-tabs-nav-y-scroll) {
-            height: 260px;
+        .n-tabs :deep(.n-tabs-nav-y-scroll) {
             background-color: #fff;
             border-radius: 5px;
         }
