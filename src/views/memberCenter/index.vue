@@ -833,7 +833,7 @@ const searchFun = () => {
 .wrap {
     @include all;
     background-color: #f2f3f5;
-    margin-top: 65px;
+    margin-top: 50px;
     @include overlay;
     .loginCom {
         z-index: 999;

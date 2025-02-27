@@ -56,6 +56,8 @@ const init = async () => {
         if (!data.next) {
             noMore.value = true;
         }
+    } else {
+        isHaveData.value = true;
     }
 };
 

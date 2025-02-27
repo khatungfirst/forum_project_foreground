@@ -406,6 +406,9 @@ const head_shot = userInfo.userInfo?.avatar_path || '';
 //是否在加载评论
 const isLoading = ref(false);
 
+//是否一条评论的数据都没有
+const isEmpty = ref(true);
+
 //评论相关数据
 const commentInfo = reactive({
     article_id: paramId.value,
@@ -429,6 +432,9 @@ const initComments = async () => {
             if (data.last_flag === '没有更多评论了') {
                 isHavaData.value = false;
             }
+            isEmpty.value = false;
+        } else {
+            isEmpty.value = true;
         }
         commentTotal.value = data.comments_total;
     }
@@ -719,8 +725,11 @@ const pubicArticle = () => {
                                 :isLogin="isLogin"
                             ></FirstOrderComments>
                             <div class="load-ing">
-                                <span class="text" v-if="isLoading && isHavaData">加载中，数据正在飞速赶来~</span>
-                                <span v-if="!isHavaData" class="text">-已经触及俺的底线啦~-</span>
+                                <span v-if="isEmpty" class="text">-评论数据空空如也-</span>
+                                <span class="text" v-if="!isEmpty && isLoading && isHavaData">
+                                    加载中，数据正在飞速赶来~
+                                </span>
+                                <span v-if="!isEmpty && !isHavaData" class="text">-已经触及俺的底线啦~-</span>
                             </div>
                         </n-infinite-scroll>
                     </div>
@@ -818,7 +827,7 @@ const pubicArticle = () => {
 .wrap {
     display: flex;
     background-color: #f2f3f5;
-    margin-top: 75px;
+    margin-top: 70px;
     position: relative;
     .emojiOverlay {
         position: fixed; /* 固定定位 */
