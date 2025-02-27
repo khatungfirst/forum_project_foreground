@@ -244,7 +244,7 @@ const scrollLoad = () => {
                             icon-placement="right"
                             v-if="currentTagStatus === 1"
                         >
-                            关注
+                            已关注
                             <n-spin :size="12" v-if="loadingState" />
                         </n-button>
                         <n-button
@@ -257,7 +257,7 @@ const scrollLoad = () => {
                             icon-placement="right"
                             @click="follow_tag(currentTag.id)"
                         >
-                            已关注
+                            关注
                             <n-spin :size="12" v-if="loadingState" />
                         </n-button>
                     </div>
