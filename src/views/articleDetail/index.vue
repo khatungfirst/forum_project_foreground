@@ -480,7 +480,7 @@ const deleteFirst = (id) => {
 
 //评论的下拉事件
 const handleLoad = async () => {
-    if (isHavaData.value) {
+    if (isHavaData.value && !isEmpty.value) {
         isLoading.value = true;
         commentInfo.offset = commentInfo.offset + 1;
         const { data } = await getFirstOrderComments(commentInfo);
