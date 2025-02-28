@@ -779,18 +779,18 @@ const pubicArticle = () => {
                             </span>
                         </template>
                         <n-collapse-item title="目录" name="收起">
-                            <div class="catalogue-detail">
+                            <n-infinite-scroll style="height: 350px" class="catalogue-detail">
                                 <!-- <MarkdownViewer :content="contents" /> -->
                                 <div
                                     v-for="(item, index) in titleList"
                                     :key="index"
-                                    :style="{ paddingLeft: item.indent * 15 + 15 + 'px' }"
+                                    :style="{ paddingLeft: item.indent * 15 + 10 + 'px' }"
                                     @click.stop="rollTo(item, index)"
                                     :class="index === heightTitle ? 'title-active' : ''"
                                 >
                                     <a style="cursor: pointer; word-break: break-all">{{ item.title }}</a>
                                 </div>
-                            </div>
+                            </n-infinite-scroll>
                         </n-collapse-item>
                     </n-collapse>
                 </div>
@@ -1069,7 +1069,7 @@ const pubicArticle = () => {
 
             .catalogue-detail div {
                 margin-bottom: 10px;
-                padding-right: 5px;
+                padding-right: 10px;
             }
 
             .title-active {

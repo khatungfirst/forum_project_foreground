@@ -86,7 +86,9 @@ const isLogin = ref(false);
 //登录后的操作
 const performOperation = async (type: string) => {
     loginAppear.value = false;
-    isSelf.value = true;
+    if (+routes.params.id === userInfor.userInfo.id) {
+        isSelf.value = true;
+    }
     isTourist.value = false;
     await userInfo();
     if (type === '关注此用户' && !user.concern_status) {
