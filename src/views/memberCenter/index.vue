@@ -86,7 +86,9 @@ const isLogin = ref(false);
 //登录后的操作
 const performOperation = async (type: string) => {
     loginAppear.value = false;
-    isSelf.value = true;
+    if (+routes.params.id === userInfor.userInfo.id) {
+        isSelf.value = true;
+    }
     isTourist.value = false;
     await userInfo();
     if (type === '关注此用户' && !user.concern_status) {
@@ -227,12 +229,9 @@ const linkInit = async () => {
 //编辑个签
 const edit = () => {
     isEdit.value = false;
-    nextTick(() => {
-        if (inputInstRef.value) {
-            inputInstRef.value.focus();
-        }
-    });
-    console.log(user.signature, 'signature');
+    setTimeout(() => {
+        inputInstRef.value.focus();
+    }, 100);
 };
 
 //输入框失焦后提交编辑的个签
@@ -337,6 +336,7 @@ const fansList = async () => {
         }
         if (!data.is_have_data) {
             noMore.value = true;
+            console.log(noMore, 'ooo');
         }
     }
 };
@@ -458,40 +458,38 @@ const tabChange = (value: string) => {
 
 //下拉加载文章数据
 const loadInit = async () => {
-    if (!noMore.value) {
-        if (isTourist.value) {
-            if (isLoading.value) return;
-            isLoading.value = true;
-            setTimeout(async () => {
-                aticleType.page++;
-                const { data } = await getTouristArticleInfo(aticleType);
-                if (data) {
-                    if (data.dataList.length > 0) {
-                        articleArr.value.push(...data.dataList);
-                    }
-                    isLoading.value = false;
-                    if (!data.next) {
-                        noMore.value = true;
-                    }
+    if (isTourist.value && !noMore.value) {
+        if (isLoading.value) return;
+        isLoading.value = true;
+        setTimeout(async () => {
+            aticleType.page++;
+            const { data } = await getTouristArticleInfo(aticleType);
+            if (data) {
+                if (data.dataList.length > 0) {
+                    articleArr.value.push(...data.dataList);
                 }
-            }, 1000);
-        } else {
-            if (isLoading.value) return;
-            isLoading.value = true;
-            setTimeout(async () => {
-                aticleType.page++;
-                const { data } = await getArticleInfo(aticleType);
-                if (data) {
-                    if (data.dataList.length > 0) {
-                        articleArr.value.push(...data.dataList);
-                    }
-                    isLoading.value = false;
-                    if (!data.next) {
-                        noMore.value = true;
-                    }
+                isLoading.value = false;
+                if (!data.next) {
+                    noMore.value = true;
                 }
-            }, 1000);
-        }
+            }
+        }, 1000);
+    } else {
+        if (isLoading.value) return;
+        isLoading.value = true;
+        setTimeout(async () => {
+            aticleType.page++;
+            const { data } = await getArticleInfo(aticleType);
+            if (data) {
+                if (data.dataList.length > 0) {
+                    articleArr.value.push(...data.dataList);
+                }
+                isLoading.value = false;
+                if (!data.next) {
+                    noMore.value = true;
+                }
+            }
+        }, 1000);
     }
 };
 
@@ -837,7 +835,7 @@ const searchFun = () => {
 .wrap {
     @include all;
     background-color: #f2f3f5;
-    margin-top: 65px;
+    margin-top: 50px;
     @include overlay;
     .loginCom {
         z-index: 999;

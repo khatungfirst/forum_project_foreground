@@ -406,6 +406,9 @@ const head_shot = userInfo.userInfo?.avatar_path || '';
 //是否在加载评论
 const isLoading = ref(false);
 
+//是否一条评论的数据都没有
+const isEmpty = ref(true);
+
 //评论相关数据
 const commentInfo = reactive({
     article_id: paramId.value,
@@ -429,6 +432,9 @@ const initComments = async () => {
             if (data.last_flag === '没有更多评论了') {
                 isHavaData.value = false;
             }
+            isEmpty.value = false;
+        } else {
+            isEmpty.value = true;
         }
         commentTotal.value = data.comments_total;
     }
@@ -474,7 +480,7 @@ const deleteFirst = (id) => {
 
 //评论的下拉事件
 const handleLoad = async () => {
-    if (isHavaData.value) {
+    if (isHavaData.value && !isEmpty.value) {
         isLoading.value = true;
         commentInfo.offset = commentInfo.offset + 1;
         const { data } = await getFirstOrderComments(commentInfo);
@@ -719,8 +725,11 @@ const pubicArticle = () => {
                                 :isLogin="isLogin"
                             ></FirstOrderComments>
                             <div class="load-ing">
-                                <span class="text" v-if="isLoading && isHavaData">加载中，数据正在飞速赶来~</span>
-                                <span v-if="!isHavaData" class="text">-已经触及俺的底线啦~-</span>
+                                <span v-if="isEmpty" class="text">-评论数据空空如也-</span>
+                                <span class="text" v-if="!isEmpty && isLoading && isHavaData">
+                                    加载中，数据正在飞速赶来~
+                                </span>
+                                <span v-if="!isEmpty && !isHavaData" class="text">-已经触及俺的底线啦~-</span>
                             </div>
                         </n-infinite-scroll>
                     </div>
@@ -770,18 +779,18 @@ const pubicArticle = () => {
                             </span>
                         </template>
                         <n-collapse-item title="目录" name="收起">
-                            <div class="catalogue-detail">
+                            <n-infinite-scroll style="height: 350px" class="catalogue-detail">
                                 <!-- <MarkdownViewer :content="contents" /> -->
                                 <div
                                     v-for="(item, index) in titleList"
                                     :key="index"
-                                    :style="{ paddingLeft: item.indent * 15 + 15 + 'px' }"
+                                    :style="{ paddingLeft: item.indent * 15 + 10 + 'px' }"
                                     @click.stop="rollTo(item, index)"
                                     :class="index === heightTitle ? 'title-active' : ''"
                                 >
                                     <a style="cursor: pointer; word-break: break-all">{{ item.title }}</a>
                                 </div>
-                            </div>
+                            </n-infinite-scroll>
                         </n-collapse-item>
                     </n-collapse>
                 </div>
@@ -818,7 +827,7 @@ const pubicArticle = () => {
 .wrap {
     display: flex;
     background-color: #f2f3f5;
-    margin-top: 75px;
+    margin-top: 70px;
     position: relative;
     .emojiOverlay {
         position: fixed; /* 固定定位 */
@@ -1060,7 +1069,7 @@ const pubicArticle = () => {
 
             .catalogue-detail div {
                 margin-bottom: 10px;
-                padding-right: 5px;
+                padding-right: 10px;
             }
 
             .title-active {
