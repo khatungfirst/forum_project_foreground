@@ -150,12 +150,7 @@ const scrollLoad = () => {
             <n-tab-pane name="1" tab="最新" ref="dataContainer" style="min-height: 750px">
                 <skeleton v-if="isSkeleton"></skeleton>
                 <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
-                <n-infinite-scroll
-                    style="min-height: 750px"
-                    :distance="20"
-                    @load="loadInitDebounce"
-                    v-if="isHaveData && !isSkeleton"
-                >
+                <n-infinite-scroll style="min-height: 750px" :distance="20" @load="loadInitDebounce">
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
                     <div class="load-ing">
                         <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
@@ -195,6 +190,7 @@ const scrollLoad = () => {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
+            object-fit: contain;
         }
 
         .load-ing {

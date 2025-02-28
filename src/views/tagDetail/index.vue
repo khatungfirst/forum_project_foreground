@@ -200,7 +200,7 @@ const loadInitDebounce = _.debounce(loadMoreData, 300); // 使用 Lodash 的 deb
 // const debouncedConcernPost = debounce(concern, 500);
 const currentTagStatus = computed(() => {
     const tag = tags.value.find((tag) => tag.id === currentTag.value.id);
-    return tag?.status || 1; // 默认值为 1（未关注）
+    return tag?.status || 2; // 默认值为 1（未关注）
 });
 
 const scrollLoad = () => {
@@ -244,7 +244,7 @@ const scrollLoad = () => {
                             icon-placement="right"
                             v-if="currentTagStatus === 1"
                         >
-                            关注
+                            已关注
                             <n-spin :size="12" v-if="loadingState" />
                         </n-button>
                         <n-button
@@ -257,7 +257,7 @@ const scrollLoad = () => {
                             icon-placement="right"
                             @click="follow_tag(currentTag.id)"
                         >
-                            已关注
+                            关注
                             <n-spin :size="12" v-if="loadingState" />
                         </n-button>
                     </div>

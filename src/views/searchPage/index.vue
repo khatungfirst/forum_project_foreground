@@ -76,13 +76,13 @@ const handleCloseAuthor = () => {
                 v-model:value="category_id"
                 :tabs-padding="screenWidth * 0.108"
             >
-                <n-tab-pane name="0" tab="综合">
+                <n-tab-pane name="0" tab="综合" style="font-size: 16px">
                     <SearchMiddleBox :category_id="category_id" class="aw" />
                 </n-tab-pane>
-                <n-tab-pane name="1" tab="前端">
+                <n-tab-pane name="1" tab="前端" style="font-size: 16px">
                     <SearchMiddleBox :category_id="category_id" />
                 </n-tab-pane>
-                <n-tab-pane name="2" tab="后端">
+                <n-tab-pane name="2" tab="后端" style="font-size: 16px">
                     <SearchMiddleBox :category_id="category_id" />
                 </n-tab-pane>
             </n-tabs>
@@ -116,6 +116,9 @@ const handleCloseAuthor = () => {
         .n-tabs :deep(.n-tabs-nav-scroll-content) {
             height: 50px;
             background-color: #fff;
+        }
+        .n-tabs :deep(.n-tabs-tab__label) {
+            font-size: 16px;
         }
         .my-tab-f :deep(.n-tabs-nav) {
             background-color: #fff;
