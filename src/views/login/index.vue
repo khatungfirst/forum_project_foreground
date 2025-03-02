@@ -5,9 +5,17 @@ import { useRouter } from 'vue-router';
 import { login } from '../../config/apis/login';
 import { useMessage } from 'naive-ui';
 import { useUserStore } from '@/config/store/userStore';
+const props = defineProps({
+    type: {
+        type: String,
+        default: ''
+    }
+});
+// import findPassword from '../findPassword/index.vue';
 const router = useRouter();
 const formRef = ref(null);
-
+// 当前激活的组件
+// const activeComponent = ref('');
 const userStore = useUserStore();
 
 const form = ref({
@@ -15,6 +23,12 @@ const form = ref({
     password: ''
 });
 const message = useMessage(); // 获取消息提示 API
+
+// 定义自定义事件
+const emit = defineEmits(['switch-component', 'trigger-type']);
+
+const isLogging = ref(false); // 控制登录按钮的状态
+
 const rules = ref({
     email: [
         { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -45,21 +59,23 @@ watch(
 const handleLogin = async () => {
     try {
         await formRef.value.validate();
+        isLogging.value = true;
+
         const response = await login({ email: form.value.email, password: form.value.password });
+
         if (response.code === 2000 && response.data) {
-            userStore.setToken(response.data.token); // 存储令牌
-            userStore.setUserInfo(response.data.UserInfo); // 存储用户信息
-            // 验证 token 是否存储成功
-            const storedToken = userStore.getToken();
-            console.log('Token is stored:', storedToken);
-            // 重新定向
-            router.push('/home');
+            isLogging.value = false; // 请求完成后，解除加载状态
+            message.success('登录成功！'); // 登录成功时显示提示
+            userStore.login(response.data); // 登录成功，调用 login 方法
+            // router.push('/home');
         } else {
-            message.error('登录失败: ' + response.data.message);
+            console.error('登录失败:', response);
+            message.error('登录失败: ' + (response.data?.message || '未知错误'));
         }
+        emit('trigger-type', props.type);
+        console.log(props.type, 'props.type');
     } catch (errors) {
-        console.error('验证失败', errors);
-        message.error('请检查表单错误');
+        console.error('登录失败:', errors);
     }
 };
 
@@ -70,35 +86,51 @@ const handleLogin = async () => {
 onMounted(() => {
     // 可以在此处执行一些初始化逻辑
 });
+
+// 切换到找回密码
+const switchToFindPassword = () => {
+    emit('switch-component', 'findPassword');
+};
 </script>
 
 <template>
-    <div class="login-container">
-        <div class="header">
+    <!-- <div class="login-container"> -->
+    <!-- <div class="header">
             <span :class="{ active: currentRoute === '/login' }" @click="router.push('/login')">登录</span>
             <span :class="{ active: currentRoute === '/register' }" @click="router.push('/register')">注册</span>
-        </div>
-        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
-            <n-form-item label="邮箱" path="email">
-                <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="密码" path="password">
-                <n-input v-model:value="form.password" type="password" placeholder="请输入密码" class="common-input">
-                    <template #suffix>
-                        <span class="forgot-password-btn" @click="router.push('/findPassword')">忘记密码</span>
-                    </template>
-                </n-input>
-            </n-form-item>
-            <n-form-item>
-                <div class="button-wrapper">
-                    <n-button @click="handleLogin" class="common-button">登陆</n-button>
-                </div>
-            </n-form-item>
-        </n-form>
-        <!-- <div class="register" @click="goToRegister">
+        </div> -->
+    <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
+        <n-form-item label="邮箱" path="email">
+            <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input"></n-input>
+        </n-form-item>
+        <n-form-item label="密码" path="password">
+            <n-input
+                v-model:value="form.password"
+                type="password"
+                show-password-on="click"
+                placeholder="请输入密码"
+                class="common-input"
+            >
+                <template #suffix>
+                    <!-- <span class="forgot-password-btn" @click="router.push('/findPassword')">忘记密码</span> -->
+
+                    <span class="forgot-password-btn" @click="switchToFindPassword">忘记密码</span>
+                </template>
+            </n-input>
+        </n-form-item>
+        <n-form-item>
+            <div class="button-wrapper">
+                <n-button @click="handleLogin" class="common-button" :disabled="isLogging">
+                    登录
+                    <n-spin :size="12" v-if="isLogging"></n-spin>
+                </n-button>
+            </div>
+        </n-form-item>
+    </n-form>
+    <!-- <div class="register" @click="goToRegister">
             <n-button class="common-button">注册</n-button>
         </div> -->
-    </div>
+    <!-- </div> -->
 </template>
 
 <style scoped>
@@ -185,6 +217,7 @@ onMounted(() => {
 }
 
 .forgot-password-btn {
+    margin-right: 6px;
     color: #19a059;
 }
 </style>

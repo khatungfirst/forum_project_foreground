@@ -1,42 +1,75 @@
 <script setup lang="ts">
-import { ref, reactive, defineProps } from 'vue';
+import { ref, reactive } from 'vue';
 import { getSelectArticle } from '@/config/apis/select';
 import Article from '@/views/components/article/index.vue';
+import skeleton from '@/views/components/skeleton/index.vue';
 import { debounce } from '@/utils/debounce.ts';
+import { useUserStore } from '@/config/store/userStore';
 
 const prop = defineProps({
     category_id: {
         type: String,
         required: true,
-        default: '1' // 设置默认值
+        default: '0' // 设置默认值
     }
 });
+
+const route = useRoute();
+const userStore = useUserStore();
+
+//控制显示骨架屏
+const isSkeleton = ref(true);
 
 //--------------------------------------生命周期-------------------------------------
 
 onMounted(async () => {
     init();
+    window.addEventListener('scroll', scrollLoad);
 });
 
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', scrollLoad);
+});
 //---------------------------------------初始化-------------------------------------
 //用来存放后端传来的相关数据
 const selectData = ref([]);
 
+//表示是否有数据
+const isHaveData = ref(true);
+
 const dataObj = reactive({
-    keyword: '',
+    keyword: route.query.keyword,
     category_id: prop.category_id,
     page: 1,
-    limit: 4,
+    limit: 6,
     kind: '0'
 });
 
 const init = async () => {
-    console.log(111);
+    selectData.value = [];
+    isSkeleton.value = true;
     const { data } = await getSelectArticle(dataObj);
-    if (data) {
+    isSkeleton.value = false;
+    if (data && data.selectedList.length > 0) {
         selectData.value = data.selectedList;
+        isHaveData.value = false;
+        if (!data.next) {
+            noMore.value = true;
+        }
+    } else {
+        isHaveData.value = true;
     }
 };
+
+watch(
+    () => userStore.selectInfo,
+    (newVal) => {
+        dataObj.keyword = newVal;
+        dataObj.page = 1;
+        init();
+    },
+    { immediate: true }
+);
 
 //----------------------------------加载后获取数据-------------------------------------
 //是否正在加载
@@ -51,16 +84,20 @@ const dataContainer = ref(null);
 const loadInit = async () => {
     if (isLoading.value) return;
     isLoading.value = true;
-    setTimeout(async () => {
-        dataObj.page++;
-        const { data } = await getSelectArticle(dataObj);
-        if (data) {
-            selectData.value.push(...data.selectedList);
-        } else {
-            dataObj.page--;
-        }
-        isLoading.value = false;
-    }, 200);
+    if (!noMore.value) {
+        setTimeout(async () => {
+            dataObj.page++;
+            const { data } = await getSelectArticle(dataObj);
+            if (data && data.selectedList.length > 0 && selectData) {
+                selectData.value.push(...data.selectedList);
+                if (!data.next) {
+                    console.log('没有更多数据了');
+                    noMore.value = true;
+                }
+            }
+            isLoading.value = false;
+        }, 200);
+    }
 };
 const loadInitDebounce = debounce(loadInit, 300);
 
@@ -69,49 +106,93 @@ const tabMiddle = (value: string) => {
     dataObj.kind = value;
     init();
 };
+
+//监听浏览器滚动条滚动到底部触发加载新数据
+const scrollLoad = () => {
+    // 获取当前滚动位置
+    const scrollTop = window.scrollY;
+    // 获取页面的总高度
+    const windowHeight = window.innerHeight;
+    // 获取页面的滚动高度
+    const scrollHeight = document.documentElement.scrollHeight;
+
+    // 判断是否滚动到页面底部
+    if (scrollTop + windowHeight + 1 >= scrollHeight) {
+        console.log('滚动到底部');
+        loadInitDebounce();
+    }
+};
 </script>
 <template>
     <div class="search-mid">
         <n-tabs type="line" animated @update:value="tabMiddle" v-model:value="dataObj.kind">
-            <n-tab-pane name="0" tab="热门" ref="dataContainer">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
-                <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+            <n-tab-pane name="0" tab="热门" ref="dataContainer" style="min-height: 750px">
+                <skeleton v-if="isSkeleton"></skeleton>
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
+                <n-infinite-scroll
+                    style="min-height: 750px"
+                    :distance="20"
+                    @load="loadInitDebounce"
+                    v-if="!isHaveData && !isSkeleton"
+                >
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                    <div class="load-ing">
+                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
+                    </div>
                 </n-infinite-scroll>
             </n-tab-pane>
-            <n-tab-pane name="1" tab="最新" ref="dataContainer">
-                <img src="../../../assets/images/noSelect.png" alt="" v-if="selectData.length === 0" />
-                <n-infinite-scroll style="height: 800px" :distance="10" @load="loadInitDebounce">
+            <n-tab-pane name="1" tab="最新" ref="dataContainer" style="min-height: 750px">
+                <skeleton v-if="isSkeleton"></skeleton>
+                <img src="../../../assets/images/noSelect.png" alt="" v-if="isHaveData && !isSkeleton" />
+                <n-infinite-scroll
+                    style="min-height: 750px"
+                    :distance="20"
+                    @load="loadInitDebounce"
+                    v-if="!isHaveData && !isSkeleton"
+                >
                     <Article :item="item" v-for="(item, index) in selectData" :key="index"></Article>
+                    <div class="load-ing">
+                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
+                    </div>
                 </n-infinite-scroll>
             </n-tab-pane>
         </n-tabs>
-        <div class="loading" v-if="isLoading && !noMore">
-            <span class="videos">
-                <video src="../../../assets/images/loading.mp4" autoplay loop muted></video>
-            </span>
-            <span class="text">正在全力加载中...</span>
-        </div>
-        <div v-if="noMore" class="loading">没有更多了 🤪</div>
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .search-mid {
+    width: 80%;
+    margin: 0 auto;
     .n-tabs {
         width: 100%;
-        height: 800px;
-        padding: 30px;
+        background-color: #fff;
+        padding: 10px 20px 0px 20px;
         .n-tab-pane {
             width: 100%;
+            position: relative;
 
             .n-infinite-scroll {
                 width: 80%;
             }
         }
+
         img {
-            width: 80%;
+            width: 50%;
             height: 80vh;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .load-ing {
+            margin: 15px 0px 15px 0px;
+            text-align: center;
+            width: 100%;
+            color: #7d8791;
+            bottom: 0px;
         }
     }
 
@@ -122,7 +203,5 @@ const tabMiddle = (value: string) => {
     .n-divider {
         display: block;
     }
-
-    @include loading;
 }
 </style>

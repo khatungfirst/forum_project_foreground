@@ -65,9 +65,10 @@ const change = async () => {
     </n-card>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .n-card {
     height: 900px;
+    border: none;
 
     .letter,
     .n-radio-group {

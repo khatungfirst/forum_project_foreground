@@ -1,4 +1,4 @@
-import { $get, $post } from '@/packages/request';
+import { $get, $post, $http } from '@/packages/request';
 
 //获取私信设置的初始状态
 export const getLetterStatus = (): Promise<any> => {
@@ -10,9 +10,14 @@ export const changeLetterStatus = (params: any): Promise<any> => {
     return $post('/user/private_settings', params);
 };
 
-///获取到账号管理的各项数据
-export const getNumberData = (): Promise<any> => {
-    return $get('/user/account_settings');
+//获取到账号管理的各项数据
+export const getNumberData = (params: any): Promise<any> => {
+    return $get('/user/account_settings', params);
+};
+
+///获取到账号管理的各项数据(游客)
+export const getTouristNumberData = (params: any): Promise<any> => {
+    return $get('/tourist/account_settings', params);
 };
 
 //改变账号管理的数据
@@ -27,5 +32,5 @@ export const getUserInfo = (): Promise<any> => {
 
 //更新个人资料
 export const changeUserInfo = (params: any): Promise<any> => {
-    return $post('/user/form_personal_data', params);
+    return $http('/user/form_personal_data', params);
 };

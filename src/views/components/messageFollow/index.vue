@@ -1,6 +1,4 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-
 const props = defineProps({
     followList: {
         type: Array,
@@ -25,14 +23,14 @@ const emit = defineEmits(['goToMember']);
                 <span class="actioned">关注了你</span>
             </div>
             <div class="follow-actions">
-                <span class="date">{{ follow.created_at }}</span>
+                <span class="date">{{ follow.daily_time }}</span>
             </div>
         </div>
-        <div class="follow-button">
+        <!-- <div class="follow-button">
             <button class="common-button" :class="{ 'is-followed': follow.is_followed === 1 }">
                 {{ follow.is_followed === 1 ? '已关注√' : '关注' }}
             </button>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -42,6 +40,7 @@ const emit = defineEmits(['goToMember']);
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    cursor: pointer;
 }
 
 .follow-avatar img {

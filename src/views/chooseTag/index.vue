@@ -1,16 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { firstTagList, chooseTag } from '@/config/apis/tag';
 import { useRouter } from 'vue-router';
 
-// 使用 useRouter 钩子
 const router = useRouter();
-// 假设这是从后端获取的标签列表
-const tagList = ref([
-    // ... 你的标签数据
-]);
-// 存储选中的标签
+const tagList = ref([]);
 const selectedTags = ref([]);
+const isManualSelectionStarted = ref(false); // 跟踪用户是否已经开始手动选择
 
 onMounted(async () => {
     const tagResponse = await firstTagList();
@@ -21,8 +17,8 @@ onMounted(async () => {
     }
 });
 
-// 选择或取消选择一个标签
 const toggleTag = (tag) => {
+    isManualSelectionStarted.value = true; // 用户开始手动选择
     const index = selectedTags.value.indexOf(tag);
     if (index > -1) {
         selectedTags.value.splice(index, 1);
@@ -31,33 +27,30 @@ const toggleTag = (tag) => {
     }
 };
 
-// 随机选择5个标签
 const randomSelect = () => {
-    // 首先清空当前选中的标签
     selectedTags.value = [];
     const allTags = [...tagList.value];
     let count = 5;
     while (count > 0 && allTags.length > 0) {
         const randomIndex = Math.floor(Math.random() * allTags.length);
         const tag = allTags[randomIndex];
-        // 只有当选中标签数组未满时，才添加新标签
-        if (!selectedTags.value.includes(tag)) {
-            selectedTags.value.push(tag);
-            count--;
-        }
-        // 从候选标签数组中移除已选标签
+        selectedTags.value.push(tag);
         allTags.splice(randomIndex, 1);
+        count--;
+    }
+    // 检查是否达到了5个标签
+    if (selectedTags.value.length === 5) {
+        isManualSelectionStarted.value = true; // 如果随机选择完成5个标签，标记为开始手动选择
     }
 };
 
-// 确定并提交选中的标签
 const confirmSelection = async () => {
+    const selectedIds = selectedTags.value.map((tag) => tag.id);
     try {
-        // 假设这是提交选中标签的API
-        const response = await chooseTag(selectedTags.value);
+        const response = await chooseTag({ tagIds: selectedIds });
         if (response.code === 2000) {
             console.log('标签提交成功');
-            gotoHome(); // 调用 gotoHome 函数跳转到首页
+            gotoHome();
         } else {
             console.error('提交失败:', response.message);
         }
@@ -84,11 +77,11 @@ const gotoHome = () => {
                 >
                     {{ tag.name }}
                 </div>
-                <div class="action-buttons">
-                    <span class="random-btn" @click="randomSelect">随机选择5个</span>
-                    <span class="confirm-btn" @click="confirmSelection">确定</span>
-                    <span class="skip" @click="gotoHome">跳过</span>
-                </div>
+            </div>
+            <div class="action-buttons">
+                <span v-if="!isManualSelectionStarted" class="random-btn" @click="randomSelect">随机选择5个</span>
+                <span v-if="isManualSelectionStarted" class="confirm-btn" @click="confirmSelection">确定</span>
+                <span class="skip" @click="gotoHome">跳过</span>
             </div>
         </div>
     </div>
@@ -103,11 +96,14 @@ const gotoHome = () => {
 }
 
 .choose_tag {
+    display: flex;
+    flex-direction: column;
     width: 680px;
     border: 1px solid #ccc;
     display: flex;
     justify-content: center; /* 水平居中 */
     align-items: center; /* 垂直居中 */
+    padding: 0 0 25px 0;
 }
 
 .tag-container {
@@ -160,9 +156,5 @@ const gotoHome = () => {
 .skip {
     font-weight: 900;
     color: #cecfce;
-}
-
-.action-buttons {
-    margin-top: 18px;
 }
 </style>

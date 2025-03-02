@@ -31,3 +31,22 @@ export const verify_code = (params: any): Promise<any> => {
 export const register = (params: any): Promise<any> => {
     return $http('/user/register', params);
 };
+
+/**
+ * 注册接口
+ * @param {string} email 邮箱
+ * @param {string} verify_code 验证码
+ * @param {string} password 密码
+ * @param {string} re_password 重复密码
+ * @returns {Promise} 注册结果
+ */
+export const forgot_password = (params: any): Promise<any> => {
+    return $http('/user/forgot_password', params);
+};
+
+/**
+ * 登出接口
+ */
+export const logout = (params: any): Promise<any> => {
+    return $http('/user/logout', params);
+};

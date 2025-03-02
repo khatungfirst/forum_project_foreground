@@ -1,26 +1,27 @@
 <script lang="ts" setup>
-import { defineProps, defineEmits } from 'vue';
 import { getImageUrl } from '@/config/apis/publicArticle';
 import { publicComments } from '@/config/apis/comments';
 import type { UploadFileInfo } from 'naive-ui';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
-import { CaretDownFilled, CloseCircleTwotone } from '@vicons/antd';
+import { CaretUpFilled, CloseCircleTwotone } from '@vicons/antd';
 import { SmileOutlined, FileImageOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue';
 import data from 'emoji-mart-vue-fast/data/all.json';
 import 'emoji-mart-vue-fast/css/emoji-mart.css';
 import { Picker, EmojiIndex } from 'emoji-mart-vue-fast/src';
+
+const route = useRoute();
 
 const prop = defineProps({
     appear: {
         type: Boolean,
         default: false
     },
-    childWidth: {
-        type: Number,
-        default: 0
+    emojiDisappear: {
+        type: Boolean,
+        default: false
     },
-    headShot: {
+    type: {
         type: String,
         default: ''
     },
@@ -29,18 +30,18 @@ const prop = defineProps({
             content: string;
             path: string;
             article_id: number;
-            user_id: number;
             highest_id: number;
             parent_id: number;
             parent_user_id: number;
+            placeholderText: string;
         },
         required: true,
         default: () => ({
             article_id: 0,
-            user_id: 0,
             highest_id: 0,
             parent_id: 0,
-            parent_user_id: 0
+            parent_user_id: 0,
+            placeholderText: '平等交流 友善表达'
         })
     }
 });
@@ -48,12 +49,58 @@ const prop = defineProps({
 //定义消息提示对象
 const message = useMessage();
 
+//定义上传图片是否被禁用
+const disabled = ref(false);
+
+const emit = defineEmits(['open-emoji', 'close-comment', 'cancel-response']);
+
+//----------------------------------------控制评论框------------------------------------
+
+//声明
+const textDom = ref(null);
+
+const isBlur = ref(true);
+
+watch(
+    () => prop.appear,
+    (newVal) => {
+        if (newVal) {
+            // console.log(isAppear.value, '8888');
+            // isAppear.value = !isAppear.value;
+            // 确保 textDom 已经存在于 DOM 中
+            nextTick(() => {
+                const input = textDom.value;
+                if (input) {
+                    input.focus();
+                    // console.log(isAppear.value, '9999');
+                }
+            });
+        }
+    }
+);
+
+//评论框失去焦点时消失
+const blurText = () => {
+    setTimeout(() => {
+        if (prop.type !== 'all' && isBlur.value && inputValue.value == '') {
+            // isAppear.value = false;
+            console.log('失去了焦点给爹');
+            emit('cancel-response');
+        }
+    }, 100);
+};
+
 //----------------------------------------评论图片---------------------------------
 
 //存放上传图片的url路径
-const uploadedImages = ref<{ id: string; url: string }[]>([]);
+// const uploadedImages = ref<{ id: string; url: string }[]>([]);
 
 const fileListRef = ref<UploadFileInfo[]>([]);
+
+const uploadImage = () => {
+    console.log('点击上传图片');
+    isBlur.value = false;
+};
 
 function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefined> {
     if (!file) return undefined;
@@ -63,13 +110,27 @@ function createThumbnailUrl(file: File | null): Promise<Promise<string> | undefi
         // 假设 getImageUrl 是一个异步函数，它返回一个包含 data.url 的 Promise
         const fd = new FormData();
         fd.append('files', file);
-        fd.append('width', '200');
+        fd.append('type', '评论');
         getImageUrl(fd)
             .then((response) => {
                 if (response && response.data) {
                     // 如果成功获取到 URL，则解析 Promise
                     resolve(response.data);
-                    uploadedImages.value.push(...response.data);
+                    // uploadedImages.value[0] = response.data[0].url;
+                    console.log(response.data[0].url, 'url');
+
+                    if (response.data[0].url) {
+                        fileListRef.value = [
+                            {
+                                id: 'a',
+                                name: '图片上传成功',
+                                status: 'finished',
+                                url: response.data[0].url
+                            }
+                        ];
+                    }
+
+                    disabled.value = true;
                 } else {
                     // 如果没有获取到有效的 URL，则拒绝 Promise（可选）
                     reject(new Error('Failed to retrieve thumbnail URL'));
@@ -104,12 +165,22 @@ const emojiI18n = {
     }
 };
 
-//控制emoji表情是否出现
-const emoji = ref(false);
+// 控制emoji表情是否出现
+const emoji = ref(prop.emojiDisappear);
 
-//控制emoji组件是否出现的点击事件
+// 监听表情框消失
+watch(
+    () => prop.emojiDisappear,
+    (newVal) => {
+        emoji.value = newVal;
+    }
+);
+
+// 控制emoji组件出现的点击事件
 const emojiClick = () => {
     emoji.value = !emoji.value;
+    isBlur.value = false;
+    emit('open-emoji');
 };
 const emojiIndex = new EmojiIndex(data);
 
@@ -121,44 +192,57 @@ const inputValue = ref('');
 //输入框中的字数
 const fontNumber = computed(() => inputValue.value.length);
 
-const emit = defineEmits(['close-comment']);
+//控制按钮的加载效果
+const loadButton = ref(false);
 
 //将emoji表情加入到评论中
 const handleEmoji = (e) => {
-    console.log(e.native);
     inputValue.value = inputValue.value + e.native;
 };
 
 const publicFirst = async () => {
-    console.log(uploadedImages.value);
+    loadButton.value = true;
     const commentDetail = reactive({
         content: inputValue.value,
-        path: uploadedImages.value,
-        article_id: prop.item.article_id,
-        user_id: prop.item.user_id,
+        path: fileListRef.value[0] ? fileListRef.value[0].url : '',
+        article_id: +route.params.id,
         highest_id: prop.item.highest_id,
         parent_id: prop.item.parent_id,
         parent_user_id: prop.item.parent_user_id
     });
 
     try {
-        await publicComments(commentDetail);
-        emit('close-comment');
+        if (commentDetail.content === '' && commentDetail.path === '') {
+            message.warning('评论内容不能为空');
+        } else {
+            const { code } = await publicComments(commentDetail);
+            if (code === 2000) {
+                inputValue.value = '';
+                emit('close-comment');
+                fileListRef.value = [];
+                disabled.value = false;
+                isBlur.value = true;
+            }
+        }
     } catch (error) {
-        message.error('点赞失败');
+        console.log(error);
+        message.error('发布评论失败');
     }
+    loadButton.value = false;
 };
 </script>
 <template>
-    <div class="drawer" v-if="prop.appear" :style="{ width: prop.childWidth + 'px' }">
-        <n-avatar round size="large" :src="prop.headShot" />
+    <div class="drawer" v-if="prop.appear">
+        <!-- <n-avatar round size="large" :src="head_shot" /> -->
         <div class="textArea">
             <textarea
                 type="text"
                 size="large"
-                placeholder="平等交流 友善表达"
+                :placeholder="prop.item.placeholderText"
                 v-model="inputValue"
                 :maxlength="1000"
+                ref="textDom"
+                @blur="blurText"
             ></textarea>
             <div class="drawer-bottom">
                 <div class="left">
@@ -169,7 +253,7 @@ const publicFirst = async () => {
                         <CloseCircleTwotone />
                     </Icon>
                     <Icon :size="18" color="#fff" class="icon1" v-if="emoji">
-                        <CaretDownFilled />
+                        <CaretUpFilled />
                     </Icon>
                     <Picker
                         :data="emojiIndex"
@@ -180,11 +264,15 @@ const publicFirst = async () => {
                         set="apple"
                         @select="handleEmoji"
                         v-if="emoji"
+                        class="Picker"
                     />
                     <n-upload
-                        list-type="image"
                         :create-thumbnail-url="createThumbnailUrl"
+                        v-model:file-list="fileListRef"
                         :default-file-list="fileListRef"
+                        list-type="image"
+                        show-remove-button
+                        @click="uploadImage"
                     >
                         <Icon :size="18" color="#8a919f" class="icon">
                             <FileImageOutlined />
@@ -192,63 +280,62 @@ const publicFirst = async () => {
                     </n-upload>
                 </div>
                 <div class="right">
-                    <span>{{ fontNumber }}/1000</span>
-                    <n-tooltip placement="top" trigger="hover" style="background-color: #f2f3f5; color: #8a919f">
-                        <template #trigger>
-                            <Icon :size="16" color="#8a919f" class="icon">
-                                <QuestionCircleOutlined />
-                            </Icon>
-                        </template>
-                        字数不能超过1000字
-                    </n-tooltip>
+                    <div>
+                        <span>
+                            {{ fontNumber }}/
+                            <span style="color: #8a919f; margin-right: 0px">1000</span>
+                        </span>
+                        <n-tooltip placement="top" trigger="hover" style="background-color: #f2f3f5; color: #8a919f">
+                            <template #trigger>
+                                <Icon :size="16" color="#8a919f" class="icon">
+                                    <QuestionCircleOutlined />
+                                </Icon>
+                            </template>
+                            字数不能超过1000字
+                        </n-tooltip>
+                    </div>
 
-                    <n-button strong secondary round type="primary" size="small" @click="publicFirst">发布</n-button>
+                    <n-button
+                        strong
+                        secondary
+                        round
+                        type="primary"
+                        size="large"
+                        @click="publicFirst"
+                        :loading="loadButton"
+                        icon-placement="right"
+                    >
+                        发布
+                    </n-button>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <style scoped lang="scss">
-@keyframes loading {
-    from {
-        transform: translateY(100%); /* 从下方进入 */
-    }
-    to {
-        transform: translateY(0); /* 从下方进入 */
-    }
-}
 .drawer {
     width: 100%;
-    /* height: 200px; */
     background-color: #fff;
-    padding: 60px 20px 20px 20px;
-    position: fixed;
-    bottom: 0;
-    border-radius: 10px;
-    z-index: 999;
-    animation: loading 1s forwards;
-
-    .n-avatar {
-        float: left;
-        margin-right: 30px;
-    }
+    z-index: 10;
+    margin-top: 5px;
 
     .textArea {
         width: 90%;
-        height: 120px;
+        height: 160px;
         display: inline-block;
         background-color: #f7f8fa;
+        padding: 10px;
 
         textarea {
             width: 100%;
-            height: 80px;
+            height: 90px;
             border: none;
             background: none;
             outline: none;
             color: inherit; /* 继承父元素的文本颜色 */
-            padding: 10px; /* 内边距，调整文本与边缘的距离 */
             overflow-y: auto;
             resize: none; /* 禁止用户手动调整大小 */
+            font-size: 16px;
         }
 
         /* 设置评论框的侧边滑轮样式 */
@@ -264,18 +351,14 @@ const publicFirst = async () => {
         }
 
         .drawer-bottom {
-            display: grid;
-            grid-template-columns: 3fr 1fr;
-            line-height: 28px;
-
             .left {
-                padding-left: 20px;
                 position: relative;
+                float: left;
+                padding-top: 25px;
 
                 .n-upload {
                     display: inline-block;
                     width: 48px;
-                    margin-left: 50px;
                 }
 
                 .n-upload :deep(.n-upload-trigger + .n-upload-file-list) {
@@ -283,21 +366,21 @@ const publicFirst = async () => {
                     display: inline-block;
                 }
 
-                .n-button {
+                .n-upload :deep(.n-upload-file-list) {
                     position: absolute;
-                    top: 40px;
-                    right: -50px;
+                    bottom: -2px;
                 }
                 .icon {
                     margin-right: 30px;
-                    position: absolute;
-                    top: 10px;
+                    float: left;
+                    // position: absolute;
+                    // top: 10px;
                 }
                 .icon1 {
                     position: absolute;
-                    bottom: 40px;
-                    left: 20px;
-                    z-index: 9999;
+                    bottom: 16px;
+                    left: 1px;
+                    z-index: 999;
                 }
                 .icon:hover {
                     cursor: pointer;
@@ -305,13 +388,19 @@ const publicFirst = async () => {
                 .emoji-mart {
                     width: 30px;
                     position: absolute;
-                    bottom: 50px;
-                    left: -120px;
+                    bottom: -400px;
+                    left: -68px;
                     z-index: 999;
                 }
             }
 
             .right {
+                float: right;
+                display: flex;
+                padding-top: 5px;
+                div {
+                    padding-top: 20px;
+                }
                 span {
                     margin-right: 20px;
                 }

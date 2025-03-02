@@ -1,12 +1,30 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+//引入自定义组件
 import Article from '@/views/components/article/index.vue';
+import skeleton from '@/views/components/skeleton/index.vue';
 import FansInfo from '@/views/components/fansInfo/index.vue';
-import { getMemberInfo, editSignature, getArticleInfo, deleteArticle, getConcernList } from '@/config/apis/member.ts';
-import { concernInter } from '@/config/apis/articleDetail';
-import { getNumberData } from '@/config/apis/settings.ts';
+import PublishButton from '../components/PublishButton/index.vue';
+import author from '@/views/components/Author/index.vue';
+//引入api
+import {
+    getMemberInfo,
+    editSignature,
+    getArticleInfo,
+    deleteArticle,
+    getConcernList,
+    getConcernDetail,
+    getTouristArticleInfo
+} from '@/config/apis/member.ts';
+import { concernInter, collectionInter, getTouristAuthorDetail } from '@/config/apis/articleDetail';
+import { getNumberData, getTouristNumberData } from '@/config/apis/settings.ts';
+//引入全局状态管理
+import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
+//引入公共方法
 import { debounce } from '@/utils/debounce.ts';
+//引入第三方组件
 import '@/assets/css/icon/iconfont.css';
 import type { InputInst } from 'naive-ui';
 import { useMessage } from 'naive-ui';
@@ -24,8 +42,20 @@ import {
 //定义路由对象
 const router = useRouter();
 
+const routes = useRoute();
+
 //定义消息提示对象
 const message = useMessage();
+
+const userInfor = useUserStore();
+
+const touristPattern = useTouristPattern();
+
+//判断是否是游客
+const isTourist = ref(false);
+
+//控制当前页面的用户是否是当前登录的用户
+const isSelf = ref(true);
 
 //------------------------生命周期---------------------
 
@@ -33,13 +63,109 @@ onMounted(async () => {
     userInfo();
     articleInit();
     linkInit();
+    window.addEventListener('scroll', scrollLoad);
+    if (userInfor.token === '') {
+        isTourist.value = true;
+    }
 });
+
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', scrollLoad);
+});
+
+//-----------------------游客模式------------------------------
+//控制登录组件是否出现
+const loginAppear = ref(false);
+
+//触发登录的事件
+const triggerType = ref('');
+
+//判断游客是否已经登录
+const isLogin = ref(false);
+
+//登录后的操作
+const performOperation = async (type: string) => {
+    loginAppear.value = false;
+    if (+routes.params.id === userInfor.userInfo.id) {
+        isSelf.value = true;
+    }
+    isTourist.value = false;
+    await userInfo();
+    if (type === '关注此用户' && !user.concern_status) {
+        concern();
+    } else if (type === '关注其关注的人') {
+        await fansList();
+        isLogin.value = true;
+    } else if (type === '发布文章') {
+        router.push(`/articlerelease/0`);
+    }
+};
+
+//登录后遮罩层消失
+const handleCloseAuthor = () => {
+    loginAppear.value = false;
+};
+
+//----------------监听跳转当前登录人的会员中心-------------------
+watch(
+    () => userInfor.jumpToMemberCenter,
+    (newVal) => {
+        updateJumpInfo(newVal);
+        if (newVal === userInfor.userInfo.id) {
+            isSelf.value = true;
+        }
+    }
+);
+
+//------------------------发布文章的按钮---------------
+//控制发布文章按钮是否显示
+const publicAppear = ref(false);
+
+const scrollLoad = () => {
+    //监听控制发布文章按钮
+    // 获取当前滚动位置
+    const scrollTop = window.scrollY;
+    if (scrollTop >= 30) {
+        publicAppear.value = true;
+    } else {
+        publicAppear.value = false;
+    }
+    //-----------监听控制下拉加载数据-----------
+    // 获取页面的总高度
+    const windowHeight = window.innerHeight;
+    // 获取页面的滚动高度
+    const scrollHeight = document.documentElement.scrollHeight;
+
+    // 判断是否滚动到页面底部
+    if (scrollTop + windowHeight + 1 >= scrollHeight) {
+        if (tabValue.value === '关注') {
+            fansLoadInit();
+        } else {
+            loadInit();
+        }
+    }
+};
 
 //------------------------用户模块---------------------
 
+//定义当前会员中心人员的id
+const paramId = ref(+routes.params.id);
+
+//控制个签是否可编辑
+const isEdit = ref(true);
+
+//获取到输入框
+const inputInstRef = ref<InputInst | null>(null);
+
+//控制显示骨架屏
+const skeletonUser = ref(true);
+
+//控制关注按钮的加载效果
+const loadButton = ref(false);
+
 //定义当前会员中心人员的各种信息
 const user = reactive({
-    id: 0,
+    id: paramId.value,
     head_shot: '',
     nickname: '',
     signature: '',
@@ -56,26 +182,48 @@ const user = reactive({
     github_link: ''
 });
 
-//控制个签是否可编辑
-const isEdit = ref(true);
-
-//获取到输入框
-const inputInstRef = ref<InputInst | null>(null);
-
 //初始化用户数据
 const userInfo = async () => {
-    const { data } = await getMemberInfo(user.id);
-    if (data) {
-        Object.assign(user, data);
+    if (+user.id !== userInfor.userInfo?.id) {
+        isSelf.value = false;
+    }
+    skeletonUser.value = true;
+    if (userInfor.token === '') {
+        const { data } = await getTouristAuthorDetail({
+            author_id: user.id
+        });
+        if (data) {
+            skeletonUser.value = false;
+            Object.assign(user, data);
+        }
+    } else {
+        const { data } = await getMemberInfo({
+            author_id: user.id
+        });
+        if (data) {
+            skeletonUser.value = false;
+            Object.assign(user, data);
+        }
     }
 };
 
 //初始化微博、博客链接
 const linkInit = async () => {
-    const { data } = await getNumberData(user.id);
-    user.blog_link = data.blog_link;
-    user.weibo_link = data.weibo_link;
-    user.github_link = data.github_link;
+    if (userInfor.token === '') {
+        const { data } = await getTouristNumberData({
+            author_id: user.id
+        });
+        user.blog_link = data.blog_link;
+        user.weibo_link = data.weibo_link;
+        user.github_link = data.github_link;
+    } else {
+        const { data } = await getNumberData({
+            author_id: user.id
+        });
+        user.blog_link = data.blog_link;
+        user.weibo_link = data.weibo_link;
+        user.github_link = data.github_link;
+    }
 };
 
 //编辑个签
@@ -89,7 +237,10 @@ const edit = () => {
 //输入框失焦后提交编辑的个签
 const commitSignature = async () => {
     isEdit.value = true;
-    const { code } = await editSignature(user.signature);
+    const signature = {
+        signature: user.signature
+    };
+    const { code } = await editSignature(signature);
     if (code === 2000) {
         message.success('更改个签成功');
     } else {
@@ -99,16 +250,30 @@ const commitSignature = async () => {
 
 //关注
 const concernFun = async () => {
-    user.concern_status = !user.concern_status;
-    const { code } = await concernInter(user.id);
-    if (code === 2000) {
-        if (user.concern_status) {
-            message.success('关注成功');
-        } else {
-            message.success('取消关注成功');
-        }
+    if (userInfor.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '关注此用户';
     } else {
-        message.error('关注失败');
+        loadButton.value = true;
+        try {
+            const { code } = await concernInter({
+                followed_id: +user.id
+            });
+            if (code === 2000) {
+                if (!user.concern_status) {
+                    message.success('关注成功');
+                } else {
+                    message.success('取消关注成功');
+                }
+            } else {
+                message.error('关注失败');
+            }
+            loadButton.value = false;
+            user.concern_status = !user.concern_status;
+        } catch (error) {
+            message.error(error);
+            loadButton.value = false;
+        }
     }
 };
 
@@ -116,16 +281,29 @@ const concern = debounce(concernFun, 500);
 
 //设置按钮
 const settinngs = () => {
-    router.push(`/settings/${user.id}`);
+    router.push(`/settings`);
+};
+
+//游客关注该用户关注的人
+const concernOther = (id) => {
+    if (userInfor.token === '') {
+        loginAppear.value = true;
+        triggerType.value = '关注其关注的人';
+        touristPattern.setTriggerId(id);
+    } else {
+        concern();
+    }
 };
 
 //--------------------关注列表模块------------------------
+//控制文章、收藏、关注模块的骨架屏
+const skeletonOther = ref(true);
 
-//定义文章的筛选条件
+//定义关注的人的筛选条件
 const fansType = reactive({
-    id: user.id,
+    userId: user.id,
     page: 1,
-    limit: 4,
+    limit: 7,
     keyword: ''
 });
 
@@ -135,30 +313,73 @@ const isLoading = ref(false);
 //表示是否还有数据
 const noMore = ref(false);
 
+//关注列表数据id
+const fansId = ref([]);
+
 //关注列表数组
 const fansArr = ref([]);
 
 //初始化关注列表
 const fansList = async () => {
+    skeletonOther.value = true;
     const { data } = await getConcernList(fansType);
     if (data) {
-        fansArr.value = data.concernList;
+        skeletonOther.value = false;
+        fansId.value = data.ids.ids;
+        const fansData = await getConcernDetail({
+            ids: fansId.value,
+            keyword: fansType.keyword,
+            user_id: isTourist.value ? 0 : userInfor.userInfo.id
+        });
+        if (fansData) {
+            fansArr.value = fansData.data.user_info_list;
+        }
+        if (!data.is_have_data) {
+            noMore.value = true;
+            console.log(noMore, 'ooo');
+        }
     }
 };
 
 //下拉加载关注列表数据
 const fansLoadInit = async () => {
-    if (isLoading.value) return;
-    isLoading.value = true;
+    if (!noMore.value) {
+        if (isLoading.value) return;
+        isLoading.value = true;
+        setTimeout(async () => {
+            fansType.page++;
+            const { data } = await getConcernList(fansType);
+            if (data) {
+                isLoading.value = false;
+                if (data.ids.ids.length === 0) {
+                    noMore.value = true;
+                } else {
+                    fansId.value.push(...data.ids.ids);
+                    const fansData = await getConcernDetail({
+                        ids: fansId.value,
+                        keyword: fansType.keyword,
+                        user_id: isTourist.value ? 0 : userInfor.userInfo.id
+                    });
+                    fansArr.value = fansData.data.user_info_list;
+                }
+                if (!data.is_have_data) {
+                    noMore.value = true;
+                }
+            }
+        }, 1000);
+    }
+};
 
-    setTimeout(async () => {
-        fansType.page++;
-        const { data } = await getConcernList(fansType);
-        if (data) {
-            fansArr.value.push(...data.concernList);
-            isLoading.value = false;
-        }
-    }, 1000);
+//跳转到关注人的会员中心
+const updateJumpInfo = (id) => {
+    user.id = id;
+    fansType.userId = id;
+    aticleType.id = id;
+    userInfo();
+    articleInit();
+    fansList();
+    linkInit();
+    userInfor.jumpToMemberCenter = id;
 };
 
 //------------------文章列表模块------------------------------
@@ -168,28 +389,62 @@ const aticleType = reactive({
     id: user.id,
     type: '文章',
     page: 1,
-    limit: 4,
+    limit: 5,
     keyword: ''
 });
 
 //文章数组
 const articleArr = ref([]);
 
+//定义变量接收标签的目前值
+const tabValue = ref('文章');
+
+//控制取消收藏按钮的加载效果
+const collectLoadButton = ref(false);
+
 //初始化文章的信息
 const articleInit = async () => {
-    const { data } = await getArticleInfo(aticleType);
-    if (data) {
-        articleArr.value = data.dataList;
+    articleArr.value = [];
+    skeletonOther.value = true;
+    const getData = async (fetchFunction) => {
+        try {
+            const { data } = await fetchFunction();
+            if (data) {
+                articleArr.value = data.dataList;
+                if (!data.next) {
+                    noMore.value = true;
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            skeletonOther.value = false;
+        }
+    };
+
+    if (userInfor.token === '') {
+        getData(() => getTouristArticleInfo(aticleType));
+    } else {
+        getData(() => getArticleInfo(aticleType));
     }
 };
 
 //发表文章按钮
 const pubicArticle = () => {
-    router.push(`/articlerelease/${user.id}`);
+    if (isTourist.value) {
+        triggerType.value = '发布文章';
+        loginAppear.value = true;
+    } else {
+        router.push(`/articlerelease/0`);
+    }
 };
 
 //切换标签
 const tabChange = (value: string) => {
+    tabValue.value = value;
+    fansType.keyword = '';
+    aticleType.keyword = '';
+    noMore.value = false;
     if (value !== '关注') {
         aticleType.type = value;
         aticleType.page = 1;
@@ -203,17 +458,39 @@ const tabChange = (value: string) => {
 
 //下拉加载文章数据
 const loadInit = async () => {
-    if (isLoading.value) return;
-    isLoading.value = true;
-
-    setTimeout(async () => {
-        aticleType.page++;
-        const { data } = await getArticleInfo(aticleType);
-        if (data) {
-            articleArr.value.push(...data.dataList);
-            isLoading.value = false;
-        }
-    }, 1000);
+    if (isTourist.value && !noMore.value) {
+        if (isLoading.value) return;
+        isLoading.value = true;
+        setTimeout(async () => {
+            aticleType.page++;
+            const { data } = await getTouristArticleInfo(aticleType);
+            if (data) {
+                if (data.dataList.length > 0) {
+                    articleArr.value.push(...data.dataList);
+                }
+                isLoading.value = false;
+                if (!data.next) {
+                    noMore.value = true;
+                }
+            }
+        }, 1000);
+    } else {
+        if (isLoading.value) return;
+        isLoading.value = true;
+        setTimeout(async () => {
+            aticleType.page++;
+            const { data } = await getArticleInfo(aticleType);
+            if (data) {
+                if (data.dataList.length > 0) {
+                    articleArr.value.push(...data.dataList);
+                }
+                isLoading.value = false;
+                if (!data.next) {
+                    noMore.value = true;
+                }
+            }
+        }, 1000);
+    }
 };
 
 //编辑本篇文章
@@ -225,11 +502,28 @@ const editTotal = (id) => {
 //删除文章
 const deleteArticles = async (id) => {
     event.stopPropagation();
-    const { code } = await deleteArticle(id);
+    const { code } = await deleteArticle({
+        id: id
+    });
     if (code === 2000) {
         message.success('删除成功');
+        articleArr.value = articleArr.value.filter((item) => item.id !== id);
     } else {
-        message.error('s删除失败');
+        message.error('删除失败');
+    }
+};
+
+//取消收藏
+const cancelCollection = async (id) => {
+    collectLoadButton.value = true;
+    const { code } = await collectionInter({
+        article_id: id,
+        collection_status: false
+    });
+    if (code === 2000) {
+        message.success('取消收藏成功！');
+        collectLoadButton.value = false;
+        articleArr.value = articleArr.value.filter((item) => item.id !== id);
     }
 };
 
@@ -241,73 +535,126 @@ const inputWidth = ref('0px'); // 初始宽度为 0
 //搜索框输入的内容
 const inputValue = ref('');
 
+//控制搜索框什么时候缩回
+const isInputBack = ref(false);
+
 // 鼠标悬停时输入框设置宽度
 const expandInput = () => {
-    inputWidth.value = '200px';
+    if (!isInputBack.value) {
+        isInputBack.value = false;
+        inputWidth.value = '200px';
+    }
 };
 
 // 鼠标移走时输入框缩回
 const shrinkInput = () => {
-    inputWidth.value = '0px';
+    if (isInputBack.value) {
+        inputWidth.value = '0px';
+        isInputBack.value = false;
+        inputValue.value = '';
+    } else {
+        inputWidth.value = '200px';
+    }
 };
 
 //搜索的方法
 const searchFun = () => {
     if (aticleType.type !== '') {
         aticleType.keyword = inputValue.value;
+        aticleType.page = 1;
         articleInit();
     } else {
+        fansType.page = 1;
         fansType.keyword = inputValue.value;
         fansList();
     }
-    inputValue.value = '';
+    // fansType.keyword = '';
+    isInputBack.value = true;
 };
 </script>
 <template>
     <div class="wrap">
+        <div class="overlay" v-if="loginAppear"></div>
+        <author
+            v-if="loginAppear"
+            class="loginCom"
+            :type="triggerType"
+            @trigger-type="performOperation"
+            @close-author="handleCloseAuthor"
+        ></author>
         <div class="member-content">
             <div class="left">
-                <n-card size="huge" class="information">
-                    <div class="left-left">
-                        <n-avatar round :size="48" src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg" />
-                        <n-ellipsis style="max-width: 240px; display: block">{{ user.nickname }}</n-ellipsis>
-                        <n-ellipsis style="max-width: 240px; display: block">{{ user.signature }}</n-ellipsis>
-                        <n-input
-                            ref="inputInstRef"
-                            v-model:value="user.signature"
-                            placeholder=""
-                            :disabled="isEdit"
-                            @blur="commitSignature"
-                        />
-                        <i class="iconfont" @click="edit" style="color: #cbcbcb">&#xe602;</i>
-                    </div>
-                    <div class="left-right">
-                        <div class="icons">
-                            <a :href="user.blog_link">
-                                <i class="iconfont">&#xe668;</i>
-                            </a>
-                            <a :href="user.weibo_link">
-                                <Icon size="18">
-                                    <WeiboOutlined />
-                                </Icon>
-                            </a>
-                            <a :href="user.github_link">
-                                <Icon size="18">
-                                    <GithubFilled />
-                                </Icon>
-                            </a>
+                <n-card size="huge">
+                    <skeleton v-if="skeletonUser"></skeleton>
+                    <div v-else class="information">
+                        <div class="left-left">
+                            <n-avatar round :size="48" :src="user.head_shot || ''" />
+                            <n-ellipsis style="max-width: 240px; display: block; font-weight: 800; font-size: 18px">
+                                {{ user.nickname }}
+                            </n-ellipsis>
+                            <n-ellipsis style="max-width: 240px; display: block">
+                                {{ user.date }} 加入了{{ user.tag }}
+                            </n-ellipsis>
+                            <n-input
+                                ref="inputInstRef"
+                                v-model:value="user.signature"
+                                placeholder=""
+                                :disabled="isEdit"
+                                @blur="commitSignature"
+                                style="width: 200px"
+                            />
+                            <i class="iconfont" @click="edit" style="color: #cbcbcb" v-if="isSelf">&#xe602;</i>
                         </div>
-                        <n-button tertiary round type="primary" @click="settinngs">设置</n-button>
-                        <n-button tertiary round type="primary" @click="concern" v-if="!user.concern_status">
-                            关注
-                        </n-button>
-                        <n-button tertiary round type="primary" @click="concern" v-else>已关注</n-button>
+                        <div class="left-right">
+                            <div class="icons">
+                                <a :href="user.blog_link" v-if="user.blog_link !== ''">
+                                    <i class="iconfont">&#xe668;</i>
+                                </a>
+                                <a :href="user.weibo_link" v-if="user.weibo_link !== ''">
+                                    <Icon size="18">
+                                        <WeiboOutlined />
+                                    </Icon>
+                                </a>
+                                <a :href="user.github_link" v-if="user.github_link !== ''">
+                                    <Icon size="18">
+                                        <GithubFilled />
+                                    </Icon>
+                                </a>
+                            </div>
+                            <n-button tertiary round type="primary" @click="settinngs" class="settings" v-if="isSelf">
+                                设置
+                            </n-button>
+                            <n-button
+                                tertiary
+                                round
+                                type="primary"
+                                @click="concern"
+                                v-if="!user.concern_status && !isSelf"
+                                class="concern"
+                                :loading="loadButton"
+                                icon-placement="right"
+                            >
+                                关注
+                            </n-button>
+                            <n-button
+                                tertiary
+                                round
+                                type="primary"
+                                @click="concern"
+                                v-if="user.concern_status && !isSelf"
+                                class="concern"
+                                :loading="loadButton"
+                                icon-placement="right"
+                            >
+                                已关注
+                            </n-button>
+                        </div>
                     </div>
                 </n-card>
-                <n-card size="huge" class="article-card">
+                <n-card size="huge" class="article-card" ref="scrollContainer">
                     <n-tabs type="line" animated @update:value="tabChange">
                         <template #suffix>
-                            <div class="searchModule" @mouseover="expandInput" @mouseleave="shrinkInput">
+                            <div class="searchModule">
                                 <transition name="slide">
                                     <n-input
                                         round
@@ -329,52 +676,111 @@ const searchFun = () => {
                                 </Icon>
                             </div>
                         </template>
-                        <n-tab-pane name="文章" tab="文章">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
-                                <Article :item="item" v-for="(item, index) in articleArr" :key="index">
-                                    <template #type>
-                                        <n-tag class="status">{{ item.status }}</n-tag>
-                                    </template>
-                                    <template #edit>
-                                        <n-tag type="success" class="edit">
-                                            <i
-                                                class="iconfont"
-                                                @click="editTotal(item.id)"
-                                                style="color: #19a059; font-size: 21px"
-                                            >
-                                                &#xe602;
-                                            </i>
-                                            <i
-                                                class="iconfont"
-                                                @click="deleteArticles(item.id)"
-                                                style="color: #19a059; font-size: 21px"
-                                            >
-                                                &#xe624;
-                                            </i>
-                                        </n-tag>
-                                    </template>
-                                </Article>
-                            </n-infinite-scroll>
+                        <n-tab-pane name="文章" tab="文章" style="min-height: 600px">
+                            <skeleton v-if="skeletonOther"></skeleton>
+                            <div v-else>
+                                <div class="empty-box" v-if="articleArr.length === 0">
+                                    <img src="../../assets/images/empty.png" />
+                                </div>
+                                <n-infinite-scroll style="min-height: 600px" :distance="10" @load="loadInit" v-else>
+                                    <Article
+                                        :item="item"
+                                        v-for="(item, index) in articleArr"
+                                        :key="index"
+                                        class="article"
+                                    >
+                                        <template #type>
+                                            <n-tag class="status">{{ item.status }}</n-tag>
+                                        </template>
+                                        <template #edit>
+                                            <n-tag type="success" class="edit" v-if="isSelf">
+                                                <i
+                                                    class="iconfont"
+                                                    @click="editTotal(item.id)"
+                                                    style="color: #19a059; font-size: 21px"
+                                                >
+                                                    &#xe602;
+                                                </i>
+                                                <i
+                                                    class="iconfont"
+                                                    @click="deleteArticles(item.id)"
+                                                    style="color: #19a059; font-size: 21px"
+                                                >
+                                                    &#xe624;
+                                                </i>
+                                            </n-tag>
+                                        </template>
+                                    </Article>
+                                    <div class="loading">
+                                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
+                                    </div>
+                                </n-infinite-scroll>
+                            </div>
                         </n-tab-pane>
-                        <n-tab-pane name="收藏" tab="收藏">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="loadInit">
-                                <Article :item="item" v-for="(item, index) in articleArr" :key="index"></Article>
-                            </n-infinite-scroll>
+                        <n-tab-pane name="收藏" tab="收藏" style="min-height: 600px">
+                            <skeleton v-if="skeletonOther"></skeleton>
+                            <div v-else>
+                                <div class="empty-box" v-if="articleArr.length === 0">
+                                    <img src="../../assets/images/empty.png" />
+                                </div>
+                                <n-infinite-scroll
+                                    style="min-height: 600px"
+                                    :distance="10"
+                                    @load="loadInit"
+                                    ref="scrollPage"
+                                    v-else
+                                >
+                                    <Article :item="item" v-for="(item, index) in articleArr" :key="index">
+                                        <template #cancelCollect>
+                                            <div class="cancelCollect">
+                                                <n-button
+                                                    strong
+                                                    secondary
+                                                    round
+                                                    type="primary"
+                                                    @click.stop="cancelCollection(item.id)"
+                                                    v-if="isSelf"
+                                                    :loading="collectLoadButton"
+                                                    icon-placement="right"
+                                                >
+                                                    取消收藏
+                                                </n-button>
+                                            </div>
+                                        </template>
+                                    </Article>
+                                    <div class="loading">
+                                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
+                                    </div>
+                                </n-infinite-scroll>
+                            </div>
                         </n-tab-pane>
-                        <n-tab-pane name="关注" tab="关注">
-                            <n-infinite-scroll style="height: 600px" :distance="10" @load="fansLoadInit">
-                                <FansInfo :item="item" v-for="(item, index) in fansArr" :key="index"></FansInfo>
-                            </n-infinite-scroll>
+                        <n-tab-pane name="关注" tab="关注" style="min-height: 600px">
+                            <skeleton v-if="skeletonOther" style="height: 100%"></skeleton>
+                            <div v-else>
+                                <div class="empty-box" v-if="fansArr.length === 0">
+                                    <img src="../../assets/images/empty.png" />
+                                </div>
+                                <n-infinite-scroll style="min-height: 600px" :distance="10" @load="fansLoadInit" v-else>
+                                    <FansInfo
+                                        :item="item"
+                                        v-for="(item, index) in fansArr"
+                                        :key="index"
+                                        @jump-memberCenter="updateJumpInfo"
+                                        @concern="concernOther(item.id)"
+                                        :islogin="isLogin"
+                                    ></FansInfo>
+                                    <div class="loading">
+                                        <span class="text" v-if="isLoading && !noMore">加载中，数据正在飞速赶来~</span>
+                                        <span v-if="noMore" class="text">-已经触及俺的底线啦~-</span>
+                                    </div>
+                                </n-infinite-scroll>
+                            </div>
                         </n-tab-pane>
                     </n-tabs>
-                    <div class="loading" v-if="isLoading && !noMore">
-                        <span class="videos">
-                            <video src="../../assets/images/loading.mp4" autoplay loop muted></video>
-                        </span>
-                        <span class="text">正在全力加载中...</span>
-                    </div>
-                    <div v-if="noMore" class="loading">没有更多了 🤪</div>
                 </n-card>
+                <!-- <div v-if="noMore" class="loading">-已经触及俺的底线啦~-</div> -->
             </div>
             <div class="right">
                 <n-button strong secondary round type="primary" @click="pubicArticle">
@@ -385,24 +791,27 @@ const searchFun = () => {
                 </n-button>
                 <n-card title="个人成就" size="huge" class="achievements">
                     <template #header-extra></template>
-                    <p>
-                        <Icon size="16" color="#19a059">
-                            <LikeTwotone />
-                        </Icon>
-                        <span>文章点赞 {{ user.likes_count }}</span>
-                    </p>
-                    <p>
-                        <Icon size="16" color="#19a059">
-                            <EyeOutlined />
-                        </Icon>
-                        <span>文章阅读 {{ user.reads_count }}</span>
-                    </p>
-                    <p>
-                        <Icon size="16" color="#19a059">
-                            <HeartFilled />
-                        </Icon>
-                        <span>文章收藏 {{ user.attentions_count }}</span>
-                    </p>
+                    <skeleton v-if="skeletonUser"></skeleton>
+                    <div v-else>
+                        <p>
+                            <Icon size="16" color="#19a059">
+                                <LikeTwotone />
+                            </Icon>
+                            <span>文章点赞 {{ user.likes_count }}</span>
+                        </p>
+                        <p>
+                            <Icon size="16" color="#19a059">
+                                <EyeOutlined />
+                            </Icon>
+                            <span>文章阅读 {{ user.reads_count }}</span>
+                        </p>
+                        <p>
+                            <Icon size="16" color="#19a059">
+                                <HeartFilled />
+                            </Icon>
+                            <span>文章收藏 {{ user.attentions_count }}</span>
+                        </p>
+                    </div>
                 </n-card>
                 <n-card size="huge" class="concernCard">
                     <div class="concern">
@@ -416,20 +825,32 @@ const searchFun = () => {
                 </n-card>
             </div>
         </div>
+        <transition name="scale">
+            <PublishButton v-if="publicAppear" @click="pubicArticle"></PublishButton>
+        </transition>
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .wrap {
     @include all;
     background-color: #f2f3f5;
-
+    margin-top: 50px;
+    @include overlay;
+    .loginCom {
+        z-index: 999;
+        position: fixed;
+        left: 50%;
+        top: 50px;
+        transform: translateX(-50%);
+        background-color: #fff;
+    }
     .member-content {
         width: 80%;
         margin: 0 auto;
         display: grid;
-        grid-template-columns: 3fr 1fr;
-        padding-top: 20px;
+        grid-template-columns: 7fr 2fr;
+        // padding-top: 20px;
 
         .left {
             .xicon {
@@ -441,11 +862,13 @@ const searchFun = () => {
                 cursor: pointer;
             }
             .n-card {
-                margin-bottom: 20px;
+                margin: 20px 0px;
+                padding-bottom: 20px;
+                border-radius: 5px;
 
                 .left-left {
-                    width: 80%;
-
+                    width: 75%;
+                    padding-top: 10px;
                     .n-avatar {
                         float: left;
                         width: 80px;
@@ -481,30 +904,53 @@ const searchFun = () => {
                 }
                 .left-right {
                     .n-button {
-                        margin-top: 40px;
-                        width: 80px;
+                        margin: 20px 20px 0px 0px;
+                        // width: 80px;
+                        float: right;
+                    }
+
+                    .concern {
+                        margin-left: 20px;
                     }
 
                     .icons {
                         position: relative;
+                        display: flex;
+                        flex-direction: row-reverse;
+                        a {
+                            margin-right: 10px;
+                        }
 
                         .iconfont {
                             font-size: 17px;
                             position: absolute;
-                            left: -20px;
+                            right: 95px;
                             top: -3px;
                         }
                     }
                 }
             }
 
-            .information :deep(.n-card__content) {
+            .information {
                 display: grid;
-                grid-template-columns: 5fr 1fr;
+                grid-template-columns: 4fr 1fr;
             }
 
             .article-card {
                 position: relative;
+
+                // .ske {
+                //     height: 600px;
+                // }
+
+                .empty-box {
+                    width: 500px;
+                    height: 600px;
+                    margin: 0 auto;
+                    img {
+                        width: 100%;
+                    }
+                }
 
                 .searchModule {
                     display: flex;
@@ -521,6 +967,13 @@ const searchFun = () => {
                     }
                 }
 
+                .n-tabs .n-tab-pane {
+                    padding: 0px;
+                }
+                .n-tabs :deep(.n-tabs-tab__label) {
+                    font-size: 16px;
+                }
+
                 .status {
                     height: 20px;
                     font-size: 12px;
@@ -530,14 +983,27 @@ const searchFun = () => {
                     pointer-events: auto;
                     background-color: #daf0e4;
                     position: absolute;
-                    right: 50px;
+                    right: 0px;
+                    top: 0px;
+                    z-index: 999;
+                    display: none;
+                }
+
+                .article:hover .edit {
+                    display: block;
                 }
 
                 @include loading;
+
+                .cancelCollect {
+                    display: flex;
+                    align-items: center;
+                    margin: 0px 20px;
+                }
             }
         }
         .n-card :deep(.n-card__content) {
-            padding: 20px 0px 20px 20px;
+            padding: 20px 0px 0px 20px;
         }
 
         .right {
@@ -546,14 +1012,18 @@ const searchFun = () => {
             margin-left: 20px;
 
             .n-button {
-                width: 90%;
+                width: 100%;
                 height: 40px;
-                margin: 10px 0px 30px 0px;
+                margin: 20px 0px 30px 0px;
             }
 
+            .achievements {
+                padding-bottom: 20px;
+            }
             .n-card {
-                width: 90%;
+                width: 100%;
                 margin-bottom: 20px;
+                border-radius: 5px;
 
                 p {
                     margin-bottom: 10px;
@@ -567,6 +1037,7 @@ const searchFun = () => {
             @include headBorder;
             .n-card :deep(.n-card-header) {
                 padding: 10px;
+                font-size: 16px;
             }
 
             .concernCard {
@@ -593,6 +1064,33 @@ const searchFun = () => {
                 padding-right: 20px;
             }
         }
+    }
+    @keyframes scaleIn {
+        0% {
+            opacity: 0;
+            transform: scale(0); /* 从 0 缩放到 1 */
+        }
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    @keyframes scaleOut {
+        from {
+            opacity: 1;
+            transform: scale(1); /* 从 1 缩放到 0 */
+        }
+        to {
+            opacity: 0;
+            transform: scale(0);
+        }
+    }
+    .scale-enter-active {
+        animation: scaleIn 0.5s ease;
+    }
+
+    .scale-leave-active {
+        animation: scaleOut 0.3s ease;
     }
 }
 </style>

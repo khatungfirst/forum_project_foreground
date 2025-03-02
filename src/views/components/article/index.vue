@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { Icon } from '@vicons/utils';
 import { EyeOutlined, LikeTwotone } from '@vicons/antd';
@@ -10,12 +9,12 @@ const prop = defineProps({
             title: string;
             summary: string;
             nickname: string;
-            published_at: string;
+            daily_time: string;
             views_count: number;
             likes_count: number;
             image_url: string;
             tags: Array<{
-                ID: number;
+                name: string;
             }>;
             id: string;
             status: boolean;
@@ -25,11 +24,11 @@ const prop = defineProps({
             title: '',
             summary: '',
             nickname: '',
-            published_at: '',
+            daily_time: '',
             views_count: 0,
             likes_count: 0,
             image_url: '',
-            tags: [{ ID: 0 }],
+            tags: [{ name: '' }],
             id: '',
             status: false
         })
@@ -43,27 +42,35 @@ const route = useRouter();
 const checkDetail = () => {
     route.push(`/articledetail/${prop.item.id}`);
 };
+
+//点击标签的触发事件
+const clickTags = () => {
+    console.log('标签被点击了');
+};
+
+//文章题目和概述高亮显示关键词
+const highlightedTitle = ref(prop.item.title);
+const highlightedSummary = ref(prop.item.summary);
 </script>
+
 <template>
     <ul class="content" @click="checkDetail">
         <li class="whole">
             <div class="left">
-                <h3>{{ prop.item.title }}</h3>
-                <slot name="type"></slot>
-                <n-ellipsis :line-clamp="2" style="color: #868686; font-size: 14px; margin: 8px 0px">
-                    {{ prop.item.summary }}
-
-                    <template #tooltip>
-                        <div style="text-align: center; width: 700px">
-                            {{ prop.item.summary }}
-                        </div>
-                    </template>
-                </n-ellipsis>
+                <div class="left-left">
+                    <h3 v-html="highlightedTitle"></h3>
+                    <slot name="type"></slot>
+                </div>
+                <n-ellipsis
+                    :line-clamp="2"
+                    style="color: #868686; font-size: 14px; margin: 8px 0px"
+                    v-html="highlightedSummary"
+                ></n-ellipsis>
                 <div class="detail-bottom">
                     <span>
                         {{ prop.item.nickname }}
                     </span>
-                    <span class="time">{{ prop.item.published_at }}</span>
+                    <span class="time">{{ prop.item.daily_time }}</span>
                     <span class="icon">
                         <Icon>
                             <EyeOutlined />
@@ -76,20 +83,25 @@ const checkDetail = () => {
                         </Icon>
                         {{ prop.item.likes_count }}
                     </span>
-                    <ul>
+                    <ul @click.stop="clickTags">
                         <li v-for="(tag, index) in prop.item.tags" :key="index" class="tag">
-                            {{ tag.ID }}
+                            {{ tag.name }}
                         </li>
                     </ul>
                 </div>
             </div>
+            <slot class="edit" name="edit"></slot>
             <div class="right" v-if="prop.item.image_url !== ''">
-                <slot class="edit" name="edit"></slot>
-                <img :src="prop.item.image_url" alt="" />
+                <img
+                    :src="`${prop.item.image_url}?path=${prop.item.image_url}width=150&height=100&level=0`"
+                    alt="封面图"
+                />
             </div>
+            <slot class="cancelCollect" name="cancelCollect"></slot>
         </li>
     </ul>
 </template>
+
 <style scoped lang="scss">
 .content {
     width: 100%;
@@ -105,13 +117,19 @@ const checkDetail = () => {
 }
 .whole {
     display: flex;
-    padding: 10px;
+    padding: 10px 0px;
     border-bottom: 1px solid rgb(223, 217, 217);
     position: relative;
-    z-index: 999;
+    z-index: 997;
+    width: 98%;
 
     .left {
         flex: 1;
+
+        .left-left {
+            height: 20px;
+            margin-bottom: 10px;
+        }
 
         h3 {
             float: left;
@@ -119,10 +137,11 @@ const checkDetail = () => {
         }
         .detail-bottom {
             span {
-                margin: 0px 5px;
+                margin-right: 5px;
                 font-size: 14px;
-                color: #868686;
-                padding: 0px 5px;
+                color: #989da6;
+                padding-right: 5px;
+                font-weight: 500;
             }
 
             .time {
@@ -133,6 +152,7 @@ const checkDetail = () => {
 
             .icon {
                 position: relative;
+                margin-right: 15px;
             }
 
             .icon :deep(svg) {
@@ -161,9 +181,11 @@ const checkDetail = () => {
         position: relative;
         /* float: right; */
         margin-left: 8px;
+
         img {
-            width: 165px;
-            height: 130px;
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
         }
     }
 }

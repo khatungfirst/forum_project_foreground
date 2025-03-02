@@ -57,19 +57,20 @@ const goBack = () => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .wrap {
     @include all;
     background-color: #f2f3f5;
     overflow: hidden;
-
+    margin-top: 55px;
     .top {
-        width: 75%;
+        width: 80%;
         height: 50px;
         line-height: 50px;
         margin: 15px auto;
         background-color: #fff;
         padding-left: 30px;
+        border-radius: 5px;
 
         span {
             color: #19a059;
@@ -81,7 +82,7 @@ const goBack = () => {
     }
 
     .middle {
-        width: 75%;
+        width: 80%;
         height: 90%;
         margin: 0 auto;
         display: flex;
@@ -94,6 +95,7 @@ const goBack = () => {
             .n-tabs :deep(.n-tabs-nav) {
                 background-color: #fff;
                 margin-right: 15px;
+                border-radius: 5px;
             }
 
             .n-tabs :deep(.n-tab-pane) {
@@ -123,6 +125,14 @@ const goBack = () => {
                 width: 130px;
                 border-radius: 40px;
                 color: #1ea05a;
+            }
+            .n-tabs :deep(.n-tabs-tab__label) {
+                font-size: 16px;
+            }
+
+            .n-tab-pane,
+            .n-tab-pane :deep(.n-card--bordered) {
+                border-radius: 5px;
             }
 
             span {

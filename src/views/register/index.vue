@@ -1,10 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { NForm, NFormItem, NInput, NButton } from 'naive-ui';
-// import { Visibility } from '@vicons/ionicons5';
 import { useRouter } from 'vue-router';
 import { useMessage } from 'naive-ui';
 import { verify_code, register } from '../../config/apis/login';
+import { useUserStore } from '@/config/store/userStore';
 const router = useRouter();
 const formRef = ref(null);
 const form = ref({
@@ -13,17 +13,17 @@ const form = ref({
     verify_code: '',
     re_password: ''
 });
-
+const isLogging = ref(false); // 控制登录按钮的状态
 const message = useMessage(); // 获取消息提示 API
-// 局部注册 NIcon 组件和 Visibility 图标
-// const icons = {
-//     Visibility
-// };
-
+const userStore = useUserStore();
 const rules = ref({
     email: [
         { required: true, message: '请输入邮箱', trigger: 'blur' },
         { pattern: /^[^@\s]+@[^@\s]+\.(com|cn)$/, message: '请输入正确的邮箱', trigger: 'blur' }
+    ],
+    verify_code: [
+        { required: true, message: '请输入验证码', trigger: 'blur' },
+        { min: 6, message: '验证码长度不得少于6位', trigger: 'blur' }
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
@@ -32,6 +32,18 @@ const rules = ref({
             pattern:
                 /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{}|\\:;"'<>,.?/])[A-Za-z\d!@#$%^&*()_+\-=\[\]{}|\\:;"'<>,.?/]{8,}$/,
             message: '密码必须包含字母、数字和特殊符号',
+            trigger: 'blur'
+        }
+    ],
+    re_password: [
+        { required: true, message: '请再次输入密码', trigger: 'blur' },
+        {
+            validator: (rule, value) => {
+                if (value !== form.value.password) {
+                    return new Error('两次输入的密码不一致');
+                }
+                return true;
+            },
             trigger: 'blur'
         }
     ]
@@ -47,15 +59,21 @@ watch(
     }
 );
 
+const countdown = ref(60); // 倒计时秒数
+const isCounting = ref(false); // 是否正在倒计时
+
 const sendVerify_code = async () => {
     if (!form.value.email) {
         message.error('请先输入邮箱地址');
         return;
+    } else if (isCounting.value) {
+        message.warning('验证码已发送, 请稍后再试');
+        return;
     }
+    startCountdown(); // 立即启动倒计时
     try {
         const email = form.value.email;
         const response = await verify_code({ email });
-
         if (response.code === 2000) {
             message.success('验证码已发送，请检查您的邮箱');
         } else {
@@ -76,30 +94,45 @@ const sendVerify_code = async () => {
     }
 };
 
+const startCountdown = () => {
+    isCounting.value = true; // 开始倒计时
+    const interval = setInterval(() => {
+        if (countdown.value > 0) {
+            countdown.value--;
+        } else {
+            clearInterval(interval);
+            isCounting.value = false; // 倒计时结束
+            countdown.value = 60; // 重置倒计时
+        }
+    }, 1000);
+};
+
 const handleResister = async () => {
     try {
         await formRef.value.validate();
-        console.log('注册', form.value);
+        isLogging.value = true;
+
         const response = await register({
             email: form.value.email,
             password: form.value.password,
             verify_code: form.value.verify_code,
             re_password: form.value.re_password
         });
+
         if (response.code === 2000 && response.data) {
-            router.push('/login');
+            message.success('注册成功！'); // 注册成功时显示提示
+            isLogging.value = false; // 请求完成后，解除加载状态
+
+            userStore.login(response.data); // 登录成功，调用 login 方法
+            router.push('/choosetag');
         } else {
-            this.$message.error('注册失败:' + response.data.message);
+            message.error('注册失败：' + response.data.message);
         }
     } catch (errors) {
         console.error('注册失败', errors);
-        this.$message.error('请检查表单错误');
+        message.error('请检查表单错误');
     }
 };
-
-// const goToRegister = () => {
-//     router.push('/register');
-// };
 
 onMounted(() => {
     // 可以在此处执行一些初始化逻辑
@@ -107,43 +140,52 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="login-container">
-        <div class="header">
+    <!-- <div class="login-container"> -->
+    <!-- <div class="header">
             <span :class="{ active: currentRoute === '/login' }" @click="router.push('/login')">登录</span>
             <span :class="{ active: currentRoute === '/register' }" @click="router.push('/register')">注册</span>
-        </div>
-        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
-            <n-form-item label="邮箱" path="email">
-                <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
-                    <template #suffix>
-                        <span class="forgot-password-btn" @click="sendVerify_code">发送验证码</span>
-                    </template>
-                </n-input>
-            </n-form-item>
-            <n-form-item label="验证码" path="verify_code">
-                <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="密码" path="password">
-                <n-input v-model:value="form.password" placeholder="请输入密码" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="重复密码" path="re_password">
-                <n-input
-                    v-model:value="form.re_password"
-                    type="password"
-                    placeholder="请输入重复密码"
-                    class="common-input"
-                ></n-input>
-            </n-form-item>
-            <n-form-item>
-                <div class="button-wrapper">
-                    <n-button @click="handleResister" class="common-button">注册</n-button>
-                </div>
-            </n-form-item>
-        </n-form>
-        <!-- <div class="register" @click="goToRegister">
-            <n-button class="common-button">注册</n-button>
         </div> -->
-    </div>
+    <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleResister">
+        <n-form-item label="邮箱" path="email">
+            <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
+                <template #suffix>
+                    <span class="forgot-password-btn" @click="sendVerify_code">
+                        {{ isCounting ? `${countdown}秒后重试` : '发送验证码' }}
+                    </span>
+                </template>
+            </n-input>
+        </n-form-item>
+        <n-form-item label="验证码" path="verify_code">
+            <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
+        </n-form-item>
+        <n-form-item label="密码" path="password">
+            <n-input
+                v-model:value="form.password"
+                type="password"
+                placeholder="请输入密码"
+                class="common-input"
+                show-password-on="click"
+            ></n-input>
+        </n-form-item>
+        <n-form-item label="重复密码" path="re_password">
+            <n-input
+                v-model:value="form.re_password"
+                type="password"
+                placeholder="请输入重复密码"
+                class="common-input"
+                show-password-on="click"
+            ></n-input>
+        </n-form-item>
+        <n-form-item>
+            <div class="button-wrapper">
+                <n-button @click="handleResister" class="common-button" :disabled="isLogging">
+                    注册
+                    <n-spin :size="12" v-if="isLogging"></n-spin>
+                </n-button>
+            </div>
+        </n-form-item>
+    </n-form>
+    <!-- </div> -->
 </template>
 
 <style scoped>
@@ -198,7 +240,6 @@ onMounted(() => {
 
 .common-button {
     width: 100%;
-    /* margin-top: 20px; */
     background-color: #c5e2d4 !important;
     color: #19a059;
     border: none;
@@ -226,5 +267,6 @@ onMounted(() => {
 }
 .forgot-password-btn {
     color: #19a059;
+    cursor: pointer;
 }
 </style>

@@ -1,6 +1,5 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
-
+import IconWrapper from '../icon/IconWrapper.vue';
 const props = defineProps({
     comment_message: {
         type: Array,
@@ -10,6 +9,10 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['likeComment', 'showCommentBox']);
+
+// const enterMemberCenter = (id) => {
+//     router.push({ path: `/member/${id}` });
+// };
 </script>
 
 <template>
@@ -29,11 +32,20 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
                 <a href="#">{{ comment.title }}</a>
             </div>
             <div class="comment-actions">
-                <span class="date">{{ comment.created_at }}</span>
-                <button class="like-button" @click="() => emit('likeComment', comment)">
-                    {{ comment.likes_count }} 次赞
-                </button>
-                <span class="comment-reply" @click="() => emit('showCommentBox', comment)">回复</span>
+                <span class="date">{{ comment.daily_time }}</span>
+                <span
+                    class="like-button"
+                    @click="() => emit('likeComment', comment)"
+                    :style="{ color: comment.likeStatus ? '#19A059' : '#8a919f' }"
+                >
+                    <i class="iconfont icon-dianzan"></i>
+                    <span v-if="comment.likes_count === 0">点赞</span>
+                    <span v-else>{{ comment.likes_count }}</span>
+                    <!-- {{ comment.likeStatus }} -->
+                    <!-- {{ comment.likeStatus ? '已赞' : '赞' }} {{ comment.likes_count }} 次赞 -->
+                </span>
+
+                <!-- <span class="comment-reply" @click="() => emit('showCommentBox', comment)">回复</span> -->
             </div>
         </div>
     </div>
@@ -50,6 +62,7 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .comment-content {
@@ -60,6 +73,7 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
     font-size: 16px;
     color: #000000;
     margin-right: 15px;
+    cursor: pointer;
 }
 
 .commented {
@@ -94,17 +108,13 @@ const emit = defineEmits(['likeComment', 'showCommentBox']);
 }
 
 .like-button {
-    background: #f0f0f0;
+    /* background: #f0f0f0; */
     border: none;
     padding: 5px 10px;
     border-radius: 5px;
-    color: #666;
+    color: #6d3f3f;
     margin-right: 10px;
     cursor: pointer;
-}
-
-.liked {
-    color: red;
 }
 
 .comment-reply {

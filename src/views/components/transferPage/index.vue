@@ -26,7 +26,7 @@ const startCountdown = () => {
             if (flag.value === 0) {
                 startCountdown(); // 递归调用，直到剩余时间为0
             }
-        }, 1000); // 每隔1秒更新一次
+        }, 10000); // 每隔1秒更新一次
     }
     console.log('倒计时');
 
@@ -61,13 +61,17 @@ const continuePublic = () => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .wrap {
+    width: 80%;
+    margin: 0 auto;
     @include flex;
     flex-direction: column;
     position: relative;
     top: 13%;
     height: 85vh;
+    background-color: #fff;
+    margin-top: 80px;
     p {
         font-size: 23px;
         color: #19a059;
@@ -78,6 +82,9 @@ const continuePublic = () => {
             margin-right: 20px;
             width: 140px;
         }
+    }
+    img {
+        width: 300px;
     }
 }
 </style>

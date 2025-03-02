@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { defineProps, ref } from 'vue';
+import { ref } from 'vue';
 import useLike from '@/hooks/useLike';
 import useDeleteComments from '@/hooks/useDeleteComments';
 import SecondOrderComments from '@/views/articleDetail/secondOrderComments/index.vue';
 import commentDrawer from '@/views/components/commentDrawer/index.vue';
 import { getSecondOrderComments } from '@/config/apis/comments';
+import { useUserStore } from '@/config/store/userStore';
+import { useTouristPattern } from '@/config/store/touristPattern';
 import '@/assets/css/icon/iconfont.css';
 import { useMessage } from 'naive-ui';
 import { Icon } from '@vicons/utils';
@@ -32,21 +34,25 @@ const prop = defineProps({
         },
         required: true,
         default: () => ({
-            id: 96,
-            nickname: '謇熙瑶',
-            create_at: '2024-12-03 06:37:05',
-            article_id: 42,
-            user_id: 84,
-            highest_id: 61,
-            parent_id: 21,
-            content: 'deserunt anim Excepteur',
-            likes_count: 76,
-            replies_count: 65,
-            path: 'cillum ut sint cupidatat',
-            comment_path: 'eiusmod nostrud do',
+            id: 0,
+            nickname: '',
+            create_at: '',
+            article_id: 0,
+            user_id: 0,
+            highest_id: 0,
+            parent_id: 0,
+            content: '',
+            likes_count: 0,
+            replies_count: 0,
+            path: '',
+            comment_path: '',
             status: 1,
             parent_user_id: 0
         })
+    },
+    isLogin: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -55,38 +61,85 @@ const router = useRouter();
 //定义消息提示对象
 const message = useMessage();
 
+const userInfo = useUserStore();
+
+const touristPattern = useTouristPattern();
+
+//通过defineEmits编译器宏生成emit方法来进行组件之间通信
+const emit = defineEmits(['delete-firComments', 'trigger-type']);
+
 //-----------------------------生命周期---------------------------
 
 // 监听窗口调整
 onMounted(async () => {
     getSecondComments();
-    updateChildWidth();
-    //监听中间窗口的变化
-    window.addEventListener('resize', updateChildWidth);
 });
 
-// 移除监听
-onBeforeUnmount(() => {
-    window.removeEventListener('resize', updateChildWidth);
-});
+//-----------------------------游客模块--------------------------
+
+//通知二级评论已经登录
+const secondLogin = ref(false);
+
+watch(
+    () => prop.isLogin,
+    (newVal) => {
+        if (prop.isLogin) {
+            isCanDelete.value = prop.item.user_id === userInfo.userInfo?.id ? true : false;
+            if (touristPattern.triggerType === '点赞二级评论' || touristPattern.triggerType === '回复二级评论') {
+                secondLogin.value = true;
+            } else {
+                performOperation(touristPattern.triggerType);
+            }
+        }
+    }
+);
+
+//登录后的紧接操作
+const performOperation = (type: string) => {
+    if (type === '回复一级评论') {
+        if (likeObj.id === touristPattern.triggerContent) {
+            appear.value = true;
+        }
+    } else if (type === '点赞一级评论') {
+        if (likeObj.id === touristPattern.triggerContent) {
+            like(likeObj);
+        }
+    }
+};
+
 //-----------------------------二级评论--------------------------
 
 //定义接收二级评论的数组
 const commentList = ref([]);
 
+//判断是否有二级评论
+const isSecondComments = ref(false);
+
 //获取评论需要的相关属性
 const commentInfo = reactive({
     highest_id: prop.item.id,
+    user_id: userInfo.userInfo?.id ? userInfo.userInfo?.id : 0,
     offset: 1,
-    limit: 2,
-    user_id: 0
+    limit: 2
+    // user_id: 0
 });
 //初始化二级评论
 const getSecondComments = async () => {
+    commentInfo.offset = 1;
+    commentList.value = [];
     try {
         const { data } = await getSecondOrderComments(commentInfo);
         if (data) {
-            commentList.value.push(...data.secondCommentsList);
+            if (data.second_comments_list.length > 0) {
+                commentList.value = data.second_comments_list;
+                if (data.last_flag === '没有更多评论了') {
+                    isSecondComments.value = false;
+                } else {
+                    isSecondComments.value = true;
+                }
+            } else {
+                isSecondComments.value = false;
+            }
         }
     } catch (error) {
         console.error('Failed to fetch comments:', error);
@@ -96,15 +149,32 @@ const getSecondComments = async () => {
 
 //加载更多二级评论
 const moreSecondComments = async () => {
-    commentInfo.limit = 5;
+    commentInfo.limit = 3;
     commentInfo.offset = commentInfo.offset + 1;
-    getSecondComments();
+    const { data } = await getSecondOrderComments(commentInfo);
+    if (data) {
+        if (data.second_comments_list.length > 0) {
+            commentList.value.push(...data.second_comments_list);
+            if (data.last_flag === '没有更多评论了') {
+                isSecondComments.value = false;
+            } else {
+                isSecondComments.value = true;
+            }
+        } else {
+            isSecondComments.value = false;
+        }
+    }
 };
 
 //删除二级评论
 const deleteSec = (id) => {
-    console.log(1111);
     commentList.value = commentList.value.filter((item) => item.id !== id);
+    getSecondComments();
+};
+
+//回复二级评论
+const publicSecond = () => {
+    getSecondComments();
 };
 
 //------------------------------一级评论---------------------------------
@@ -112,18 +182,30 @@ const deleteSec = (id) => {
 //回复一级评论需要的相关属性
 const commentItems = reactive({
     article_id: prop.item.article_id,
-    user_id: 0, //当前登录
     highest_id: prop.item.highest_id,
     parent_id: prop.item.parent_id,
-    parent_user_id: prop.item.parent_id
+    parent_user_id: prop.item.parent_id,
+    content: '',
+    path: '',
+    placeholderText: `回复：${prop.item.nickname}`
 });
 
 //解构点赞方法
-const { likeCounts, like, likeStatus } = useLike(prop.item.likes_count, prop.item.status);
+const { likeCounts, like, likeStatus, isTourist } = useLike(prop.item.likes_count, prop.item.status);
 const likeObj = {
-    id: 0,
-    status: 1,
-    user_id: 1
+    id: prop.item.id,
+    status: prop.item.status === 2 ? 1 : 2
+};
+
+const likeFirst = (obj: object) => {
+    if (isTourist.value) {
+        // triggerType.value = '点赞一级评论';
+        // emit('trigger-type', triggerType);
+        touristPattern.setType('点赞一级评论');
+        touristPattern.setTriggerId(obj.id);
+    } else {
+        like(obj);
+    }
 };
 
 //跳转到指定用户会员中心
@@ -131,99 +213,132 @@ const jumpMember = (id: number) => {
     router.push(`/member/${id}`);
 };
 
+//判断这个评论是否是自己的评论
+const iid = ref(userInfo.userInfo?.id || 0);
+
+//--------------------------------回复评论-----------------------------
+
+//控制emoji框是否显示
+const isEmojiDisappear = ref(false);
+
+//得知emoji框出现
+const openEmoji = () => {
+    isEmojiDisappear.value = true;
+};
+
+//控制emoji表情框消失
+const emojiDisappear = () => {
+    isEmojiDisappear.value = false;
+};
+
+const responseComments = (obj: object) => {
+    if (userInfo.token === '') {
+        // triggerType.value = '回复一级评论';
+        touristPattern.setType('回复一级评论');
+        touristPattern.setTriggerId(obj.id);
+    } else {
+        appear.value = !appear.value;
+        commentItems.highest_id = prop.item.id;
+        commentItems.parent_id = prop.item.id;
+        commentItems.parent_user_id = prop.item.user_id;
+    }
+};
+let timer = null;
+
+//评论框焦点消失后评论框消失
+const cancelResponse = () => {
+    if (timer) {
+        clearTimeout(timer);
+    }
+    timer = setTimeout(() => {
+        appear.value = false;
+        console.log(appear.value, '失去评论1');
+    }, 100);
+};
+
 //--------------------------------删除、举报功能------------------------
 
+//判断是否具有删除权力
+const isCanDelete = ref(prop.item.user_id === iid.value);
+
 //解构删除方法
-const { deleteCom } = useDeleteComments(prop.item.id);
+const { deleteCom } = useDeleteComments();
 
-//通过defineEmits编译器宏生成emit方法来进行组件之间通信
-const emit = defineEmits(['delete-firComments']);
-
-const deleteFun = () => {
-    deleteCom();
+const deleteFun = async () => {
+    await deleteCom(prop.item.id);
     emit('delete-firComments', prop.item.id);
 };
 
 //举报评论
-const report = () => {
-    message.warning('举报功能暂未开发，敬请期待吧！');
-};
-
-//-----------------------------确定评论盒子宽度-------------------------
-
-///获取中间盒子对象
-const boxRef = ref<HTMLElement | null>(null);
-
-//定义一个变量接收中间盒子宽度
-const childWidth = ref(0);
-
-//获取中间盒子宽度
-const updateChildWidth = () => {
-    if (boxRef.value) {
-        childWidth.value = boxRef.value.clientWidth;
-    }
-};
-
+// const report = () => {
+//     message.warning('举报功能暂未开发，敬请期待吧！');
+// };
 //-----------------------------遮罩层-----------------------------------
 
 //控制评论框是否显示
 const appear = ref(false);
 
-//定义是否显示遮罩层的变量
-const isOverlayVisible = ref(false);
-
 //定义遮罩层的点击事件
 const handleMaskClick = () => {
-    isOverlayVisible.value = false;
     appear.value = false;
+    getSecondComments();
 };
 </script>
 <template>
     <div class="f-comments" ref="boxRef">
-        <div v-if="isOverlayVisible" class="overlay" @click="handleMaskClick"></div>
-        <n-avatar
-            round
-            size="large"
-            src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-            @click="jumpMember(1)"
-        />
+        <div class="emojiOverlay" @click="emojiDisappear" v-if="isEmojiDisappear"></div>
+        <n-avatar round size="large" :src="prop.item.path" @click="jumpMember(prop.item.user_id)" />
         <div class="avatar-other">
             <div class="first-comment">
                 <div class="comments-detail">
-                    <n-ellipsis style="max-width: 240px">{{ prop.item.nickname }}</n-ellipsis>
-                    <p>{{ prop.item.content }}</p>
+                    <n-ellipsis style="max-width: 240px; margin-bottom: 10px; color: #5d6271">
+                        {{ prop.item.nickname }}
+                    </n-ellipsis>
+                    <p style="font-size: 15px; margin-bottom: 10px" v-if="prop.item.content !== ''">
+                        {{ prop.item.content }}
+                    </p>
+                    <p>
+                        <img style="width: 200px" :src="prop.item.comment_path" v-if="prop.item.comment_path !== ''" />
+                    </p>
                     <div class="comment-detail">
                         <span class="small-detail1">{{ prop.item.create_at }}</span>
                         <span
                             class="small-detail"
-                            @click="like(likeObj)"
+                            @click="likeFirst(likeObj)"
                             :style="{ color: likeStatus === 1 ? '#19A059' : '#8a919f' }"
                         >
                             <i class="iconfont">&#xe616;</i>
                             <span v-if="likeCounts === 0">点赞</span>
                             <span v-else>{{ likeCounts }}</span>
                         </span>
-                        <span
-                            class="small-detail"
-                            @click="
-                                appear = !appear;
-                                isOverlayVisible = !isOverlayVisible;
-                            "
-                        >
+                        <span class="small-detail" @click="responseComments(likeObj)">
                             <i class="iconfont">&#xe6b3;</i>
-                            回复
+                            <span>{{ appear ? '取消回复' : '回复' }}</span>
                         </span>
+                        <commentDrawer
+                            :appear="appear"
+                            :headShot="prop.item.path"
+                            :item="commentItems"
+                            :emojiDisappear="isEmojiDisappear"
+                            @close-comment="handleMaskClick"
+                            @open-emoji="openEmoji"
+                            @cancel-response="cancelResponse"
+                        ></commentDrawer>
                     </div>
                 </div>
-                <div class="more">
-                    <n-popconfirm :positive-text="null" :negative-text="null" :show-icon="false">
+                <div class="more" v-if="isCanDelete">
+                    <n-popconfirm
+                        :positive-text="null"
+                        :negative-text="null"
+                        @positive-click="deleteFun"
+                        :show-icon="false"
+                    >
                         <template #trigger>
                             <i class="iconfont">&#xe61e;</i>
                         </template>
-                        <div class="button-container">
-                            <n-button text :block="true" @click="deleteFun" style="margin-top: 10px">删除</n-button>
-                            <n-button text :block="true" @click="report" style="margin-top: 10px">举报</n-button>
-                        </div>
+                        <template #action>
+                            <p @click="deleteFun" class="deleteSty">删除</p>
+                        </template>
                     </n-popconfirm>
                 </div>
             </div>
@@ -233,33 +348,34 @@ const handleMaskClick = () => {
                     v-for="(item, index) in commentList"
                     :key="index"
                     @delete-secComments="deleteSec"
+                    @public-second="publicSecond"
+                    :isLogin="secondLogin"
                 ></SecondOrderComments>
-                <p @click="moreSecondComments">
+                <p @click="moreSecondComments" v-if="isSecondComments">
                     查看更多回复
-                    <Icon size="18">
+                    <Icon size="14">
                         <DownOutlined />
                     </Icon>
                 </p>
             </div>
         </div>
-        <commentDrawer
-            :appear="appear"
-            :childWidth="childWidth"
-            :headShot="prop.item.path"
-            :item="commentItems"
-            @close-comment="handleMaskClick"
-        ></commentDrawer>
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .f-comments {
     width: 100%;
-    padding: 20px;
+    padding: 15px 0px;
     display: flex;
 
+    .emojiOverlay {
+        position: fixed; /* 固定定位 */
+        top: 0;
+        left: 0;
+        @include all;
+        z-index: 998;
+    }
     @include overlay;
-
     .n-avatar {
         width: 40px;
     }
@@ -278,6 +394,10 @@ const handleMaskClick = () => {
 
                 .small-detail {
                     margin-left: 20px;
+
+                    span {
+                        margin-left: 4px;
+                    }
                 }
 
                 .small-detail:hover {
@@ -286,6 +406,10 @@ const handleMaskClick = () => {
                 .comment-detail {
                     color: #8a919f;
                     font-size: 13px;
+
+                    .drawer :deep(.textArea) {
+                        width: 100%;
+                    }
                 }
             }
             .more {
@@ -294,9 +418,9 @@ const handleMaskClick = () => {
                 .iconfont:hover {
                     cursor: pointer;
                 }
-                .button-container {
-                    display: flex;
-                    flex-direction: column;
+
+                .deleteSty:hover {
+                    cursor: pointer;
                 }
             }
         }

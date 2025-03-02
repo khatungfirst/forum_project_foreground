@@ -1,51 +1,88 @@
 <script setup>
-import { defineProps, computed, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
+import { Tag_follow } from '../../../config/apis/tag';
+import { useUserStore } from '@/config/store/userStore';
+const userStore = useUserStore();
 const emit = defineEmits(['follow']);
 const props = defineProps({
-    tag: {
-        type: Object,
-        required: true
-    }
+    tag: { type: Object, required: true },
+    isFollowing: { type: Boolean, default: false } // 接收父组件的加载状态
 });
+// const tagToFollow = ref(null); // 用于存储待关注的标签id
+const isFollowed = ref(props.isFollowing);
+const loadingState = ref(false); // 存储每个标签的加载状态
+const router = useRouter();
 
-const handleFollow = () => {
-    emit('follow', props.tag.id);
+// const handleFollow = () => {
+//     emit('follow', props.tag.id);
+// };
+
+const handleFollow = async () => {
+    if (userStore.token === '') {
+        // 存储当前作者 ID
+        emit('follow', props.tag.id, '关注');
+        // loginAppear.value = true;
+        console.log('关注了');
+        return;
+    }
+    try {
+        // 设置加载状态
+        loadingState.value = true;
+        const response = await Tag_follow({ id: props.tag.id });
+        if (response.code === 2000) {
+            // 更新本地关注状态
+            isFollowed.value = !isFollowed.value;
+
+            // 触发父组件的 follow 事件
+            emit('follow', props.tag.id);
+        } else {
+            console.error('关注标签失败:', response.message);
+        }
+    } catch (error) {
+        console.error('Error following tag:', error);
+    } finally {
+        // 请求完成后，解除加载状态
+        loadingState.value = false;
+    }
 };
 
 // 截取标签描述的长度
 const truncatedDescriptions = computed(() => {
     return props.tags.map((tag) => {
-        // 假设限制长度为20个字符
         const truncatedDescription =
-            tag.description.length > 39 ? tag.description.slice(0, 39) + '...' : tag.description;
+            tag.description.length > 16 ? tag.description.slice(0, 16) + '...' : tag.description;
         return { ...tag, description: truncatedDescription };
     });
 });
+
+// 点击标签跳转到此标签的标签详情页，携带id
+const handleDetail = (id) => {
+    router.push({ path: `/tagDetail/${id}` });
+};
 </script>
 
 <template>
     <div class="tag-item">
-        <div class="tag-item-container">
-            <div class="tag-item-single">
-                <div class="tag-item-info">
-                    <img :src="props.tag.path" alt="tag image" class="tag-item_avatar" />
-                    <div class="tag-item-message">
-                        <span class="tag-item_title">{{ props.tag.name }}</span>
-                        <div class="tag-item_data">
-                            文章：{{ props.tag.article_count }} | 热度：{{ props.tag.heat }} | 人数：{{
-                                props.tag.fans_count
-                            }}
-                        </div>
+        <div class="tag-item-single">
+            <div class="tag-item-info" @click="handleDetail(tag.id)">
+                <img :src="props.tag.path" alt="tag image" class="tag-item_avatar" />
+                <div class="tag-item-message">
+                    <span class="tag-item_title">{{ props.tag.name }}</span>
+                    <div class="tag-item_data">
+                        文章：{{ props.tag.article_count }} | 热度：{{ props.tag.heat }} | 人数：{{
+                            props.tag.fans_count
+                        }}
                     </div>
                 </div>
-                <div class="tag-item-description">
-                    <span>{{ props.tag.description }}</span>
-                </div>
-                <div class="tag-item_follow">
-                    <button class="tag-item_button" @click="handleFollow">
-                        {{ props.tag.status === 1 ? '已关注√' : '关注' }}
-                    </button>
-                </div>
+            </div>
+            <div class="tag-item-description">
+                {{ props.tag.description }}
+            </div>
+            <div class="tag-item_follow">
+                <button class="tag-item_button" :disabled="loadingState" @click="handleFollow">
+                    {{ isFollowed ? '已关注' : '关注' }}
+                    <n-spin :size="12" v-if="loadingState" />
+                </button>
             </div>
         </div>
     </div>
@@ -56,23 +93,27 @@ const truncatedDescriptions = computed(() => {
     display: flex;
     /* flex-direction: column; */
     align-items: center;
-    padding: 10px;
-    border: 1px solid #ccc;
+    padding: 12px;
+    /* border: 1px solid #ccc; */
     border-radius: 5px;
-    width: 320px;
+    /* width: 345px; */
+    width: 100%;
+    height: 196px;
     background-color: #ffffff;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease; /* 添加过渡效果 */
 }
 
-.tag-item-container {
-    display: flex;
-    /* flex-direction: column; */
-    align-items: center;
+.tag-item:hover {
+    /* background-color: #e4e6eb; 鼠标悬浮时背景变灰 */
+    box-shadow: 3px 3px 5px 2px rgba(0, 0, 0, 0.3); /* 添加轻微阴影，模拟凸起效果 */
 }
 
 .tag-item-single {
     display: flex;
-    align-items: center;
+    /* align-items: center; */
     flex-direction: column;
+    justify-content: center;
+    margin: auto;
 }
 
 .tag-item-info {
@@ -80,6 +121,7 @@ const truncatedDescriptions = computed(() => {
     display: flex;
     flex-direction: row;
     align-items: center;
+    cursor: pointer;
 }
 
 .tag-item_avatar {
@@ -106,12 +148,26 @@ const truncatedDescriptions = computed(() => {
 }
 
 .tag-item-description {
-    margin: 1px 0;
+    /* margin: 1px 0; */
     font-size: 14px;
     color: #7d7b7b;
-    width: 100%;
+    width: 260px;
+    height: 45px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* 限制显示两行 */
+    -webkit-box-orient: vertical;
+}
+.tag-item_follow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
+.tag-item_follow:hover {
+    color: #24314c;
+}
 .tag-item_button {
     cursor: pointer;
     background-color: #f0f0f0;
@@ -121,7 +177,7 @@ const truncatedDescriptions = computed(() => {
     color: #19a059;
     /* padding: 8px 125px; */
     margin: 6px 0;
-    padding: 8px 0;
-    width: 270px;
+    padding: 5px 0;
+    width: 100%;
 }
 </style>

@@ -1,0 +1,117 @@
+<script setup>
+const props = defineProps({
+    likeCommentList: {
+        type: Array,
+        required: true,
+        default: () => []
+    }
+});
+
+// const emit = defineEmits(['likeComment', 'showCommentBox']);
+
+// const enterMemberCenter = (id) => {
+//     router.push({ path: `/member/${id}` });
+// };
+const emit = defineEmits(['goToMember', 'goToArticleDetail']);
+</script>
+
+<template>
+    <div class="comment-item" v-for="comment in likeCommentList" :key="comment.id">
+        <div class="comment-avatar" @click="() => emit('goToMember', comment.user_id)">
+            <img :src="comment.path" alt="User avatar" />
+        </div>
+        <div class="comment-content">
+            <div class="comment-header">
+                <span class="nickname" @click="() => emit('goToMember', comment.user_id)">
+                    {{ comment.nickname }}
+                </span>
+                <span class="commented">点赞了你在 《{{ comment.title }}》 的评论</span>
+            </div>
+            <p class="comment-text">{{ comment.content }}</p>
+            <div class="comment-title" @click="() => emit('goToArticleDetail', comment.article_id)">
+                <a href="#">{{ comment.title }}</a>
+            </div>
+            <div class="comment-actions">
+                <span class="date">{{ comment.daily_time }}</span>
+                <!-- <button class="like-button">{{ comment.likes_count }} 次赞</button> -->
+                <!-- <span class="comment-reply">回复</span> -->
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped>
+.comment-item {
+    display: flex;
+    margin-bottom: 20px;
+}
+
+.comment-avatar img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.comment-content {
+    flex-grow: 1;
+}
+
+.nickname {
+    font-size: 16px;
+    color: #000000;
+    margin-right: 15px;
+    cursor: pointer;
+}
+
+.commented {
+    font-size: 16px;
+    color: #474646;
+}
+
+.date {
+    font-size: 14px;
+    color: #666;
+    padding: 5px 10px 5px 0px;
+}
+
+.comment-title a {
+    color: rgb(143, 139, 139);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.comment-text {
+    margin: 5px 0;
+    color: #141414;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.like-button {
+    background: #f0f0f0;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #666;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.liked {
+    color: red;
+}
+
+.comment-reply {
+    color: #007bff;
+    cursor: pointer;
+}
+</style>

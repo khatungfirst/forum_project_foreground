@@ -23,11 +23,11 @@ import { addPendingMap, removePendingRequest } from './cancel';
 import { againRequest } from './retry';
 // http错误状态码处理
 import { httpErrorStatusHandle } from './httpErrorStatusHandle';
-import { useUserStore } from '@/config/store/userStore';
+import { useUserStore } from '../../config/store/userStore';
 
 const userStore = useUserStore();
 //  将自动加在 `url` 前面，除非 `url` 是一个绝对 URL。
-axios.defaults.baseURL ='/proxy_url' || import.meta.env.VITE_APP_AXIOS_BASEURL;
+axios.defaults.baseURL = import.meta.env.VITE_APP_AXIOS_BASEURL;
 
 // 表示跨域请求时是否需要使用凭证
 axios.defaults.withCredentials = true;
@@ -95,7 +95,7 @@ axios.interceptors.request.use(
         // 全局开关开启并且该请求也允许
         if (enableCancelModel && config.enableCancelModel !== false) {
             // 如果当前请求存在pendingMap队列中，就先删除重复请求
-            removePendingRequest(config);
+            // removePendingRequest(config);
             // 将当前请求加入pendingMap队列
             addPendingMap(config);
         }
@@ -142,15 +142,25 @@ axios.interceptors.response.use(
 
         // 需要特殊处理请求被取消的情况
         // 如果不是取消请求导致的, 就进行重新发送
-        if (!axios.isCancel(error) && enableRetryModel) {
+        // if (!axios.isCancel(error) && enableRetryModel) {
+        //     // 请求重发
+        //     return againRequest(error, axios, retryConfig);
+        // }
+
+        // // 处理错误状态码
+        // enableErrorMessage && httpErrorStatusHandle(error, axios);
+
+        // return Promise.reject(error); // 错误继续返回给到具体页面
+        if (error.code === 'ECONNABORTED' && enableRetryModel) {
+            // 判断是否是超时错误
             // 请求重发
             return againRequest(error, axios, retryConfig);
+        } else {
+            // 处理其他类型错误
+            enableErrorMessage && httpErrorStatusHandle(error, axios);
+            // 如果不是超时错误且不取消请求情况下，继续返回错误
+            return Promise.reject(error);
         }
-
-        // 处理错误状态码
-        enableErrorMessage && httpErrorStatusHandle(error, axios);
-
-        return Promise.reject(error); // 错误继续返回给到具体页面
     }
 );
 

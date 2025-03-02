@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { defineProps } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/config/store/userStore';
+const userStore = useUserStore();
+
 const prop = defineProps({
     authorInfo: {
         type: Object as () => {
@@ -25,10 +28,23 @@ const prop = defineProps({
         })
     }
 });
+
+const router = useRouter();
+
+const jumpCenter = (id) => {
+    router.push(`/member/${id}`);
+    userStore.jumpToMemberCenter = id;
+};
 </script>
 <template>
     <div class="top">
-        <n-avatar round size="large" :src="prop.authorInfo.head" />
+        <n-avatar
+            round
+            size="large"
+            :src="prop.authorInfo.head"
+            @click="jumpCenter(prop.authorInfo.author_id)"
+            style="cursor: pointer"
+        />
         <div class="authorName">
             <p class="name">{{ prop.authorInfo.nickname }}</p>
             <p class="tag">{{ prop.authorInfo.signature }}</p>
@@ -48,9 +64,11 @@ const prop = defineProps({
             <p class="second">粉丝</p>
         </div>
     </div>
+    <!-- 插槽部分 -->
+    <slot name="actions"></slot>
 </template>
 <style scoped lang="scss">
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .top {
     padding-left: 15px;
     .n-avatar {

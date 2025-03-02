@@ -4,7 +4,7 @@ import { NForm, NFormItem, NInput, NButton } from 'naive-ui';
 // import { Visibility } from '@vicons/ionicons5';
 import { useRouter } from 'vue-router';
 import { useMessage } from 'naive-ui';
-import { register, verify_code } from '../../config/apis/login';
+import { forgot_password, verify_code } from '../../config/apis/login';
 const router = useRouter();
 const formRef = ref(null);
 const form = ref({
@@ -34,9 +34,25 @@ const rules = ref({
             message: '密码必须包含字母、数字和特殊符号',
             trigger: 'blur'
         }
+    ],
+    verify_code: [{ required: true, message: '请输入验证码', trigger: 'blur' }],
+    re_password: [
+        { required: true, message: '请再次输入密码', trigger: 'blur' },
+        {
+            validator: (rule, value) => {
+                return value === form.value.password;
+            },
+            message: '确认密码与新密码不一致',
+            trigger: 'blur'
+        }
     ]
 });
+// 在 findPassword 子组件的 script setup 中
+const emit = defineEmits(['close-popup']);
 
+const closeAuthor = () => {
+    emit('close-popup');
+};
 const currentRoute = ref(router.currentRoute.value.path); // 使用响应式引用来存储当前路由
 
 // 使用 watchEffect 来响应路由变化
@@ -53,7 +69,8 @@ const sendVerify_code = async () => {
         return;
     }
     try {
-        const response = await verify_code(form.value.email);
+        const email = form.value.email;
+        const response = await verify_code({ email });
 
         if (response.code === 2000) {
             message.success('验证码已发送，请检查您的邮箱');
@@ -66,17 +83,16 @@ const sendVerify_code = async () => {
     }
 };
 
-const handleResister = async () => {
+const resetPassword = async () => {
     try {
         await formRef.value.validate();
-        console.log('注册', form.value);
-        const response = await register(
-            form.value.email,
-            form.value.password,
-            form.value.verify_code,
-            form.value.re_password
-        );
-        if (response.code === 200 && response.data) {
+        const response = await forgot_password({
+            email: form.value.email,
+            verify_code: form.value.verify_code,
+            password: form.value.password,
+            re_password: form.value.re_password
+        });
+        if (response.code === 2000 && response.data) {
             router.push('/login');
         } else {
             this.$message.error('注册失败:' + response.data.message);
@@ -97,42 +113,51 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="login-container">
-        <div class="header">
-            <span>找回密码</span>
-        </div>
-        <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
-            <n-form-item label="邮箱" path="email">
-                <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
-                    <template #suffix>
-                        <span class="forgot-password-btn" @click="sendVerify_code">发送验证码</span>
-                    </template>
-                </n-input>
-            </n-form-item>
-            <n-form-item label="验证码" path="verify_code">
-                <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="密码" path="password">
-                <n-input v-model:value="form.password" placeholder="请输入密码" class="common-input"></n-input>
-            </n-form-item>
-            <n-form-item label="重复密码" path="re_password">
-                <n-input
-                    v-model:value="form.re_password"
-                    type="password"
-                    placeholder="请输入重复密码"
-                    class="common-input"
-                ></n-input>
-            </n-form-item>
-            <n-form-item>
-                <div class="button-wrapper">
-                    <n-button @click="handleResister" class="common-button">登陆</n-button>
-                </div>
-            </n-form-item>
-        </n-form>
-        <!-- <div class="register" @click="goToRegister">
+    <!-- <div class="login-container"> -->
+    <div class="header">
+        <span>找回密码</span>
+        <n-icon><i class="close-button iconfont icon-guanbi" @click="closeAuthor"></i></n-icon>
+    </div>
+    <n-form ref="formRef" :model="form" :rules="rules" label-placement="top" @submit="handleLogin">
+        <n-form-item label="邮箱" path="email">
+            <n-input v-model:value="form.email" placeholder="请输入邮箱" class="common-input">
+                <template #suffix>
+                    <span class="forgot-password-btn" @click="sendVerify_code">发送验证码</span>
+                </template>
+            </n-input>
+        </n-form-item>
+        <n-form-item label="验证码" path="verify_code">
+            <n-input v-model:value="form.verify_code" placeholder="请输入验证码" class="common-input"></n-input>
+        </n-form-item>
+        <n-form-item label="密码" path="password">
+            <n-input
+                v-model:value="form.password"
+                placeholder="请输入密码"
+                type="password"
+                class="common-input"
+                show-password-on="click"
+            ></n-input>
+        </n-form-item>
+        <n-form-item label="重复密码" path="re_password">
+            <n-input
+                v-model:value="form.re_password"
+                type="password"
+                placeholder="请输入重复密码"
+                class="common-input"
+                show-password-on="click"
+            ></n-input>
+        </n-form-item>
+        <n-form-item>
+            <div class="button-wrapper">
+                <n-button @click="resetPassword" class="common-button">重置密码</n-button>
+            </div>
+        </n-form-item>
+    </n-form>
+
+    <!-- <div class="register" @click="goToRegister">
             <n-button class="common-button">注册</n-button>
         </div> -->
-    </div>
+    <!-- </div> -->
 </template>
 
 <style scoped>
@@ -171,6 +196,7 @@ onMounted(() => {
 
 .n-form {
     width: 290px;
+    margin: 0 54px;
 }
 
 .n-form-item {
@@ -215,5 +241,17 @@ onMounted(() => {
 }
 .forgot-password-btn {
     color: #19a059;
+}
+
+.close-button {
+    position: absolute; /* 使用 absolute 定位 */
+    top: -36px;
+    right: -121px;
+    cursor: pointer;
+    z-index: 1000; /* 确保按钮在父容器内容之上 */
+}
+.icon-guanbi {
+    font-size: 18px;
+    color: #5c9e64;
 }
 </style>

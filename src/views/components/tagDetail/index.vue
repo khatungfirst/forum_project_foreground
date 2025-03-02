@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, defineEmits } from 'vue';
+import { computed } from 'vue';
 // 定义可以触发的事件
 const emit = defineEmits(['follow']);
 const props = defineProps({
@@ -112,11 +112,10 @@ const truncatedDescriptions = computed(() => {
     cursor: pointer;
     background-color: #f0f0f0;
     border: none;
-    border-radius: 50px;
-    outline: none;
+    border-radius: 5px;
     color: #19a059;
-    padding: 8px 0;
-    width: 100%;
+    padding: 8px 10px;
     text-align: center;
+    width: 100%;
 }
 </style>

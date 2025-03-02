@@ -8,7 +8,7 @@
  */
 import { createRouter, createWebHistory } from 'vue-router';
 import routes from './routes';
-
+import { useUserStore } from '../../config/store/userStore';
 import NProgress from 'nprogress';
 // NProgress樣式
 import 'nprogress/nprogress.css';
@@ -16,31 +16,24 @@ import 'nprogress/nprogress.css';
 NProgress.configure({ showSpinner: false });
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.VITE_APP_ROUTER_BASE),
+    history: createWebHistory(),
     routes
 });
 
-router.beforeEach(
-    (
-        to: {
-            meta?: {
-                title?: string;
-                keepAlive?: boolean;
-            };
-        },
-        from,
-        next
-    ) => {
-        // 设置 doc.title
-        if (to.meta && to.meta.title) {
-            document.title = to.meta.title.toString();
-        }
-        // 开启NProgress（router 切换 loading）
-        NProgress.start();
+// 定义路由守卫
+router.beforeEach(async (to, from, next) => {
+    const userStore = useUserStore();
 
-        next();
+    if (to.meta.requiresAuth) {
+        if (!userStore.isLogin) {
+            next('/home'); // 用户未登录，重定向到首页
+        } else {
+            next(); // 用户已登录，允许访问
+        }
+    } else {
+        next(); // 不需要登录，允许访问
     }
-);
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 router.afterEach((to) => {

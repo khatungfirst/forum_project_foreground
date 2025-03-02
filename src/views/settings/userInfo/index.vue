@@ -10,21 +10,25 @@ const message = useMessage();
 
 //-----------------------------------个人资料-------------------------------------
 
+//定义所有标签的数组
+const all_tag = ref([]);
+
+//控制保存修改资料的按钮加载效果
+const saveChangeLoadButton = ref(false);
+
 onMounted(async () => {
     const { data } = await getUserInfo();
     if (data) {
         const { all_tag_names, ...rest } = data;
         if (all_tag_names !== null) {
-            all_tag_names.value = all_tag_names;
+            all_tag.value = all_tag_names;
         }
         Object.assign(userInfo, rest);
-        console.log(userInfo, '------');
     }
 });
 
 //定义个人资料的所有信息
 const userInfo = reactive({
-    id: 0,
     nickname: '',
     career_direction: '',
     user_home_page: '',
@@ -32,9 +36,6 @@ const userInfo = reactive({
     user_tags: [],
     path: ''
 });
-
-//定义所有标签的数组
-const all_tag_names = ref([]);
 
 //定义更改前的个人资料的所有信息
 const oldUserInfo = reactive({ ...userInfo });
@@ -65,7 +66,9 @@ const update = async (msg1, msg2) => {
 
 //更新用户表单数据
 const changeForm = () => {
+    saveChangeLoadButton.value = true;
     update('信息更改成功', '信息更改失败');
+    saveChangeLoadButton.value = false;
     Object.assign(oldUserInfo, userInfo);
 };
 
@@ -73,16 +76,24 @@ const changeForm = () => {
 
 //计算属性，处理过的标签
 const processedTags = computed(() => {
-    return all_tag_names.value.map((tag) => {
+    console.log('进到标签里');
+    console.log(all_tag.value, '标签');
+    return all_tag.value.map((tag) => {
         console.log(tag);
-
-        const isSelected = userInfo.user_tags.includes(tag);
-        return { tag, isSelected };
+        if (userInfo.user_tags) {
+            const isSelected = userInfo.user_tags.includes(tag);
+            return { tag, isSelected };
+        } else {
+            return { tag, isSelected: false };
+        }
     });
 });
 
 //添加标签的方法
 const addTags = async (item) => {
+    if (userInfo.user_tags === null) {
+        userInfo.user_tags = [];
+    }
     userInfo.user_tags.push(item.tag);
     update('添加标签成功', '添加标签失败');
 };
@@ -95,14 +106,22 @@ const handleClose = async (e) => {
 
 //---------------------------------上传头像-----------------------------------
 
-const { image_url, getUrl } = useUpload();
+const { image_url, getUrl } = useUpload('用户');
 
 //上传图片预览图
 const handlePreview = async (item) => {
     await getUrl(item);
     userInfo.path = image_url.value;
     update('更改头像成功', '更改头像失败');
-    // showModalRef.value = true;
+    //更改本地的头像数据
+    const oldLocalInfo = JSON.parse(localStorage.getItem('userInfo'));
+    const localInfo = {
+        avatar_path: oldLocalInfo.avatar_path,
+        id: oldLocalInfo.id,
+        nickname: oldLocalInfo.nickname
+    };
+    localInfo.avatar_path = image_url.value;
+    localStorage.setItem('userInfo', JSON.stringify(localInfo));
 };
 </script>
 <template>
@@ -150,12 +169,22 @@ const handlePreview = async (item) => {
                     <n-avatar round size="large" :src="userInfo.path" style="width: 100%; height: 100%" />
                 </n-upload>
                 <p>上传头像</p>
-                <p class="small">格式：支持JPG、PNG、JPEG</p>
-                <p class="small">大小：5M以内</p>
+                <p class="small">格式：支持JPG、PNG、JPEG、GIF</p>
+                <p class="small">大小：2M以内</p>
             </div>
         </div>
         <div class="commitButton">
-            <n-button strong secondary round type="primary" @click="changeForm">保存修改</n-button>
+            <n-button
+                strong
+                secondary
+                round
+                type="primary"
+                @click="changeForm"
+                :loading="saveChangeLoadButton"
+                icon-placement="right"
+            >
+                保存修改
+            </n-button>
         </div>
         <P>标签管理</P>
         <div class="tag">
@@ -187,11 +216,12 @@ const handlePreview = async (item) => {
     </n-card>
 </template>
 <style lang="scss" scoped>
-@import '@/assets/styles/mixin.scss';
+@use '@/assets/styles/mixin.scss' as *;
 .n-card {
     height: 900px;
     // @include all;
     margin-bottom: 40px;
+    border: none;
 
     .top {
         display: grid;
@@ -199,7 +229,7 @@ const handlePreview = async (item) => {
     }
 
     .commitButton {
-        width: 75%;
+        width: 55%;
         @include flex;
     }
 

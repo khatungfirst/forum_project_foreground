@@ -9,7 +9,7 @@
 // import path = require('path');
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHistory } from 'vue-router';
-import { useUserStore } from '../stores/userStore';
+import { useUserStore } from '../../config/store/userStore';
 // * 导入所有router
 // * 处理路由
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,16 +35,12 @@ const routers404: any = [
 
 const routes = [
     {
+        path: '/',
+        redirect: '/home'
+    },
+    {
         path: '/login',
-        component: () => import('../../views/login/index.vue')
-    },
-    {
-        path: '/register',
-        component: () => import('../../views/register/index.vue')
-    },
-    {
-        path: '/findPassword',
-        component: () => import('../../views/findPassword/index.vue')
+        component: () => import('../../views/components/Author/index.vue')
     },
     {
         path: '/chooseTag',
@@ -64,19 +60,17 @@ const routes = [
             },
             {
                 path: '/articlerelease/:id',
-                component: () => import('../../views/articleRelease/index.vue')
+                component: () => import('../../views/articleRelease/index.vue'),
+                meta: { requiresAuth: true } // 添加 requiresAuth 标记
             },
             {
                 path: '/select',
                 component: () => import('../../views/searchPage/index.vue')
             },
             {
-                path: '/drawer',
-                component: () => import('../../views/components/markdownViewer/index.vue')
-            },
-            {
                 path: '/settings',
-                component: () => import('../../views/settings/index.vue')
+                component: () => import('../../views/settings/index.vue'),
+                meta: { requiresAuth: true } // 添加 requiresAuth 标记
             },
             {
                 path: '/member/:id',
@@ -96,11 +90,13 @@ const routes = [
             },
             {
                 path: '/message',
-                component: () => import('../../views/message/index.vue')
+                component: () => import('../../views/message/index.vue'),
+                meta: { requiresAuth: true } // 添加 requiresAuth 标记
             }
         ]
     }
 ];
+
 routerArray.push(...routers404);
 routerArray.push(...routes);
 console.log(routerArray);

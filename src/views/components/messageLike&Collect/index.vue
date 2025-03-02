@@ -1,5 +1,4 @@
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
     messageList: {
@@ -37,7 +36,7 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
                 </span>
             </div>
             <div class="message-actions">
-                <span class="date">{{ message.created_at }}</span>
+                <span class="date">{{ message.daily_time }}</span>
             </div>
         </div>
     </div>
@@ -55,6 +54,7 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .message-content {
@@ -65,11 +65,13 @@ const emit = defineEmits(['goToMember', 'goToArticleDetail']);
     font-size: 16px;
     color: #000000;
     margin-right: 15px;
+    cursor: pointer;
 }
 
 .actioned {
     font-size: 16px;
     color: #474646;
+    cursor: pointer;
 }
 
 .date {
