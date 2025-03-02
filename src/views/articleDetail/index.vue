@@ -412,6 +412,9 @@ const isLoading = ref(false);
 //是否一条评论的数据都没有
 const isEmpty = ref(true);
 
+//是否一条评论的数据都没有
+const isEmpty = ref(true);
+
 //评论相关数据
 const commentInfo = reactive({
     article_id: paramId.value,
@@ -435,6 +438,9 @@ const initComments = async () => {
             if (data.last_flag === '没有更多评论了') {
                 isHavaData.value = false;
             }
+            isEmpty.value = false;
+        } else {
+            isEmpty.value = true;
             isEmpty.value = false;
         } else {
             isEmpty.value = true;
@@ -483,6 +489,7 @@ const deleteFirst = (id) => {
 
 //评论的下拉事件
 const handleLoad = async () => {
+    if (isHavaData.value && !isEmpty.value) {
     if (isHavaData.value && !isEmpty.value) {
         isLoading.value = true;
         commentInfo.offset = commentInfo.offset + 1;
@@ -741,6 +748,11 @@ const handleCopyCodeSuccess = () => {
                                     加载中，数据正在飞速赶来~
                                 </span>
                                 <span v-if="!isEmpty && !isHavaData" class="text">-已经触及俺的底线啦~-</span>
+                                <span v-if="isEmpty" class="text">-评论数据空空如也-</span>
+                                <span class="text" v-if="!isEmpty && isLoading && isHavaData">
+                                    加载中，数据正在飞速赶来~
+                                </span>
+                                <span v-if="!isEmpty && !isHavaData" class="text">-已经触及俺的底线啦~-</span>
                             </div>
                         </n-infinite-scroll>
                     </div>
@@ -796,11 +808,13 @@ const handleCopyCodeSuccess = () => {
                                     v-for="(item, index) in titleList"
                                     :key="index"
                                     :style="{ paddingLeft: item.indent * 15 + 10 + 'px' }"
+                                    :style="{ paddingLeft: item.indent * 15 + 10 + 'px' }"
                                     @click.stop="rollTo(item, index)"
                                     :class="index === heightTitle ? 'title-active' : ''"
                                 >
                                     <a style="cursor: pointer; word-break: break-all">{{ item.title }}</a>
                                 </div>
+                            </n-infinite-scroll>
                             </n-infinite-scroll>
                         </n-collapse-item>
                     </n-collapse>
@@ -838,6 +852,7 @@ const handleCopyCodeSuccess = () => {
 .wrap {
     display: flex;
     background-color: #f2f3f5;
+    margin-top: 70px;
     margin-top: 70px;
     position: relative;
     .emojiOverlay {
@@ -1074,6 +1089,7 @@ const handleCopyCodeSuccess = () => {
 
             .catalogue-detail div {
                 margin-bottom: 10px;
+                padding-right: 10px;
                 padding-right: 10px;
             }
 
