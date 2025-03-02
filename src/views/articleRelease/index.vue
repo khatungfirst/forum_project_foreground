@@ -383,8 +383,8 @@ const publicArticle = async () => {
 .wrap {
     @include overlay;
     @include all;
-    display: grid;
-    grid-template-rows: 1fr 18fr;
+    // display: grid;
+    // grid-template-rows: 1fr 18fr;
     overflow: hidden;
     position: relative;
     margin-top: 55px;
@@ -471,6 +471,7 @@ const publicArticle = async () => {
         display: flex;
         align-items: center;
         background-color: #fff;
+        height: 50px;
         span {
             color: #8a919f;
         }
@@ -511,7 +512,7 @@ const publicArticle = async () => {
     }
 
     .md-editor {
-        height: 80vh;
+        height: 85vh;
     }
 }
 </style>

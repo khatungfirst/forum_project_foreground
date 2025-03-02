@@ -66,10 +66,14 @@ const update = async (msg1, msg2) => {
 
 //更新用户表单数据
 const changeForm = () => {
-    saveChangeLoadButton.value = true;
-    update('信息更改成功', '信息更改失败');
-    saveChangeLoadButton.value = false;
-    Object.assign(oldUserInfo, userInfo);
+    if (userInfo.nickname !== '' && userInfo.career_direction !== '') {
+        saveChangeLoadButton.value = true;
+        update('信息更改成功', '信息更改失败');
+        saveChangeLoadButton.value = false;
+        Object.assign(oldUserInfo, userInfo);
+    } else {
+        message.warning('用户名和职业方向不要忘记填写哦~');
+    }
 };
 
 //-----------------------------------标签-------------------------------------

@@ -31,17 +31,18 @@ const RegVideo = /\.(mp4|webm|ogg)$/;
 
 // https://vitejs.dev/config/
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(async ({ command, mode }) => {
     // 根据当前工作目录中的 `mode` 加载 .env 文件
     // 设置第三个参数为 '' 来加载所有环境变量，而不管是否有 `VITE_` 前缀。
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const env = loadEnv(mode, process.cwd(), '');
     console.log(mode, '环境');
+    const Unocss = (await import('unocss/vite')).default;
 
     return {
         // 开发或生产环境服务的公共基础路径。
         base: env.VITE_APP_PUBLIC_URL,
-        plugins: [
+        plugins: [ 
             vue(),
             vueJsx(),
             Unocss(),

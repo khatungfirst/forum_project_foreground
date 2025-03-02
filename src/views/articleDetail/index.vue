@@ -30,6 +30,7 @@ import { useMessage } from 'naive-ui';
 import { LikeFilled, MessageTwotone, StarFilled, EyeOutlined, PlusCircleFilled, CheckCircleFilled } from '@vicons/antd';
 import { Icon } from '@vicons/utils';
 import MarkdownIt from 'markdown-it';
+import { MdPreview } from 'md-editor-v3';
 
 //定义router
 const router = useRouter();
@@ -184,14 +185,16 @@ const initArticle = async () => {
         authorInit();
         getTitle();
     }
+    console.log(articleInfo.content, 'result');
 };
 
-//文章内容（计算属性来转换markdown语言）
-const contents = computed(() => {
-    const md = new MarkdownIt();
-    const result = md.render(articleInfo.content);
-    return result;
-});
+// //文章内容（计算属性来转换markdown语言）
+// const contents = computed(() => {
+//     const md = new MarkdownIt();
+//     const result = md.render(articleInfo.content);
+//     console.log(articleInfo.content, 'result');
+//     return result;
+// });
 
 //点赞的方法
 const like = async () => {
@@ -525,7 +528,7 @@ const heightTitle = ref(0);
 const getTitle = async () => {
     await nextTick();
     // 使用js选择器，获取对应的h标签，组合成列表
-    const anchors = editor.value.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    const anchors = editor.value.querySelectorAll('h1,h2');
     anchors.forEach((heading, index) => {
         heading.setAttribute('data-v-md-line', `line-${index}`);
     });
@@ -557,10 +560,14 @@ const rollTo = (anchor, index) => {
     // 获取要跳转的标签的lineIndex
     const { lineIndex } = anchor;
     // 查找lineIndex对应的元素对象
-    const heading = editor.value.querySelector(`.v-md-editor-preview [data-v-md-line="${lineIndex}"]`);
+    const heading = editor.value.querySelector(`.v-md-editor [data-v-md-line="${lineIndex}"]`);
+    const targetPosition = heading.offsetTop+200;
     // 页面跳转
     if (heading) {
-        heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.scrollTo({
+            top: targetPosition,
+            behavior: 'smooth'
+        });
     }
     // 修改当前高亮的标题
     heightTitle.value = index;
@@ -599,6 +606,10 @@ const pubicArticle = () => {
     } else {
         router.push(`/articlerelease/0`);
     }
+};
+
+const handleCopyCodeSuccess = () => {
+    console.log('复制');
 };
 </script>
 <template>
@@ -675,9 +686,9 @@ const pubicArticle = () => {
                         {{ articleInfo.views_count }}
                     </span>
                 </div>
-                <!-- <p v-html="contents"></p> -->
                 <div ref="editor">
-                    <v-md-preview :text="contents" />
+                    <!-- <v-md-preview :text="contents" @copy-code-success="handleCopyCodeSuccess" /> -->
+                    <v-md-editor v-model="articleInfo.content" mode="preview" @copy-code-success="handleCopyCodeSuccess"></v-md-editor>
                 </div>
                 <div class="tags">
                     <span v-if="articleInfo.tags.length !== 0">标签：</span>
@@ -779,7 +790,7 @@ const pubicArticle = () => {
                             </span>
                         </template>
                         <n-collapse-item title="目录" name="收起">
-                            <n-infinite-scroll style="height: 350px" class="catalogue-detail">
+                            <n-infinite-scroll style="max-height: 350px" class="catalogue-detail">
                                 <!-- <MarkdownViewer :content="contents" /> -->
                                 <div
                                     v-for="(item, index) in titleList"
@@ -911,17 +922,11 @@ const pubicArticle = () => {
             margin-bottom: 20px;
             border-radius: 5px;
 
-            .v-md-editor-preview :deep(.github-markdown-body) {
+            .v-md-editor :deep(.vuepress-markdown-body) {
                 padding: 0px;
             }
-
-            .v-md-editor-preview :deep(.github-markdown-body h1),
-            .v-md-editor-preview :deep(.github-markdown-body h2),
-            .v-md-editor-preview :deep(.github-markdown-body h3),
-            .v-md-editor-preview :deep(.github-markdown-body h4),
-            .v-md-editor-preview :deep(.github-markdown-body h5),
-            .v-md-editor-preview :deep(.github-markdown-body h6) {
-                border-bottom: none !important;
+            .v-md-editor :deep(.vuepress-markdown-body h1,h2,h3,h4,h5,h6) {
+                font-size: 2rem;
             }
 
             .message {

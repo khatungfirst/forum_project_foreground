@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import '@wangeditor/editor/dist/css/style.css';
+// import '@wangeditor/editor/dist/css/style.css';
 import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue';
-import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
+// import { Editor, Toolbar } from '@wangeditor/editor-for-vue';
 import { getArticleDetail } from '../../../config/apis/articleDetail';
 import { getImageUrl } from '../../../config/apis/publicArticle';
 

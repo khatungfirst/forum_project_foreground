@@ -18,26 +18,32 @@ import router from './packages/router';
 import plugin from '@/resources/plugin';
 import { useUserStore } from './config/store/userStore';
 
-import VMdPreview from '@kangc/v-md-editor/lib/preview';
-import '@kangc/v-md-editor/lib/style/preview.css';
-import githubTheme from '@kangc/v-md-editor/lib/theme/github.js';
-import '@kangc/v-md-editor/lib/theme/style/github.css';
+import VueMarkdownEditor from '@kangc/v-md-editor';
+import '@kangc/v-md-editor/lib/style/base-editor.css';
+import vuepressTheme from '@kangc/v-md-editor/lib/theme/vuepress.js';
+import '@kangc/v-md-editor/lib/theme/style/vuepress.css';
+import createLineNumbertPlugin from '@kangc/v-md-editor/lib/plugins/line-number/index';
+import createHighlightLinesPlugin from '@kangc/v-md-editor/lib/plugins/highlight-lines/index';
+import '@kangc/v-md-editor/lib/plugins/highlight-lines/highlight-lines.css';
+import createCopyCodePlugin from '@kangc/v-md-editor/lib/plugins/copy-code/index';
+import '@kangc/v-md-editor/lib/plugins/copy-code/copy-code.css';
 
-// import { useMessageStore } from '@/config/store/messageStore';
-// 引入阿里妈妈的CSS链接
-// import 'http://at.alicdn.com/t/c/font_4701115_se3u8vd3d2.css';
+import Prism from 'prismjs';
 
-import hljs from 'highlight.js';
-
-VMdPreview.use(githubTheme, {
-    Hljs: hljs
+VueMarkdownEditor.use(vuepressTheme, {
+  Prism,
 });
+
+VueMarkdownEditor.use(createLineNumbertPlugin());
+VueMarkdownEditor.use(createHighlightLinesPlugin());
+VueMarkdownEditor.use(createCopyCodePlugin());
+
 
 const app = createApp(App);
 app.use(plugin);
 app.use(createPinia()); //创建一个 pinia 实例(根 store)并将其传递给应用
 app.use(router);
-app.use(VMdPreview);
+app.use(VueMarkdownEditor);
 const userStore = useUserStore();
 userStore.init();
 // const messageStore = useMessageStore();

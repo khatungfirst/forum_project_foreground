@@ -72,6 +72,25 @@
     "watch": true,
     "watchEffect": true,
     "watchPostEffect": true,
-    "watchSyncEffect": true
+    "watchSyncEffect": true,
+    "Component": true,
+    "ComponentPublicInstance": true,
+    "ComputedRef": true,
+    "DirectiveBinding": true,
+    "ExtractDefaultPropTypes": true,
+    "ExtractPropTypes": true,
+    "ExtractPublicPropTypes": true,
+    "InjectionKey": true,
+    "MaybeRef": true,
+    "MaybeRefOrGetter": true,
+    "PropType": true,
+    "Ref": true,
+    "VNode": true,
+    "WritableComputedRef": true,
+    "onWatcherCleanup": true,
+    "toValue": true,
+    "useId": true,
+    "useModel": true,
+    "useTemplateRef": true
   }
 }
