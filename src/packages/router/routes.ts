@@ -94,10 +94,6 @@ const routes = [
                 meta: { requiresAuth: true } // 添加 requiresAuth 标记
             }
         ]
-    },
-    {
-        path: '/code',
-        component: () => import('../../views/components/code/index.vue')
     }
 ];
 
